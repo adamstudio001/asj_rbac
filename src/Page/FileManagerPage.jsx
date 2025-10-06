@@ -442,7 +442,7 @@ function Modal({ isOpen, onClose }) {
               {uploadingCount > 0 && (
                 <div>
                   <p className="font-medium mb-2">
-                    Uploading - {files.filter(f => f.uploaded).length + 1}/
+                    Uploading - {files.filter(f => f.uploaded).length}/
                     {files.length} files
                   </p>
                   {files
