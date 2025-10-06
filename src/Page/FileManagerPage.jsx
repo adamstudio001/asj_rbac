@@ -373,7 +373,10 @@ function Modal({ isOpen, onClose }) {
   // Close modal on ESC
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        setFiles([]);
+        onClose();
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -389,7 +392,10 @@ function Modal({ isOpen, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose} // klik di area luar modal menutup modal
+          onClick={()=>{
+            setFiles([]);
+            onClose();
+          }} // klik di area luar modal menutup modal
         >
           {/* Backdrop */}
           <motion.div
