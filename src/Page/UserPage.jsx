@@ -5,6 +5,7 @@ import Sidebar from "@src/Components/Sidebar";
 import { FiLock, FiTrash2 } from "react-icons/fi";
 
 const UserPage = () => {
+  const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); //provider
   const [selected, setSelected] = useState([]);
@@ -29,6 +30,10 @@ const UserPage = () => {
     }
   };
 
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="flex h-screen bg-white">
       {/* Sidebar */}
@@ -51,6 +56,7 @@ const UserPage = () => {
             <div className="relative">
               <input
                 type="text"
+                onChange={(e)=>setSearch(e.target.value)}
                 placeholder="Search by name"
                 className="pl-4 pr-10 py-2 rounded-md bg-gray-200 placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
               />
@@ -97,7 +103,7 @@ const UserPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <tr
                       key={user.id}
                       className="hover:bg-gray-50 transition"
@@ -119,13 +125,13 @@ const UserPage = () => {
                       <td className="px-4 py-3">{user.position}</td>
                       <td className="px-4 py-3">{user.status}</td>
                       <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
-                        <button className="flex items-center gap-1 hover:text-red-600 transition">
+                        <button onClick={()=>alert("fungsi reset")} className="flex items-center gap-1 hover:text-red-600 transition">
                           <FiLock size={14} />
                           <span className="text-sm">Reset Password</span>
                         </button>
                         <button className="flex items-center gap-1 hover:text-red-600 transition">
                           <FiTrash2 size={14} />
-                          <span className="text-sm">Delete User</span>
+                          <span onClick={()=>alert("fungsi delete")} className="text-sm">Delete User</span>
                         </button>
                       </td>
                     </tr>

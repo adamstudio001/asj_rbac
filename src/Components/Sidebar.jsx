@@ -61,9 +61,9 @@ const Sidebar = () => {
   const currentPath = location.pathname;
 
   return (
-    <aside className="w-64 h-screen overflow-auto bg-gray-100 p-2">
-      <nav className="h-full flex flex-col">
-        <div>
+    <aside className="w-64 h-screen overflow-auto bg-gray-100">
+      <nav className="h-full flex flex-col justify-between">
+        <div className='p-2'>
             <div className="w-full flex justify-center">
                 <img src={Logo} alt="logo" className='w-[120px] aspect-square'/>
             </div>
@@ -76,7 +76,7 @@ const Sidebar = () => {
             </ul>
         </div>
 
-        <p>Logout</p>
+        <button onClick={()=>alert("fungsi logout")} className="p-8 border-t border-grey hover:bg-gray-300">Logout</button>
 
         {/* <div>
           <ul className="space-y-1">
