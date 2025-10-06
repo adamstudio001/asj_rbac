@@ -17,7 +17,7 @@ const SidebarItem = ({ icon: Icon, label, size=20, isActive = false, to="#" }) =
 
   return (
     <li className={clsx(
-          `text-base rounded-lg hover:${active} `,
+          `text-base rounded-lg hover:text-[#497fff] hover:bg-[#e5eaf7] `,
           isActive
             ? active
             : noactive,
