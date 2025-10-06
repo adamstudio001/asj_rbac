@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .grid-masonry {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-rows: masonry;
+  }
+}
+
+@layer utilities {
+  .masonry-columns {
+    column-count: 4;
+    column-gap: 10px;
+  }
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: 10px;
+  }
+}
