@@ -1,7 +1,24 @@
 import { getFileIcon } from '@src/Common/Utils';
+import { useFileManager } from '../Providers/FileManagerProvider';
+import { NavLink } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
-function FileGridView({ files, activeFilter }) {
-  console.log(activeFilter)
+function FileGridView({ folderKeys, mode }) {
+  const { 
+      activeFilter, 
+      getFileDirectory,
+    } = useFileManager();
+
+  let files = getFileDirectory(folderKeys);
+  if(mode=="Folders"){
+    files = files.filter((f) => f.isFolder)
+  } else if(mode=="Files"){
+    files = files.filter((f) => !f.isFolder)
+  } else{
+    files = files.filter((f) => f.name.toLowerCase().includes(activeFilter.search.toLowerCase()))
+  }
+
+  console.log(folderKeys, mode, activeFilter)
   const isFolderFilter = activeFilter.group?.label === 'Folders';
   const searchQuery = activeFilter.search?.toLowerCase() || ''; // Ambil search query dan ubah ke lowercase
 
@@ -31,13 +48,38 @@ function FileGridView({ files, activeFilter }) {
   });
 
   return (
-    <div className="grid grid-cols-4 gap-4">
-      {sortedFiles.map((file, index) => (
-        <div key={index} className="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer">
-          <div className="text-4xl mb-2">{getFileIcon(file.name, file.isFolder)}</div>
-          <div className="text-sm font-medium truncate">{file.name}</div>
-        </div>
-      ))}
+    <div
+      className="grid gap-4"
+      style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}
+    >
+      {sortedFiles.map((file, index) =>
+        file.isFolder ? (
+          <NavLink
+            key={index}
+            to={`/filemanager/${file.folderKeys}`}
+            className="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
+          >
+            <div className="text-4xl mb-2">{getFileIcon(file.name, file.isFolder)}</div>
+            <div className="text-sm font-medium truncate w-full">{file.name}</div>
+          </NavLink>
+        ) : (
+          <div
+            key={index}
+            className="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
+          >
+            <div className="text-4xl mb-2">{getFileIcon(file.name, file.isFolder)}</div>
+            <div className="text-sm font-medium truncate w-full">{file.name}</div>
+          </div>
+        )
+      )}
+
+      {sortedFiles.length > 0 && sortedFiles.length < 4 &&
+        Array.from({ length: 4 - sortedFiles.length }).map((_, i) => (
+          <div key={uuidv4()}>
+            &nbsp;
+          </div>
+        ))
+      }
     </div>
   );
 }

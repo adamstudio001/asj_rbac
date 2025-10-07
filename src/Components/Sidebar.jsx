@@ -27,7 +27,7 @@ const SidebarItem = ({ icon: Icon, label, size=20, isActive = false, to="#" }) =
         to={to}
         className={"flex items-center gap-[0.7rem]"}
       >
-        <Icon size={18} />
+        <Icon size={size} />
         <span>{label}</span>
       </NavLink>
     </li>
@@ -61,22 +61,22 @@ const Sidebar = () => {
   const currentPath = location.pathname;
 
   return (
-    <aside className="w-64 h-screen overflow-auto bg-gray-100">
+    <aside className="w-64 h-screen overflow-y-auto bg-gray-100">
       <nav className="h-full flex flex-col justify-between">
         <div className='p-2'>
             <div className="w-full flex justify-center">
                 <img src={Logo} alt="logo" className='w-[120px] aspect-square'/>
             </div>
-            <ul className="mt-4">
+            <ul className="mt-4 space-y-2">
                 <SidebarItem icon={LiaHomeSolid} label="File Management" to={"/filemanager"} isActive={["/filemanager"].some((p) => currentPath.startsWith(p))}/>
                 <SidebarItem icon={FaRegUser} label="Users" size={16} to={"/users"} isActive={["/users"].some((p) => currentPath.startsWith(p))}/>
-                <SidebarItem icon={BsPersonLock} label="Role & Permissions" isActive={["/role_permission"].some((p) => currentPath.startsWith(p))}/>
-                <SidebarItem icon={IoNotificationsOutline} label="Log History" isActive={["/log"].some((p) => currentPath.startsWith(p))}/>
+                <SidebarItem icon={BsPersonLock} label="Role & Permissions" to={"/role_permissions"} isActive={["/role_permission"].some((p) => currentPath.startsWith(p))}/>
+                <SidebarItem icon={IoNotificationsOutline} label="Log History" to={"/logs"}  isActive={["/log"].some((p) => currentPath.startsWith(p))}/>
                 <SidebarItem icon={GoGear} label="Settings" />
             </ul>
         </div>
 
-        <button onClick={()=>alert("fungsi logout")} className="p-8 border-t border-grey hover:bg-gray-300">Logout</button>
+        <button onClick={()=>alert("fungsi logout")} className="p-[8%] border-t border-grey hover:bg-gray-300">Logout</button>
 
         {/* <div>
           <ul className="space-y-1">

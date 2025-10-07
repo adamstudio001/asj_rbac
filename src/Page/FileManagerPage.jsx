@@ -3,41 +3,37 @@ import { HiHome } from "react-icons/hi";
 import { LuUpload } from "react-icons/lu";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2 } from "lucide-react";
-import Sidebar from "@src/Components/Sidebar";
 import FileGridView from "@src/Components/FileGridView";
 import FileListView from "@src/Components/FileListView";
 import { IoGridOutline } from "react-icons/io5";
 import { FaListUl } from "react-icons/fa6";
+import { useFileManager } from "@src/Providers/FileManagerProvider";
+import { NavLink, useParams } from "react-router-dom";
+import { IoArrowBack } from "react-icons/io5";
+import { getFileIconBig } from '@src/Common/Utils';
+import { v4 as uuidv4 } from 'uuid';
+import { useSidebar } from "@src/Providers/SidebarProvider";
+
 
 const FileManagerPage = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState("grid");
-  const [activeFilter, setActiveFilter] = useState({search: "", group: null});
+  const { folderKeys } = useParams();
+  console.log(folderKeys)
+
+  const { 
+    isModalOpen, 
+    setIsModalOpen,
+    viewMode, 
+    viewModeFolders, 
+    viewModeFiles, 
+    setActiveFilter,
+    getDirectory,
+    findParentFolderKey
+  } = useFileManager();
   
-  const dummyFiles = [
-    { name: "Laporan Absensi Karyawan", isFolder: true },
-    { name: "Surat Izin Cuti.docx" },
-    { name: "Monthly Report Presentation.pptx" },
-    { name: "Payroll-2026.xlsx" },
-    { name: "tree-trunk.png" },
-    { name: "Home_Renovation_Plan.xlsx" },
-    { name: "Surat Resign Samsul.pdf" },
-    { name: "music.mp3" },
-    { name: "Vacation_Photos_Italy.zip" },
-    { name: "Laporan Absensi Karyawan", isFolder: true },
-  ];
+  const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
 
   return (
-    <div className="flex h-screen bg-white">
-      {/* Sidebar */}
-      {isSidebarOpen && (
-        <div className="w-64 flex-shrink-0">
-          <Sidebar />
-        </div>
-      )}
-
-      {/* Main Content */}
+    <>
       <div className="flex flex-col flex-1">
         {/* Navbar */}
         <header className="flex items-center justify-between px-6 py-6">
@@ -65,37 +61,85 @@ const FileManagerPage = () => {
 
         {/* Content */}
         <main className="flex-1 items-center p-6 overflow-auto">
-          <div className="px-[15%] w-full">
-            <div className="mt-[30px] text-gray-600 text-lg">
-              <input
-                type="text"
-                placeholder="Search"
-                onChange={(e) =>
-                  setActiveFilter((prev) => ({
-                    ...prev,
-                    search: e.target.value,
-                  }))
-                }
-                className="w-full px-4 py-2 text-lg bg-[#f5f4f4] rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#497fff]"
-              />
-            </div>
-
-            <div className="py-6 space-y-4">
-              <div>
-                <div className="flex justify-between items-center p-2">
-                  <h1 className="text-sm font-bold text-[#5b5b5b]">Files</h1>
-                  <SectionViewMode action={setViewMode} viewMode={viewMode} />
+          <div className="px-[10vw] w-full">
+            {
+              !folderKeys?  
+              <>
+                <div className="mt-[30px] text-gray-600 text-lg">
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    onChange={(e) =>
+                      setActiveFilter((prev) => ({
+                        ...prev,
+                        search: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 text-lg bg-[#f5f4f4] rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#497fff] focus:bg-white"
+                  />
                 </div>
-                <SectionGroupFilter action={setActiveFilter} activeFilter={activeFilter} />
-              </div>
 
-              {viewMode === "grid" ? (
-                <FileGridView files={dummyFiles} activeFilter={activeFilter} />
-              ) : (
-                <FileListView files={dummyFiles} activeFilter={activeFilter} />
-              )}
-            </div>
+                <div className="mt-16">
+                  <RecentOpened />
+                </div>
+              </> : 
+              <>
+                <NavLink to={`/filemanager/${findParentFolderKey(folderKeys)==null? "":findParentFolderKey(folderKeys)}`} className="flex w-[min-content] items-center gap-1 text-black font-bold px-1 py-2 rounded-md hover:bg-gray-300 transition">
+                  <IoArrowBack />
+                  Back
+                </NavLink>
+                <h2 className="text-black text-3xl my-4">{getDirectory(folderKeys)}</h2>
+              </>
+            }
 
+            {
+              folderKeys == null?
+              <div className="py-6 space-y-4">
+                <div>
+                  <div className="flex justify-between items-center p-2">
+                    <h1 className="text-sm font-bold text-[#5b5b5b]">Files</h1>
+                    <SectionViewMode />
+                  </div>
+                  <SectionGroupFilter />
+                </div>
+                
+                {viewMode === "grid" ? (
+                  <FileGridView folderKeys={folderKeys}/>
+                ) : (
+                  <FileListView folderKeys={folderKeys}/>
+                )}
+              </div> : 
+              <>
+                <div className="py-6 space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center p-2">
+                      <h1 className="text-sm font-bold text-[#5b5b5b]">Folders</h1>
+                      <SectionViewMode isNested={true} mode="Folders"/>
+                    </div>
+                  </div>
+                  
+                  {viewModeFolders === "grid" ? (
+                    <FileGridView folderKeys={folderKeys} mode="Folders"/>
+                  ) : (
+                    <FileListView folderKeys={folderKeys} mode="Folders"/>
+                  )}
+                </div>
+                <div className="py-6 space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center p-2">
+                      <h1 className="text-sm font-bold text-[#5b5b5b]">Files</h1>
+                      <SectionViewMode isNested={true} mode="Files"/>
+                    </div>
+                  </div>
+                  
+                  {viewModeFiles === "grid" ? (
+                    <FileGridView folderKeys={folderKeys} mode="Files"/>
+                  ) : (
+                    <FileListView folderKeys={folderKeys} mode="Files"/>
+                  )}
+                </div>
+              </>
+            }
 
             {/* <div className="mt-[60px] flex items-center justify-between">
               <h4 className="text-[#5b5b5b]">Your Workspace</h4> 
@@ -238,27 +282,122 @@ const FileManagerPage = () => {
           Ini contoh konten modal seperti di Bootstrap, tapi dengan React + Tailwind.
         </p>
       </Modal>
-    </div>
+    </>
   );
 };
 
-function SectionViewMode({action, viewMode}){
+function RecentOpened(){
+  const [recents, setRecents] = useState([
+    { name: "Laporan Absensi Karyawan", type: "folder" },
+    { name: "Surat Izin Cuti.docx", type: "doc" },
+    { name: "Monthly Report Presentation.pptx", type: "image", preview: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e" },
+    { name: "Payroll-2026.xlsx", type: "excel" },
+  ]);
+
+  const renderIcon = (file) => {
+    switch (file.type) {
+      case "image":
+        return (
+          <img
+            src={file.preview}
+            alt={file.name}
+            className="w-full h-24 object-cover rounded-xl"
+          />
+        );
+      default:
+        return getFileIconBig(file.name, file.type=="folder");
+    }
+  };
+
+  function clear(){
+    setRecents([]);
+  }
+
+  return <>
+    <div className="flex justify-between items-center">
+      <h3 className="text-sm font-bold text-[#5b5b5b]">Recenly Opened</h3>
+      <button
+        onClick={() => clear()}
+        className="flex w-[min-content] items-center gap-1 text-[#999999] px-2 py-1 rounded-md hover:bg-gray-300 hover:text-black transition"
+      >
+        Clear
+      </button>
+    </div>
+
+    <div
+      className="grid gap-4 p-4"
+      style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}
+    >
+      {recents.map((file, idx) => (
+        <div
+          key={idx}
+          className="bg-gray-50 space-y-2 hover:bg-gray-100 cursor-pointer p-4 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm transition"
+        >
+          <div className={`${file.type === "image" ? "w-full" : "w-[5cqi]"}`}>
+            {renderIcon(file)}
+          </div>
+          <div className="text-sm font-medium text-gray-900 truncate w-full">
+            {file.name}
+          </div>
+        </div>
+      ))}
+    </div>
+  </>
+}
+
+function SectionViewMode({isNested = false, mode=null}){
+  const { 
+    viewMode, 
+    setViewMode,
+    viewModeFolders, 
+    setViewModeFolders,
+    viewModeFiles, 
+    setViewModeFiles,
+  } = useFileManager();
+
+  function changeMode(target){
+    console.log({target, isNested, mode})
+    if(!isNested && mode==null){
+      setViewMode(target)
+    } else if(isNested && mode=="Folders"){
+      setViewModeFolders(target);
+    } else if(isNested && mode=="Files"){
+      setViewModeFiles(target);
+    }
+  }
+
+  function getMode(){
+    if(!isNested && mode==null){
+      return viewMode;
+    } else if(isNested && mode=="Folders"){
+      return viewModeFolders
+    } else if(isNested && mode=="Files"){
+      return viewModeFiles;
+    }
+  }
+
   return  <div className="flex gap-1">
             <button
-              className={`px-3 py-2 flex items-center gap-2 rounded ${viewMode === "grid" ? "text-[#497fff] bg-[#e1e7f4]":"bg-transparent text-[#929292]"}`}
-              onClick={() => action("grid")}
+              className={`px-3 py-2 flex items-center gap-2 rounded ${getMode() === "grid" ? "text-[#497fff] bg-[#e1e7f4]":"bg-transparent text-[#929292]"}`}
+              onClick={() => changeMode("grid")}
             >
               <IoGridOutline size={15}/>
             </button>
             <button
-              className={`px-3 py-2 flex items-center gap-2 rounded ${viewMode === "list" ? "text-[#497fff] bg-[#e1e7f4]":"bg-transparent text-[#929292]"}`}
-              onClick={() => action("list")}
+              className={`px-3 py-2 flex items-center gap-2 rounded ${getMode() === "list" ? "text-[#497fff] bg-[#e1e7f4]":"bg-transparent text-[#929292]"}`}
+              onClick={() => changeMode("list")}
             >
               <FaListUl size={15}/>
             </button>
           </div>
 }
-function SectionGroupFilter({activeFilter, action}){
+
+function SectionGroupFilter(){
+  const { 
+    activeFilter, 
+    setActiveFilter,
+  } = useFileManager();
+
   const list_group_filters = [
     {
       label: 'Documents',
@@ -295,7 +434,7 @@ function SectionGroupFilter({activeFilter, action}){
               <button
                 key={filter.label}
                 onClick={()=>{
-                  action((prev) => ({
+                  setActiveFilter((prev) => ({
                     ...prev,
                     group: prev.group?.label===filter.label? null:filter,
                   }))
@@ -309,64 +448,104 @@ function SectionGroupFilter({activeFilter, action}){
 }
 
 function Modal({ isOpen, onClose }) {
-  const [files, setFiles] = useState([]); // semua file, termasuk status progress
+  const [files, setFiles] = useState([]);
   const inputRef = useRef(null);
+  const uploadRefs = useRef({}); // simpan timeout & interval per file
 
   // Handle browse click
   const handleBrowse = () => inputRef.current.click();
 
-  // Handle file selection (tidak langsung upload)
+  // Handle file selection
   const handleFileSelect = (e) => {
     const newFiles = Array.from(e.target.files).map(file => ({
-      file,
+      id: uuidv4(),
+      file: file,
       progress: 0,
-      uploaded: false
+      uploaded: false,
+      uploading: false,
     }));
     setFiles(prev => [...prev, ...newFiles]);
+
+    // ✅ Reset supaya file yang sama bisa dipilih ulang
+    e.target.value = "";
   };
 
-  // Handle drag & drop (tidak langsung upload)
+  // Handle drag & drop
   const handleDrop = (e) => {
     e.preventDefault();
     const droppedFiles = Array.from(e.dataTransfer.files).map(file => ({
-      file,
+      id: uuidv4(),
+      file: file,
       progress: 0,
-      uploaded: false
+      uploaded: false,
+      uploading: false,
     }));
     setFiles(prev => [...prev, ...droppedFiles]);
   };
 
   const handleDragOver = (e) => e.preventDefault();
 
-  // Remove file
+  // Remove file (cancel upload)
   const handleRemove = (fileToRemove) => {
-    setFiles(prev => prev.filter(f => f.file !== fileToRemove.file));
+    const ref = uploadRefs.current[fileToRemove.id];
+    if (ref) {
+      if (ref.intervalId) clearInterval(ref.intervalId);
+      if (ref.timeoutId) clearTimeout(ref.timeoutId);
+      delete uploadRefs.current[fileToRemove.id];
+    }
+    setFiles(prev => prev.filter(f => f.id !== fileToRemove.id));
   };
 
-  // Simulate upload saat klik tombol dengan delay 3 detik per file
+  // Simulate upload with delay 3 detik per file (relatif)
   const handleUploadFiles = () => {
-    files.forEach((f, index) => {
-      if (f.uploaded) return; // skip jika sudah di-upload
+    const notUploaded = files.filter(f => !f.uploaded && !f.uploading);
 
-      setTimeout(() => {
+    notUploaded.forEach((f, relIndex) => {
+      const fileId = f.id;
+
+      // Tandai file sedang upload
+      setFiles(prev =>
+        prev.map(fileObj =>
+          fileObj.id === fileId ? { ...fileObj, uploading: true } : fileObj
+        )
+      );
+
+      const timeoutId = setTimeout(() => {
         let progress = 0;
-        const interval = setInterval(() => {
+        const intervalId = setInterval(() => {
           progress += 10;
+
           setFiles(prev =>
-            prev.map((fileObj, i) =>
-              i === index ? { ...fileObj, progress: Math.min(progress, 100) } : fileObj
+            prev.map(fileObj =>
+              fileObj.id === fileId
+                ? { ...fileObj, progress: Math.min(progress, 100) }
+                : fileObj
             )
           );
+
           if (progress >= 100) {
-            clearInterval(interval);
+            clearInterval(intervalId);
+            delete uploadRefs.current[fileId];
             setFiles(prev =>
-              prev.map((fileObj, i) =>
-                i === index ? { ...fileObj, uploaded: true, progress: 100 } : fileObj
+              prev.map(fileObj =>
+                fileObj.id === fileId
+                  ? { ...fileObj, uploaded: true, uploading: false, progress: 100 }
+                  : fileObj
               )
             );
           }
         }, 200);
-      }, index * 3000); // delay 3 detik per file
+
+        uploadRefs.current[fileId] = {
+          ...(uploadRefs.current[fileId] || {}),
+          intervalId
+        };
+      }, relIndex * 3000);
+
+      uploadRefs.current[fileId] = {
+        ...(uploadRefs.current[fileId] || {}),
+        timeoutId
+      };
     });
   };
 
@@ -392,10 +571,10 @@ function Modal({ isOpen, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={()=>{
+          onClick={() => {
             setFiles([]);
             onClose();
-          }} // klik di area luar modal menutup modal
+          }}
         >
           {/* Backdrop */}
           <motion.div
@@ -411,7 +590,7 @@ function Modal({ isOpen, onClose }) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            onClick={(e) => e.stopPropagation()} // klik di modal tidak menutup
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="text-2xl font-semibold text-center p-4">
@@ -422,7 +601,7 @@ function Modal({ isOpen, onClose }) {
             <div className="max-w-lg mx-auto p-6 space-y-4">
               {/* Drag & Drop Area */}
               <div
-                className={`${files.length==0? `h-[300px]`:``} bg-[#f8f8ff] rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-500 transition`}
+                className={`${files.length === 0 ? `h-[400px]` : ``} bg-[#f8f8ff] rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-500 transition`}
                 onClick={handleBrowse}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -444,58 +623,61 @@ function Modal({ isOpen, onClose }) {
                 />
               </div>
 
-              {/* Uploading Files */}
-              {uploadingCount > 0 && (
-                <div>
-                  <p className="font-medium mb-2">
-                    Uploading - {files.filter(f => f.uploaded).length}/
-                    {files.length} files
-                  </p>
-                  {files
-                    .filter(f => !f.uploaded)
-                    .map((f) => (
-                      <div key={f.file.name} className="mb-2">
-                        <div className="relative border border-gray-400 rounded p-2 mb-2 text-sm">
-                          <span className="truncate">{f.file.name}</span>
-                          <button
-                            onClick={() => handleRemove(f)}
-                            className="absolute right-2 p-[2px] bg-gray-300 rounded-full text-white"
-                          >
-                            <X size={16} />
-                          </button>
+              {files.length > 0 && (
+                <div className="w-full h-[300px] overflow-y-auto">
+                  {/* Uploading Files */}
+                  {uploadingCount > 0 && (
+                    <div>
+                      <p className="font-medium mb-2">
+                        Uploading - {files.filter(f => f.uploaded).length}/{files.length} files
+                      </p>
+                      {files
+                        .filter(f => !f.uploaded)
+                        .map((f) => (
+                          <div key={f.id} className="mb-2">
+                            <div className="relative border border-gray-400 rounded p-2 mb-2 text-sm">
+                              <span className="truncate">{f.file.name}</span>
+                              <button
+                                onClick={() => handleRemove(f)}
+                                className="absolute right-2 p-[2px] bg-gray-300 hover:bg-black rounded-full text-white"
+                              >
+                                <X size={16} />
+                              </button>
 
-                          <div className="absolute ml-[-8px] w-[100%] h-1 bg-gray-200 rounded mt-1">
-                            <div
-                              className="h-1 bg-blue-500 rounded transition-all duration-200"
-                              style={{ width: `${f.progress}%` }}
-                            ></div>
+                              <div className="absolute ml-[-8px] w-[100%] h-1 bg-gray-200 rounded mt-1">
+                                <div
+                                  className="h-1 bg-blue-500 rounded transition-all duration-200"
+                                  style={{ width: `${f.progress}%` }}
+                                ></div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
+                        ))}
+                    </div>
+                  )}
 
-              {/* Uploaded Files */}
-              {files.filter(f => f.uploaded).length > 0 && (
-                <div>
-                  <p className="font-medium mb-2">Uploaded</p>
-                  {files
-                    .filter(f => f.uploaded)
-                    .map((f) => (
-                      <div
-                        key={f.file.name}
-                        className="flex justify-between items-center border border-green-400 rounded p-2 mb-2 text-sm"
-                      >
-                        <span className="truncate">{f.file.name}</span>
-                        <button
-                          onClick={() => handleRemove(f)}
-                          className="text-red-500 hover:text-red-600"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    ))}
+                  {/* Uploaded Files */}
+                  {files.filter(f => f.uploaded).length > 0 && (
+                    <div>
+                      <p className="font-medium mb-2">Uploaded</p>
+                      {files
+                        .filter(f => f.uploaded)
+                        .map((f) => (
+                          <div
+                            key={f.id}
+                            className="flex justify-between items-center border border-green-400 rounded p-2 mb-2 text-sm"
+                          >
+                            <span className="truncate">{f.file.name}</span>
+                            <button
+                              onClick={() => handleRemove(f)}
+                              className="text-red-500 hover:text-red-600"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
               )}
 

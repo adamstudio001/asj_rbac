@@ -1,7 +1,7 @@
 {
   "name": "asj_rbac",
   "private": true,
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "homepage": "https://adamf0.github.io/asj_rbac",
   "scripts": {
@@ -14,6 +14,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.22",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
@@ -21,7 +22,8 @@
     "react-hook-form": "^7.64.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.3",
-    "tailwindcss": "^4.1.14"
+    "tailwindcss": "^4.1.14",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

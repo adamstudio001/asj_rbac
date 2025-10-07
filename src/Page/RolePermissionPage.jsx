@@ -1,35 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, Pencil } from "lucide-react";
 import { FiLock, FiTrash2 } from "react-icons/fi";
 
-const UserPage = () => {
+const RolePermissionPage = () => {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selected, setSelected] = useState([]);
-  const users = [
-    { id: 1, name: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", status: "27 mins" },
-    { id: 2, name: "Hani Ayu Wula..", role: "Admin", position: "Finance", status: "11 mins" },
-    { id: 3, name: "Rahul", role: "Admin", position: "Operation", status: "8 mins" },
-    { id: 4, name: "Dika", role: "Super Admin", position: "Operation", status: "1 mins" },
+  const roles = [
+    { id: 1, role: "HR/GA", permission: ["create"]},
+    { id: 2, role: "Finance", permission: []},
+    { id: 3, role: "Operation", permission: []},
+    { id: 4, role: "Developer", permission: []},
   ];
 
-  const toggleSelect = (id) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selected.length === users.length) {
-      setSelected([]);
-    } else {
-      setSelected(users.map((u) => u.id));
-    }
-  };
-
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(search.toLowerCase())
+  const filteredRoles = roles.filter(user =>
+    user.role.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -38,7 +23,7 @@ const UserPage = () => {
         {/* Navbar */}
        <header className="flex items-center justify-between px-6 py-6 border-b border-[#eaeaea]">
           {/* Left: Title */}
-          <h1 className="text-xl font-semibold text-[#1e3264]">User Management</h1>
+          <h1 className="text-xl font-semibold text-[#1e3264]">Roles & Permissions</h1>
 
           {/* Right: Search + Button */}
           <div className="flex items-center gap-3">
@@ -62,9 +47,9 @@ const UserPage = () => {
             </div>
 
             {/* New User Button */}
-            <button onClick={()=>setIsModalOpen(!isModalOpen)} className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition">
+            {/* <button onClick={()=>setIsModalOpen(!isModalOpen)} className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition">
               + New User
-            </button>
+            </button> */}
           </div>
         </header>
 
@@ -74,54 +59,29 @@ const UserPage = () => {
               <table className="w-full text-left text-sm">
                 <thead className="bg-[#f8f8f8] text-black font-medium">
                   <tr>
-                    <th className="px-4 py-3 w-10">
-                      <input
-                          type="checkbox"
-                          onClick={toggleSelectAll}
-                          className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
-                            checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
-                            checked:before:content-['✔'] checked:before:text-[8px] 
-                            checked:before:flex checked:before:items-center checked:before:justify-center 
-                            cursor-pointer"
-                        />
-                    </th>
-                    <th className="px-4 py-3">Name</th>
                     <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Position</th>
-                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Permission</th>
                     <th className="px-4 py-3">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user) => (
+                  {filteredRoles.map((role) => (
                     <tr
-                      key={user.id}
+                      key={role.id}
                       className="hover:bg-gray-50 transition"
                     >
-                      <td className="px-4 py-3">
-                        <input
-                          type="checkbox"
-                          checked={selected.includes(user.id)}
-                          onChange={() => toggleSelect(user.id)}
-                          className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
-                            checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
-                            checked:before:content-['✔'] checked:before:text-[8px] 
-                            checked:before:flex checked:before:items-center checked:before:justify-center 
-                            cursor-pointer"
-                        />
-                      </td>
-                      <td className="px-4 py-3 font-medium text-gray-800">{user.name}</td>
-                      <td className="px-4 py-3">{user.role}</td>
-                      <td className="px-4 py-3">{user.position}</td>
-                      <td className="px-4 py-3">{user.status}</td>
+                      <td className="px-4 py-3">{role.role}</td>
+                      <td className="px-4 py-3">{
+                        role.permission.map(p => <span className="px-2 py-1 bg-green-400 rounded rounded-xl">{p}</span>)  
+                      }</td>
                       <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
-                        <button onClick={()=>alert("fungsi reset")} className="flex items-center gap-1 hover:text-red-600 transition">
-                          <FiLock size={14} />
-                          <span className="text-sm">Reset Password</span>
+                        <button onClick={()=>alert("fungsi edit")} className="flex items-center gap-1 hover:text-red-600 transition">
+                          <Pencil size={14} />
+                          <span className="text-sm">Edit</span>
                         </button>
                         <button className="flex items-center gap-1 hover:text-red-600 transition">
-                          <FiTrash2 size={14} />
-                          <span onClick={()=>alert("fungsi delete")} className="text-sm">Delete User</span>
+                          <FiLock size={14} />
+                          <span onClick={()=>alert("fungsi permission")} className="text-sm">Set Permission</span>
                         </button>
                       </td>
                     </tr>
@@ -286,4 +246,4 @@ function Modal({ isOpen, onClose }) {
   );
 }
 
-export default UserPage;
+export default RolePermissionPage;

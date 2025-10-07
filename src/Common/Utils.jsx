@@ -18,3 +18,17 @@ export function getFileIcon(fileName, isFolder = false) {
 
   return <CgFileDocument className="text-gray-400 text-xl" />; // default
 }
+
+export function getFileIconBig(fileName, isFolder = false) {
+  if (isFolder) return <FaFolder size={"100%"} className="text-blue-500 text-xl" />;
+
+  const ext = fileName.split('.').pop().toLowerCase();
+
+  if (['ppt', 'pptx'].includes(ext)) return <HiOutlinePresentationChartLine size={"100%"} className="text-orange-500 text-xl" />;
+  if (['xlsx', 'xls'].includes(ext)) return <GoDatabase size={"100%"} className="text-green-600 text-xl" />;
+  if (['doc', 'docx', 'txt'].includes(ext)) return <CgFileDocument size={"100%"} className="text-gray-600 text-xl" />;
+  if (['pdf', 'mp3', 'zip'].includes(ext)) return <BsFileEarmarkZip size={"100%"} className="text-red-500 text-xl" />;
+  if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(ext)) return <SlPicture size={"100%"} className="text-purple-400 text-xl" />;
+
+  return <CgFileDocument size={"100%"} className="text-gray-400 text-xl" />; // default
+}
