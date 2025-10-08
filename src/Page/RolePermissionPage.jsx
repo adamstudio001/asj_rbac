@@ -25,7 +25,16 @@ const RolePermissionPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar
+        renderActionModal={() => (
+          <button
+            onClick={() => setIsModalOpen(!isModalOpen)}
+            className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition"
+          >
+            + New User
+          </button>
+        )}
+      />
       
       <main className="flex-1 items-center p-6 overflow-auto">
         <div className="w-full overflow-hidden rounded-lg border border-gray-200">

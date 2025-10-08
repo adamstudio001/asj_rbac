@@ -4,7 +4,7 @@ import { LuUpload } from "react-icons/lu";
 import { useLocation } from "react-router-dom";
 import { useSearch } from "@src/Providers/SearchProvider";
 
-const Navbar = () => {
+const Navbar = ({renderActionModal = null}) => {
     const location = useLocation();
     const currentPath = location.pathname;
     const { toggleSidebar, toggleCollapse } = useSidebar();
@@ -64,10 +64,7 @@ const Navbar = () => {
                     </svg>
                     </div>
 
-                    {/* New User Button */}
-                    <button onClick={()=>setIsModalOpen(!isModalOpen)} className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition">
-                    + New User
-                    </button>
+                    {typeof renderActionModal === "function" && renderActionModal()}
                 </div>
             </>
         } else if(["/role_permissions"].some((p) => currentPath.startsWith(p))){
@@ -99,10 +96,7 @@ const Navbar = () => {
                     </svg>
                     </div>
 
-                    {/* New User Button */}
-                    <button onClick={()=>setIsModalOpen(!isModalOpen)} className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition">
-                    + New User
-                    </button>
+                    {typeof renderActionModal === "function" && renderActionModal()}
                 </div>
             </>
         } else if(["/logs"].some((p) => currentPath.startsWith(p))){
@@ -134,10 +128,7 @@ const Navbar = () => {
                     </svg>
                     </div>
 
-                    {/* New User Button */}
-                    <button onClick={()=>setIsModalOpen(!isModalOpen)} className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition">
-                    + New User
-                    </button>
+                    {typeof renderActionModal === "function" && renderActionModal()}
                 </div>
             </>
         }
