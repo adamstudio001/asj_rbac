@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Trash2, Pencil } from "lucide-react";
-import { FiLock, FiTrash2 } from "react-icons/fi";
+import { X, Pencil } from "lucide-react";
+import { FiLock } from "react-icons/fi";
+import { useSearch } from "../Providers/SearchProvider";
+import Navbar from "@src/Components/Navbar";
 
 const RolePermissionPage = () => {
-  const [search, setSearch] = useState("");
+  const { search, setSearch } = useSearch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const roles = [
     { id: 1, role: "HR/GA", permission: ["create"]},
@@ -13,84 +15,54 @@ const RolePermissionPage = () => {
     { id: 4, role: "Developer", permission: []},
   ];
 
+  useEffect(()=>{
+      setSearch("");
+  },[]);
+
   const filteredRoles = roles.filter(user =>
     user.role.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <>
-      <div className="flex flex-col flex-1">
-        {/* Navbar */}
-       <header className="flex items-center justify-between px-6 py-6 border-b border-[#eaeaea]">
-          {/* Left: Title */}
-          <h1 className="text-xl font-semibold text-[#1e3264]">Roles & Permissions</h1>
-
-          {/* Right: Search + Button */}
-          <div className="flex items-center gap-3">
-            {/* Search */}
-            <div className="relative">
-              <input
-                type="text"
-                onChange={(e)=>setSearch(e.target.value)}
-                placeholder="Search by name"
-                className="pl-4 pr-10 py-2 rounded-md bg-gray-200 placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
-              />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-
-            {/* New User Button */}
-            {/* <button onClick={()=>setIsModalOpen(!isModalOpen)} className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition">
-              + New User
-            </button> */}
-          </div>
-        </header>
-
-        {/* Content */}
-        <main className="flex-1 items-center p-6 overflow-auto">
-          <div className="w-full overflow-hidden rounded-lg border border-gray-200">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-[#f8f8f8] text-black font-medium">
-                  <tr>
-                    <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Permission</th>
-                    <th className="px-4 py-3">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRoles.map((role) => (
-                    <tr
-                      key={role.id}
-                      className="hover:bg-gray-50 transition"
-                    >
-                      <td className="px-4 py-3">{role.role}</td>
-                      <td className="px-4 py-3">{
-                        role.permission.map(p => <span className="px-2 py-1 bg-green-400 rounded rounded-xl">{p}</span>)  
-                      }</td>
-                      <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
-                        <button onClick={()=>alert("fungsi edit")} className="flex items-center gap-1 hover:text-red-600 transition">
-                          <Pencil size={14} />
-                          <span className="text-sm">Edit</span>
-                        </button>
-                        <button className="flex items-center gap-1 hover:text-red-600 transition">
-                          <FiLock size={14} />
-                          <span onClick={()=>alert("fungsi permission")} className="text-sm">Set Permission</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-        </main>
-      </div>
+      <Navbar />
+      
+      <main className="flex-1 items-center p-6 overflow-auto">
+        <div className="w-full overflow-hidden rounded-lg border border-gray-200">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#f8f8f8] text-black font-medium">
+              <tr>
+                <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Permission</th>
+                <th className="px-4 py-3">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRoles.map((role) => (
+                <tr
+                  key={role.id}
+                  className="hover:bg-gray-50 transition"
+                >
+                  <td className="px-4 py-3">{role.role}</td>
+                  <td className="px-4 py-3">{
+                role.permission.map(p => <span className="px-2 py-1 bg-green-400 rounded rounded-xl">{p}</span>)  
+                  }</td>
+                  <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
+                <button onClick={()=>alert("fungsi edit")} className="flex items-center gap-1 hover:text-red-600 transition">
+                  <Pencil size={14} />
+                  <span className="text-sm">Edit</span>
+                </button>
+                <button className="flex items-center gap-1 hover:text-red-600 transition">
+                  <FiLock size={14} />
+                  <span onClick={()=>alert("fungsi permission")} className="text-sm">Set Permission</span>
+                </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
 
       <Modal
         isOpen={isModalOpen}

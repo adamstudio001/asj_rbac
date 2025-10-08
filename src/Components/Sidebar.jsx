@@ -1,119 +1,106 @@
-import React, { useState } from 'react';
-import { NavLink, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { LiaHomeSolid } from "react-icons/lia";
-// import { IoIosArrowDown } from "react-icons/io";
 import Logo from "@assets/logo.png";
-
 import { FaRegUser } from "react-icons/fa6";
 import { BsPersonLock } from "react-icons/bs";
 import { GoGear } from "react-icons/go";
-import clsx from 'clsx';
+import { Link } from "react-router-dom";
 
-const SidebarItem = ({ icon: Icon, label, size=20, isActive = false, to="#" }) => {
+const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
+  const location = useLocation();
   const active = "text-[#497fff] bg-[#e5eaf7]";
   const noactive = "text-[#656565]";
-  const padding = "px-[1.2rem] py-[.8rem]";
-
-  return (
-    <li className={clsx(
-          `text-base rounded-lg hover:text-[#497fff] hover:bg-[#e5eaf7] `,
-          isActive
-            ? active
-            : noactive,
-             padding
-    )}>
-      <NavLink
-        to={to}
-        className={"flex items-center gap-[0.7rem]"}
-      >
-        <Icon size={size} />
-        <span>{label}</span>
-      </NavLink>
-    </li>
-  );
-};
-
-// const SidebarSection = ({ title, items }) => {
-//   const [isOpen, setIsOpen] = useState(true);
-
-//   return (
-//     <div className="mt-6">
-//       <button
-//         onClick={() => setIsOpen(!isOpen)}
-//         className="flex items-center w-full text-[#656565] text-[12px] uppercase pl-[1.2rem] pr-[.6rem] focus:outline-none"
-//       >
-//         <h2 className="text-gray-500 mr-2 text-left">{title}</h2>
-//         <IoIosArrowDown
-//           size={14}
-//           className={`transform transition-transform duration-200 ${isOpen ? 'rotate-0' : '-rotate-90'}`}
-//         />
-//       </button>
-//       <ul className={`space-y-2 mt-2 overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[500px]' : 'max-h-0'}`}>
-//         {items}
-//       </ul>
-//     </div>
-//   );
-// };
-
-const Sidebar = () => {
-  const location = useLocation();
   const currentPath = location.pathname;
 
   return (
-    <aside className="w-64 h-screen overflow-y-auto bg-gray-100">
-      <nav className="h-full flex flex-col justify-between">
-        <div className='p-2'>
-            <div className="w-full flex justify-center">
-                <img src={Logo} alt="logo" className='w-[120px] aspect-square'/>
-            </div>
-            <ul className="mt-4 space-y-2">
-                <SidebarItem icon={LiaHomeSolid} label="File Management" to={"/filemanager"} isActive={["/filemanager"].some((p) => currentPath.startsWith(p))}/>
-                <SidebarItem icon={FaRegUser} label="Users" size={16} to={"/users"} isActive={["/users"].some((p) => currentPath.startsWith(p))}/>
-                <SidebarItem icon={BsPersonLock} label="Role & Permissions" to={"/role_permissions"} isActive={["/role_permission"].some((p) => currentPath.startsWith(p))}/>
-                <SidebarItem icon={IoNotificationsOutline} label="Log History" to={"/logs"}  isActive={["/log"].some((p) => currentPath.startsWith(p))}/>
-                <SidebarItem icon={GoGear} label="Settings" />
-            </ul>
-        </div>
+    <>
+      {/* Sidebar */}
+      <div
+        className={`fixed lg:relative top-0 left-0 h-screen bg-gray-100 border-r-2 border-gray-100 transition-all duration-300 ease-in-out z-50 p-3 flex flex-col justify-between
+          ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 
+          ${isCollapsed ? "w-18" : "w-64"}`}
+      >
+        <div className="flex flex-col">
+          {/* Sidebar Content */}
+          <div className="flex justify-center items-center gap-3 mb-4">
+            <img src={Logo} alt="logo" className='w-[120px] aspect-square'/>
+          </div>
 
-        <button onClick={()=>alert("fungsi logout")} className="p-[8%] border-t border-grey hover:bg-gray-300">Logout</button>
-
-        {/* <div>
-          <ul className="space-y-1">
-            <SidebarItem icon={LiaHomeSolid} label="Home" />
-            <SidebarItem icon={IoGrid} label="Workspace" isActive />
-            <SidebarItem icon={IoIosSearch} label="Search" />
-            <SidebarItem icon={IoNotificationsOutline} label="Notifications" />
+          {/* Sidebar Menu */}
+          <ul className="flex flex-col gap-3 mt-4">
+            <li>
+              <Link
+                to="/filemanager"
+                className={`flex items-center gap-3 ${["/filemanager"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                onClick={toggleSidebar} // Tutup sidebar saat di mobile
+              >
+                <LiaHomeSolid size={24} />
+                <span className={`${isCollapsed ? "hidden" : "block"}`}>File Management</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/users"
+                className={`flex items-center gap-3 ${["/users"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                onClick={toggleSidebar} // Tutup sidebar saat di mobile
+              >
+                <FaRegUser size={18} />
+                <span className={`${isCollapsed ? "hidden" : "block"}`}>Users</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/role_permissions"
+                className={`flex items-center gap-3 ${["/role_permissions"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                onClick={toggleSidebar} // Tutup sidebar saat di mobile
+              >
+                <BsPersonLock size={24} />
+                <span className={`${isCollapsed ? "hidden" : "block"}`}>Role & Permissions</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/logs"
+                className={`flex items-center gap-3 ${["/logs"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                onClick={toggleSidebar} // Tutup sidebar saat di mobile
+              >
+                <IoNotificationsOutline size={24} />
+                <span className={`${isCollapsed ? "hidden" : "block"}`}>Logs History</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/settings"
+                className={`flex items-center gap-3 ${["/settings"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                onClick={toggleSidebar} // Tutup sidebar saat di mobile
+              >
+                <GoGear size={24} />
+                <span className={`${isCollapsed ? "hidden" : "block"}`}>Settings</span>
+              </Link>
+            </li>
           </ul>
         </div>
 
-        <SidebarSection
-          title="Workspaces"
-          items={
-            <>
-              <SidebarItem icon={SlPicture} label="Collage" />
-              <SidebarItem icon={AiOutlineFile} label="Work" />
-              <SidebarItem icon={AiOutlineFile} label="Family" />
-              <SidebarItem icon={IoMusicalNotesOutline} label="Others" />
-            </>
-          }
-        />
+        <div className="flex flex-col flex-wrap gap-2">
+          <hr className="border border-t border-gray-300"/>
+          <button
+              className={`flex items-center gap-3 hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition text-venter`}
+              onClick={()=>{alert("fungsi logout")}} // Tutup sidebar saat di mobile
+          >
+            <span className={`w-full ${isCollapsed ? "hidden" : "block"}`}>Logout</span>
+          </button>
+        </div>
+      </div>
 
-        <SidebarSection
-          title="Categories"
-          items={
-            <>
-              <SidebarItem icon={SlPicture} label="Photos" />
-              <SidebarItem icon={AiOutlineFile} label="Video" />
-              <SidebarItem icon={AiOutlineFile} label="Documents" />
-              <SidebarItem icon={IoMusicalNotesOutline} label="Audio" />
-              <SidebarItem icon={FaUsers} label="Share with me" />
-            </>
-          }
-        /> */}
-
-      </nav>
-    </aside>
+      {/* Overlay untuk Mobile */}
+      {isOpen && (
+        <div
+          className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-40 lg:hidden"
+          onClick={toggleSidebar}
+        ></div>
+      )}
+    </>
   );
 };
 

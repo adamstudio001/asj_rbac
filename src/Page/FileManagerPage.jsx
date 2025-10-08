@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { HiHome } from "react-icons/hi";
-import { LuUpload } from "react-icons/lu";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2 } from "lucide-react";
 import FileGridView from "@src/Components/FileGridView";
@@ -12,7 +10,7 @@ import { NavLink, useParams } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import { getFileIconBig } from '@src/Common/Utils';
 import { v4 as uuidv4 } from 'uuid';
-import { useSidebar } from "@src/Providers/SidebarProvider";
+import Navbar from "@src/Components/Navbar";
 
 
 const FileManagerPage = () => {
@@ -29,38 +27,11 @@ const FileManagerPage = () => {
     getDirectory,
     findParentFolderKey
   } = useFileManager();
-  
-  const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
 
   return (
     <>
-      <div className="flex flex-col flex-1">
-        {/* Navbar */}
-        <header className="flex items-center justify-between px-6 py-6">
-          {/* Left: Toggle Sidebar */}
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex items-center gap-1  font-medium transition"
-          >
-            <HiHome className="text-[#497fff]" size={20}/>
-            Home
-          </button>
-
-          {/* Right: Upload + Avatar */}
-          <div className="flex items-center gap-4">
-            <button onClick={()=>setIsModalOpen(!isModalOpen)} className="flex items-center gap-3 bg-[#497fff] text-white px-4 py-2 rounded-md hover:bg-[#3a6ee8] transition">
-              <LuUpload size={18}/> 
-              Upload file
-            </button>
-            <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
-              C
-            </div>
-            <span className="font-medium text-gray-800">HR/GA</span>
-          </div>
-        </header>
-
-        {/* Content */}
-        <main className="flex-1 items-center p-6 overflow-auto">
+      <Navbar />
+      <main className="flex-1 overflow-auto items-center p-6">
           <div className="px-[10vw] w-full">
             {
               !folderKeys?  
@@ -272,7 +243,6 @@ const FileManagerPage = () => {
             
           </div>
         </main>
-      </div>
 
       <Modal
         isOpen={isModalOpen}

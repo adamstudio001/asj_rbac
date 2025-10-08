@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { formatDistanceToNowStrict, isValid } from "date-fns";
 import clsx from "clsx";
+import Navbar from "@src/Components/Navbar";
+import { useSearch } from "@src/Providers/SearchProvider";
 
 const LogHistoryPage = () => {
-  const [search, setSearch] = useState("");
+  const { search, setSearch } = useSearch();
   const [tick, setTick] = useState(0);
+
+  useEffect(()=>{
+    setSearch("");
+  },[]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -64,38 +70,9 @@ const LogHistoryPage = () => {
 
   return (
     <>
-      <div className="flex flex-col flex-1">
-        {/* Navbar */}
-       <header className="flex items-center justify-between px-6 py-6 border-b border-[#eaeaea]">
-          {/* Left: Title */}
-          <h1 className="text-xl font-semibold text-[#1e3264]">Activity Log History</h1>
+      <Navbar />
 
-          {/* Right: Search + Button */}
-          <div className="flex items-center gap-3">
-            {/* Search */}
-            <div className="relative">
-              <input
-                type="text"
-                onChange={(e)=>setSearch(e.target.value)}
-                placeholder="Search by name"
-                className="pl-4 pr-10 py-2 rounded-md bg-gray-200 placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
-              />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-
-          </div>
-        </header>
-
-        {/* Content */}
-        <main className="flex-1 items-center p-6 overflow-auto">
+      <main className="flex-1 items-center p-6 overflow-auto">
           <div className="w-full overflow-hidden rounded-lg border border-gray-200">
               <table className="w-full text-left text-sm">
                 <thead className="bg-[#f8f8f8] text-black font-medium">
@@ -129,8 +106,6 @@ const LogHistoryPage = () => {
               </table>
             </div>
         </main>
-      </div>
-
     </>
   );
 };
