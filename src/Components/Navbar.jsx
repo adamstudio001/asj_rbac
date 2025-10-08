@@ -1,6 +1,5 @@
 import { useSidebar } from "@src/Providers/SidebarProvider";
 import { HiHome } from "react-icons/hi";
-import { LuUpload } from "react-icons/lu";
 import { useLocation } from "react-router-dom";
 import { useSearch } from "@src/Providers/SearchProvider";
 
@@ -24,16 +23,7 @@ const Navbar = ({renderActionModal = null}) => {
                     Home
                 </button>
 
-                <div className="flex items-center gap-4">
-                    <button onClick={()=>setIsModalOpen(!isModalOpen)} className="flex items-center gap-3 bg-[#497fff] text-white px-4 py-2 rounded-md hover:bg-[#3a6ee8] transition">
-                    <LuUpload size={18}/> 
-                    Upload file
-                    </button>
-                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
-                    C
-                    </div>
-                    <span className="font-medium text-gray-800">HR/GA</span>
-                </div>
+                {typeof renderActionModal === "function" && renderActionModal()}
             </>;
         } else if(["/users"].some((p) => currentPath.startsWith(p))){
             return <>

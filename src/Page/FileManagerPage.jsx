@@ -11,6 +11,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { getFileIconBig } from '@src/Common/Utils';
 import { v4 as uuidv4 } from 'uuid';
 import Navbar from "@src/Components/Navbar";
+import { LuUpload } from "react-icons/lu";
 
 
 const FileManagerPage = () => {
@@ -30,7 +31,18 @@ const FileManagerPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar renderActionModal={()=> (
+        <div className="flex items-center gap-4">
+                    <button onClick={()=>setIsModalOpen(!isModalOpen)} className="flex items-center gap-3 bg-[#497fff] text-white px-4 py-2 rounded-md hover:bg-[#3a6ee8] transition">
+                    <LuUpload size={18}/> 
+                    Upload file
+                    </button>
+                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
+                    C
+                    </div>
+                    <span className="font-medium text-gray-800">HR/GA</span>
+                </div>
+      )}/>
       <main className="flex-1 overflow-auto items-center p-6">
           <div className="px-[10vw] w-full">
             {
