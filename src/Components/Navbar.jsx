@@ -131,6 +131,15 @@ const Navbar = ({renderActionModal = null}) => {
                     {typeof renderActionModal === "function" && renderActionModal()}
                 </div>
             </>
+        } else if(["/settings"].some((p) => currentPath.startsWith(p))){
+            return <>
+                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                   Settings
+                </button>
+                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                   Settings
+                </button>
+            </>
         }
     }
   return (

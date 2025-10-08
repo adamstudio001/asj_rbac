@@ -6,6 +6,7 @@ import LogHistoryPage from "./Page/LogHistoryPage";
 import { SidebarProvider } from "./Providers/SidebarProvider";
 import RolePermissionPage from "./Page/RolePermissionPage";
 import PanelLayout from "./Template/PanelLayout";
+import SettingPage from "./Page/SettingPage";
 
 export default function App() {
   return (
@@ -18,7 +19,7 @@ export default function App() {
                     <Route path="/users/" element={<UserPage />} />
                     <Route path="/logs/" element={<LogHistoryPage />} />
                     <Route path="/role_permissions/" element={<RolePermissionPage />} />
-                    {/* <Route path="/portofolio/:id" element={<PortfolioDetail />} /> */}
+                    <Route path="/settings/" element={<SettingPage />} />
                 </Route>
             </Routes>
         </Router>
