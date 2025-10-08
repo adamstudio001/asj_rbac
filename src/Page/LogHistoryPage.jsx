@@ -96,7 +96,7 @@ const LogHistoryPage = () => {
                       <td className="px-4 py-3">{log.os}</td>
                       <td className="px-4 py-3">{log.duration}</td>
                       <td className="px-4 py-3 flex items-center gap-2">
-                        <div className={clsx("w-3 h-3 rounded-full", log.lastSee.end==null? "bg-green-400":"bg-red-400")}></div>
+                        <div className={clsx("w-3 h-3 rounded-full", log.lastSee.end==null? "bg-[#62de00]":"bg-[#ff0405]")}></div>
                         {formatLastSeen(log.lastSee.start, log.lastSee.end)}
                       </td>
                       <td className="px-4 py-3">{log.role}</td>
