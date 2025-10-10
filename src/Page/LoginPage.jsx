@@ -64,7 +64,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-row">
       {/* Kolom 1 - Login */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 bg-gray-50">
         <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-6">
