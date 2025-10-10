@@ -8,7 +8,7 @@ const PanelLayout = () => {
   const { isSidebarOpen, toggleSidebar, isCollapsed } = useSidebar();
 
   return (
-    <div className="flex h-screen">
+    <div className="md:flex h-screen">
       <Sidebar 
         isOpen={isSidebarOpen} 
         toggleSidebar={toggleSidebar} 

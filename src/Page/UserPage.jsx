@@ -52,7 +52,7 @@ const UserPage = () => {
         )}
       />
       <main className="flex-1 items-center p-6 overflow-auto">
-        <div className="w-full overflow-hidden rounded-lg border border-gray-200">
+        <div className="w-full overflow-x-scroll rounded-lg border border-gray-200">
           <table className="w-full text-left text-sm">
             <thead className="bg-[#f8f8f8] text-black font-medium">
               <tr>

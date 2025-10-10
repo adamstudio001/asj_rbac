@@ -1,7 +1,7 @@
 {
   "name": "asj_rbac",
   "private": true,
-  "version": "0.0.15",
+  "version": "0.0.16",
   "type": "module",
   "homepage": "https://adamf0.github.io/asj_rbac",
   "scripts": {
