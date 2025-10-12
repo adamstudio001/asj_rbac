@@ -6,6 +6,7 @@ import { FaRegUser } from "react-icons/fa6";
 import { BsPersonLock } from "react-icons/bs";
 import { GoGear } from "react-icons/go";
 import { Link } from "react-router-dom";
+import { IoFileTrayStacked } from "react-icons/io5";
 
 const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const location = useLocation();
@@ -31,11 +32,21 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
           <ul className="flex flex-col gap-3 mt-4">
             <li>
               <Link
+                to="/dashboard"
+                className={`flex items-center gap-3 ${["/dashboard"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                onClick={toggleSidebar} // Tutup sidebar saat di mobile
+              >
+                <LiaHomeSolid size={24} />
+                <span className={`${isCollapsed ? "hidden" : "block"}`}>Dashboard</span>
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/filemanager"
                 className={`flex items-center gap-3 ${["/filemanager"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
                 onClick={toggleSidebar} // Tutup sidebar saat di mobile
               >
-                <LiaHomeSolid size={24} />
+                <IoFileTrayStacked size={18} />
                 <span className={`${isCollapsed ? "hidden" : "block"}`}>File Management</span>
               </Link>
             </li>

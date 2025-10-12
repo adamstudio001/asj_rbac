@@ -12,9 +12,10 @@ import { getFileIconBig } from '@src/Common/Utils';
 import { v4 as uuidv4 } from 'uuid';
 import Navbar from "@src/Components/Navbar";
 import { LuUpload } from "react-icons/lu";
+import ImgItems from "@assets/item-img.png";
+import { IoIosArrowDown } from "react-icons/io";
 
-
-const FileManagerPage = () => {
+const DashboardPage = () => {
   const { folderKeys } = useParams();
   console.log(folderKeys)
 
@@ -32,15 +33,20 @@ const FileManagerPage = () => {
   return (
     <>
       <Navbar renderActionModal={()=> (
-        <div className="flex items-center gap-4">
-                    <button onClick={()=>setIsModalOpen(!isModalOpen)} className="flex items-center gap-3 bg-[#497fff] text-white px-4 py-2 rounded-md hover:bg-[#3a6ee8] transition">
+        <div className="flex items-center gap-8">
+                    <button onClick={()=>setIsModalOpen(!isModalOpen)} className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#3a6ee8] transition">
                     <LuUpload size={18}/> 
                     Upload file
                     </button>
-                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
-                    C
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
+                        C
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-gray-800">HR/GA</span>
+                        <IoIosArrowDown className="w-4 text-[#a5a5a5]"/>
+                      </div>
                     </div>
-                    <span className="font-medium text-gray-800">HR/GA</span>
                 </div>
       )}/>
       <main className="flex-1 overflow-auto items-center p-6">
@@ -80,7 +86,7 @@ const FileManagerPage = () => {
               <div className="py-6 space-y-4">
                 <div>
                   <div className="flex justify-between items-center p-2">
-                    <h1 className="text-sm font-bold text-[#5b5b5b]">Files</h1>
+                    <h1 className="text-sm font-medium text-black font-inter text-[14px] leading-[100%]">Files</h1>
                     <SectionViewMode />
                   </div>
                   <SectionGroupFilter />
@@ -272,7 +278,7 @@ function RecentOpened(){
   const [recents, setRecents] = useState([
     { name: "Laporan Absensi Karyawan", type: "folder" },
     { name: "Surat Izin Cuti.docx", type: "doc" },
-    { name: "Monthly Report Presentation.pptx", type: "image", preview: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e" },
+    { name: "Monthly Report Presentation.pptx", type: "image", preview: ImgItems },
     { name: "Payroll-2026.xlsx", type: "excel" },
   ]);
 
@@ -297,10 +303,10 @@ function RecentOpened(){
 
   return <>
     <div className="flex justify-between items-center">
-      <h3 className="text-sm font-bold text-[#5b5b5b]">Recenly Opened</h3>
+      <h3 className="text-sm font-medium text-black font-inter text-[14px] leading-[100%]">Recenly Opened</h3>
       <button
         onClick={() => clear()}
-        className="flex w-[min-content] items-center gap-1 text-[#999999] px-2 py-1 rounded-md hover:bg-gray-300 hover:text-black transition"
+        className="flex w-[min-content] items-center gap-1 text-[#999999] font-inter font-medium text-[14px] leading-[100%] px-2 py-1 rounded-md hover:bg-gray-300 hover:text-black transition"
       >
         Clear
       </button>
@@ -318,7 +324,7 @@ function RecentOpened(){
           <div className={`${file.type === "image" ? "w-full" : "w-[5cqi]"}`}>
             {renderIcon(file)}
           </div>
-          <div className="text-sm font-medium text-gray-900 truncate w-full">
+          <div className="font-inter font-medium text-[13px] leading-[18px] text-gray-900 truncate w-full">
             {file.name}
           </div>
         </div>
@@ -360,13 +366,13 @@ function SectionViewMode({isNested = false, mode=null}){
 
   return  <div className="flex gap-1">
             <button
-              className={`px-3 py-2 flex items-center gap-2 rounded ${getMode() === "grid" ? "text-[#497fff] bg-[#e1e7f4]":"bg-transparent text-[#929292]"}`}
+              className={`p-2 flex items-center gap-2 rounded ${getMode() === "grid" ? "text-[#497FFF] bg-[#7979791A]":"bg-transparent text-[#929292]"}`}
               onClick={() => changeMode("grid")}
             >
               <IoGridOutline size={15}/>
             </button>
             <button
-              className={`px-3 py-2 flex items-center gap-2 rounded ${getMode() === "list" ? "text-[#497fff] bg-[#e1e7f4]":"bg-transparent text-[#929292]"}`}
+              className={`p-2 flex items-center gap-2 rounded ${getMode() === "list" ? "text-[#497FFF] bg-[#7979791A]":"bg-transparent text-[#929292]"}`}
               onClick={() => changeMode("list")}
             >
               <FaListUl size={15}/>
@@ -421,7 +427,7 @@ function SectionGroupFilter(){
                     group: prev.group?.label===filter.label? null:filter,
                   }))
                 }}
-                className={`${activeFilter.group?.label === filter.label? "text-[#497fff] bg-[#e1e7f4]":"border border-gray-300 text-gray-700"} rounded-lg px-4 py-2 text-sm hover:bg-gray-100`}
+                className={`${activeFilter.group?.label === filter.label? "text-[#497fff] bg-[#e1e7f4]":"border border-gray-300 text-gray-700"} rounded-lg px-4 py-2 font-dmSans font-medium text-[12px] hover:bg-gray-100`}
               >
                 {filter.label}
               </button>
@@ -679,4 +685,4 @@ function Modal({ isOpen, onClose }) {
   );
 }
 
-export default FileManagerPage;
+export default DashboardPage;

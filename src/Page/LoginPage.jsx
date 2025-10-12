@@ -52,7 +52,7 @@ export default function LoginPage() {
 
   const onSubmit = (data) => {
     console.log("✅ Login Data:", data);
-    navigate("/filemanager");
+    navigate("/dashboard");
   };
 
   if (!isLoaded) {
@@ -76,27 +76,31 @@ export default function LoginPage() {
             {/* Email */}
             <div>
               <label
-                htmlFor="username"
+                htmlFor="email"
                 className="block text-sm font-medium text-gray-600 mb-2"
               >
-                Username
+                Email
               </label>
               <input
-                id="username"
-                type="username"
-                placeholder="Masukkan username"
+                id="email"
+                type="email"
+                placeholder="Masukkan email"
                 className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                  errors.username
+                  errors.email
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
-                {...register("username", {
-                  required: "Username harus diisi",
+                {...register("email", {
+                  required: "email harus diisi",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Format email tidak valid",
+                  },
                 })}
               />
-              {errors.username && (
+              {errors.email && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.username.message}
+                  {errors.email.message}
                 </p>
               )}
             </div>
@@ -110,13 +114,13 @@ export default function LoginPage() {
                 >
                   Password
                 </label>
-                <button
+                {/* <button
                   type="button"
                   className="text-sm font-medium text-blue-600 hover:underline"
                   onClick={() => alert("Link forgot password")}
                 >
                   Forgot Password?
-                </button>
+                </button> */}
               </div>
               <div className="relative">
                 <input

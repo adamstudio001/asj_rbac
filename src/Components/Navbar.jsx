@@ -12,13 +12,13 @@ const Navbar = ({renderActionModal = null}) => {
     function renderContent(){
         if(["/filemanager"].some((p) => currentPath.startsWith(p))){
             return <>
-                <button onClick={toggleSidebar} className="lg:hidden flex items-center gap-1 text-left  font-medium transition">
+                <button onClick={toggleSidebar} className="lg:hidden flex text-black text-left font-inter font-[542] text-[14px] items-center gap-2 transition">
                     <HiHome className="text-[#497fff]" size={20}/>
                     Home
                 </button>
 
                 {/* Tombol Collapse Sidebar untuk Desktop */}
-                <button onClick={toggleCollapse} className="hidden lg:flex text-gray-700 items-center gap-1 text-left  font-medium transition">
+                <button onClick={toggleCollapse} className="hidden lg:flex text-black text-left font-inter font-[542] text-[14px] items-center gap-2 transition">
                     <HiHome className="text-[#497fff]" size={20}/>
                     Home
                 </button>

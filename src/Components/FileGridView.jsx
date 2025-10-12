@@ -57,18 +57,18 @@ function FileGridView({ folderKeys, mode }) {
           <NavLink
             key={index}
             to={`/filemanager/${file.folderKeys}`}
-            className="flex flex-row gap-2 bg-[#f8f8f8] p-4 rounded shadow-md hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
+            className="flex flex-row gap-2 bg-[#7979790D] p-4 rounded shadow-md hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
           >
             <div className="text-4xl">{getFileIcon(file.name, file.isFolder)}</div>
-            <div className="text-sm text-left font-medium truncate w-full">{file.name}</div>
+            <div className="text-left text-[#1A1A1A] text-[13px] leading-[18px] font-inter font-medium truncate w-full">{file.name}</div>
           </NavLink>
         ) : (
           <div
             key={index}
-            className="flex flex-row gap-2 bg-[#f8f8f8] p-4 rounded shadow-md hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
+            className="flex flex-row gap-2 bg-[#7979790D] p-4 rounded shadow-md hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
           >
             <div className="text-4xl">{getFileIcon(file.name, file.isFolder)}</div>
-            <div className="text-sm text-left font-medium truncate w-full">{file.name}</div>
+            <div className="text-left text-[#1A1A1A] text-[13px] leading-[18px] font-inter font-medium truncate w-full">{file.name}</div>
           </div>
         )
       )}
