@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { FiLock, FiTrash2 } from "react-icons/fi";
 import Navbar from "@src/Components/Navbar";
+import Pagination from "@src/Components/Pagination";
 import { useSearch } from "@src/Providers/SearchProvider";
 import { IoIosArrowDown } from "react-icons/io";
 import { LuUpload } from "react-icons/lu";
@@ -11,6 +11,8 @@ import { formatDate, formatFileSize, formatFileType, getFileIcon } from "../Comm
 
 const FileManagementPage = () => {
   const { search, setSearch } = useSearch();
+  const [page, setPage] = useState(1);
+  const totalPages = 6;
 
   const [selected, setSelected] = useState([]);
   const files = [
@@ -116,18 +118,6 @@ const FileManagementPage = () => {
                     key={file.id}
                     className="hover:bg-gray-50 transition border-b border-gray-200"
                   >
-                    {/* <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selected.includes(file.id)}
-                        onChange={() => toggleSelect(file.id)}
-                        className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
-                          checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
-                          checked:before:content-['✔'] checked:before:text-[8px] 
-                          checked:before:flex checked:before:items-center checked:before:justify-center 
-                          cursor-pointer"
-                      />
-                    </td> */}
                     <td className="px-4 py-3 text-gray-800 flex gap-2 items-center">
                       {getFileIcon(file.name, file.isFolder, 24)}
                       {file.name}
@@ -135,20 +125,14 @@ const FileManagementPage = () => {
                     <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatFileType(file.name)}</td>
                     <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatDate(file.lastModified)}</td>
                     <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatFileSize(file.fileSize)}</td>
-                    {/* <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
-                      <button onClick={()=>alert("fungsi reset")} className="flex items-center gap-1 hover:text-red-600 transition">
-                        <FiLock size={14} />
-                        <span className="text-sm">Reset Password</span>
-                      </button>
-                      <button className="flex items-center gap-1 hover:text-red-600 transition">
-                        <FiTrash2 size={14} />
-                        <span onClick={()=>alert("fungsi delete")} className="text-sm">Delete User</span>
-                      </button>
-                    </td> */}
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="w-full">
+            <Pagination className="mt-8" currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
       </main>
 
@@ -160,7 +144,6 @@ const FileManagementPage = () => {
           Ini contoh konten modal seperti di Bootstrap, tapi dengan React + Tailwind.
         </p>
       </Modal>
-
     </>
   );
 };
