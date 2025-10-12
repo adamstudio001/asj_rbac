@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import Navbar from "@src/Components/Navbar";
 import Pagination from "@src/Components/Pagination";
 import { useSearch } from "@src/Providers/SearchProvider";
@@ -8,6 +8,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { LuUpload } from "react-icons/lu";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
 import { formatDate, formatFileSize, formatFileType, getFileIcon } from "../Common/Utils";
+import { v4 as uuidv4 } from 'uuid';
 
 const FileManagementPage = () => {
   const { search, setSearch } = useSearch();
