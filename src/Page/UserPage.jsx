@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { FiLock, FiTrash2 } from "react-icons/fi";
+import { FaUserEdit } from "react-icons/fa";
+import { FaLock, FaTrash } from "react-icons/fa";
 import Navbar from "@src/Components/Navbar";
 import { useSearch } from "@src/Providers/SearchProvider";
+import {TableActionMenu} from "@src/Components/TableActionMenu";
 
 const UserPage = () => {
   const { search, setSearch } = useSearch();
@@ -52,12 +54,12 @@ const UserPage = () => {
         )}
       />
       <main className="flex-1 items-center p-6 overflow-auto">
-        <div className="w-full overflow-x-scroll rounded-lg border border-gray-200">
+        <div className="w-full overflow-x-scroll rounded-lg">
           <table className="w-full text-left text-sm">
-            <thead className="bg-[#f8f8f8] text-black font-medium">
-              <tr>
+            <thead className="bg-[#F3F3F3]">
+              <tr className="border border-gray-200">
                 <th className="px-4 py-3 w-10">
-                  <input
+                  {/* <input
                   type="checkbox"
                   onClick={toggleSelectAll}
                   className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
@@ -65,47 +67,60 @@ const UserPage = () => {
                     checked:before:content-['✔'] checked:before:text-[8px] 
                     checked:before:flex checked:before:items-center checked:before:justify-center 
                     cursor-pointer"
-                />
+                /> */}
                 </th>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Role</th>
-                <th className="px-4 py-3">Position</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Action</th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Name</th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Role</th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Position</th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Status</th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
                 <tr
                   key={user.id}
-                  className="hover:bg-gray-50 transition"
+                  className="hover:bg-gray-50 transition border-b border-gray-200"
                 >
                   <td className="px-4 py-3">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(user.id)}
-                  onChange={() => toggleSelect(user.id)}
-                  className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
-                    checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
-                    checked:before:content-['✔'] checked:before:text-[8px] 
-                    checked:before:flex checked:before:items-center checked:before:justify-center 
-                    cursor-pointer"
-                />
+                    {/* <input
+                      type="checkbox"
+                      checked={selected.includes(user.id)}
+                      onChange={() => toggleSelect(user.id)}
+                      className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
+                        checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
+                        checked:before:content-['✔'] checked:before:text-[8px] 
+                        checked:before:flex checked:before:items-center checked:before:justify-center 
+                        cursor-pointer"
+                    /> */}
+
+                    <TableActionMenu>
+                      <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => alert("Edit User")}
+                      >
+                        <FaUserEdit className="mr-2 text-gray-500" />
+                        Edit User
+                      </button>
+                      <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => alert("Reset Password")}
+                      >
+                        <FaLock className="mr-2 text-gray-500" />
+                        Reset Password
+                      </button>
+                      <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-50"
+                        onClick={() => alert("Delete User")}
+                      >
+                        <FaTrash className="mr-2 text-red-500" />
+                        Delete User
+                      </button>
+                    </TableActionMenu>
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-800">{user.name}</td>
-                  <td className="px-4 py-3">{user.role}</td>
-                  <td className="px-4 py-3">{user.position}</td>
-                  <td className="px-4 py-3">{user.status}</td>
-                  <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
-                <button onClick={()=>alert("fungsi reset")} className="flex items-center gap-1 hover:text-red-600 transition">
-                  <FiLock size={14} />
-                  <span className="text-sm">Reset Password</span>
-                </button>
-                <button className="flex items-center gap-1 hover:text-red-600 transition">
-                  <FiTrash2 size={14} />
-                  <span onClick={()=>alert("fungsi delete")} className="text-sm">Delete User</span>
-                </button>
-                  </td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.name}</td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.role}</td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.position}</td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.status}</td>
                 </tr>
               ))}
             </tbody>

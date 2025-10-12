@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Pencil } from "lucide-react";
-import { FiLock } from "react-icons/fi";
+import { X } from "lucide-react";
 import { useSearch } from "../Providers/SearchProvider";
 import Navbar from "@src/Components/Navbar";
+import {TableActionMenu} from "@src/Components/TableActionMenu";
 
 const RolePermissionPage = () => {
   const { search, setSearch } = useSearch();
@@ -25,47 +25,70 @@ const RolePermissionPage = () => {
 
   return (
     <>
-      <Navbar
-        renderActionModal={() => (
-          <button
-            onClick={() => setIsModalOpen(!isModalOpen)}
-            className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition"
-          >
-            + New User
-          </button>
-        )}
-      />
+      <Navbar/>
       
       <main className="flex-1 items-center p-6 overflow-auto">
-        <div className="w-full overflow-x-scroll rounded-lg border border-gray-200">
+        <div className="w-full overflow-x-scroll rounded-lg">
           <table className="w-full text-left text-sm">
-            <thead className="bg-[#f8f8f8] text-black font-medium">
-              <tr>
-                <th className="px-4 py-3">Role</th>
-                <th className="px-4 py-3">Permission</th>
-                <th className="px-4 py-3">Action</th>
+            <thead className="bg-[#F3F3F3]">
+              <tr className="border border-gray-200">
+                <th className="px-4 py-3 w-10"></th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Role</th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Permission</th>
               </tr>
             </thead>
             <tbody>
               {filteredRoles.map((role) => (
                 <tr
                   key={role.id}
-                  className="hover:bg-gray-50 transition"
+                  className="hover:bg-gray-50 transition border-b border-gray-200"
                 >
-                  <td className="px-4 py-3">{role.role}</td>
-                  <td className="px-4 py-3">{
-                role.permission.map(p => <span className="px-2 py-1 bg-green-400 rounded rounded-xl">{p}</span>)  
-                  }</td>
-                  <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
-                <button onClick={()=>alert("fungsi edit")} className="flex items-center gap-1 hover:text-red-600 transition">
-                  <Pencil size={14} />
-                  <span className="text-sm">Edit</span>
-                </button>
-                <button className="flex items-center gap-1 hover:text-red-600 transition">
-                  <FiLock size={14} />
-                  <span onClick={()=>alert("fungsi permission")} className="text-sm">Set Permission</span>
-                </button>
+                  <td className="px-4 py-3">
+                    <TableActionMenu>
+                      <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => alert("Read")}
+                      >
+                        {/* <FaLock className="mr-2 text-gray-500" /> */}
+                        Read
+                      </button>
+                       <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => alert("View")}
+                      >
+                        {/* <Eye className="mr-2 text-red-500" /> */}
+                        View
+                      </button>
+                      <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => alert("Edit")}
+                      >
+                        {/* <FaUserEdit className="mr-2 text-gray-500" /> */}
+                        Edit
+                      </button>
+                      <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-50"
+                        onClick={() => alert("Delete")}
+                      >
+                        {/* <FaTrash className="mr-2 text-red-500" /> */}
+                        Delete
+                      </button>
+                    </TableActionMenu>
                   </td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{role.role}</td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{
+                      role.permission.map(p => <span className="px-2 py-1 bg-green-400 rounded rounded-xl">{p}</span>)  
+                  }</td>
+                  {/* <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
+                    <button onClick={()=>alert("fungsi edit")} className="flex items-center gap-1 hover:text-red-600 transition">
+                      <Pencil size={14} />
+                      <span className="text-sm">Edit</span>
+                    </button>
+                    <button className="flex items-center gap-1 hover:text-red-600 transition">
+                      <FiLock size={14} />
+                      <span onClick={()=>alert("fungsi permission")} className="text-sm">Set Permission</span>
+                    </button>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

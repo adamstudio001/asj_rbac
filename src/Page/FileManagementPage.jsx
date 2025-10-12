@@ -7,17 +7,17 @@ import { useSearch } from "@src/Providers/SearchProvider";
 import { IoIosArrowDown } from "react-icons/io";
 import { LuUpload } from "react-icons/lu";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
-import { formatDate, formatFileSize, formatFileType } from "../Common/Utils";
+import { formatDate, formatFileSize, formatFileType, getFileIcon } from "../Common/Utils";
 
 const FileManagementPage = () => {
   const { search, setSearch } = useSearch();
 
   const [selected, setSelected] = useState([]);
   const files = [
-    { id: 1, name: "Laporan Absensi Karyawan", lastModified: "2025-01-01 10:00:00", fileSize: 20202000000 },
-    { id: 2, name: "Reimbursment.xlsx", lastModified: "2025-01-01 10:00:00", fileSize: 10240},
-    { id: 3, name: "surat izin cuti.docx", lastModified: "2025-01-01 10:00:00", fileSize: 30000 },
-    { id: 4, name: "dokumen operasional.zip", lastModified: "2025-01-01 10:00:00", fileSize: 645000 },
+    { id: 1, name: "Laporan Absensi Karyawan", isFolder: true, lastModified: "2025-01-01 10:00:00", fileSize: 20202000000 },
+    { id: 2, name: "Reimbursment.xlsx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 10240},
+    { id: 3, name: "surat izin cuti.docx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 30000 },
+    { id: 4, name: "dokumen operasional.zip", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 645000 },
   ];
 
   const { 
@@ -68,66 +68,89 @@ const FileManagementPage = () => {
           </div>
         )}
       />
-      <main className="flex-1 items-center p-6 overflow-auto">
-        <div className="w-full overflow-x-scroll rounded-lg border border-gray-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#f8f8f8] text-black font-medium">
-              <tr>
-                <th className="px-4 py-3 w-10">
-                  <input
-                  type="checkbox"
-                  onClick={toggleSelectAll}
-                  className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
-                    checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
-                    checked:before:content-['✔'] checked:before:text-[8px] 
-                    checked:before:flex checked:before:items-center checked:before:justify-center 
-                    cursor-pointer"
-                />
-                </th>
-                <th className="px-4 py-3">File Name</th>
-                <th className="px-4 py-3">File Type</th>
-                <th className="px-4 py-3">Last Modified</th>
-                <th className="px-4 py-3">File Size</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredFiles.map((file) => (
-                <tr
-                  key={file.id}
-                  className="hover:bg-gray-50 transition"
-                >
-                  <td className="px-4 py-3">
+      <main className="flex-1 items-center py-6 px-[2.5cqi] overflow-auto">
+          <div className="w-full mb-8 pb-4 sm:w-auto flex items-center gap-3">
+            <div className="relative">
                 <input
-                  type="checkbox"
-                  checked={selected.includes(file.id)}
-                  onChange={() => toggleSelect(file.id)}
-                  className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
-                    checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
-                    checked:before:content-['✔'] checked:before:text-[8px] 
-                    checked:before:flex checked:before:items-center checked:before:justify-center 
-                    cursor-pointer"
+                    type="text"
+                    onChange={(e)=>setSearch(e.target.value)}
+                    placeholder="Search by name"
+                    className="pl-4 pr-10 py-2 rounded-md bg-[#F4F3F3] placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
                 />
-                  </td>
-                  <td className="px-4 py-3 font-medium text-gray-800">{file.name}</td>
-                  <td className="px-4 py-3">{formatFileType(file.name)}</td>
-                  <td className="px-4 py-3">{formatDate(file.lastModified)}</td>
-                  <td className="px-4 py-3">{formatFileSize(file.fileSize)}</td>
-                  {/* <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
-                <button onClick={()=>alert("fungsi reset")} className="flex items-center gap-1 hover:text-red-600 transition">
-                  <FiLock size={14} />
-                  <span className="text-sm">Reset Password</span>
-                </button>
-                <button className="flex items-center gap-1 hover:text-red-600 transition">
-                  <FiTrash2 size={14} />
-                  <span onClick={()=>alert("fungsi delete")} className="text-sm">Delete User</span>
-                </button>
-                  </td> */}
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-black"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            {typeof renderActionModal === "function" && renderActionModal()}
+          </div>
+          <div className="w-full overflow-x-scroll rounded-lg">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-[#F3F3F3]">
+                <tr className="border border-gray-200">
+                  {/* <th className="px-4 py-3 w-10">
+                    <input
+                    type="checkbox"
+                    onClick={toggleSelectAll}
+                    className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
+                      checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
+                      checked:before:content-['✔'] checked:before:text-[8px] 
+                      checked:before:flex checked:before:items-center checked:before:justify-center 
+                      cursor-pointer"
+                  />
+                  </th> */}
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">File Name</th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">File Type</th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">Last Modified</th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">File Size</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        </main>
+              </thead>
+              <tbody>
+                {filteredFiles.map((file) => (
+                  <tr
+                    key={file.id}
+                    className="hover:bg-gray-50 transition border-b border-gray-200"
+                  >
+                    {/* <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(file.id)}
+                        onChange={() => toggleSelect(file.id)}
+                        className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
+                          checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
+                          checked:before:content-['✔'] checked:before:text-[8px] 
+                          checked:before:flex checked:before:items-center checked:before:justify-center 
+                          cursor-pointer"
+                      />
+                    </td> */}
+                    <td className="px-4 py-3 text-gray-800 flex gap-2 items-center">
+                      {getFileIcon(file.name, file.isFolder, 24)}
+                      {file.name}
+                    </td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatFileType(file.name)}</td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatDate(file.lastModified)}</td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatFileSize(file.fileSize)}</td>
+                    {/* <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
+                      <button onClick={()=>alert("fungsi reset")} className="flex items-center gap-1 hover:text-red-600 transition">
+                        <FiLock size={14} />
+                        <span className="text-sm">Reset Password</span>
+                      </button>
+                      <button className="flex items-center gap-1 hover:text-red-600 transition">
+                        <FiTrash2 size={14} />
+                        <span onClick={()=>alert("fungsi delete")} className="text-sm">Delete User</span>
+                      </button>
+                    </td> */}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+      </main>
 
       <Modal
         isOpen={isModalOpen}

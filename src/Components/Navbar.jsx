@@ -28,14 +28,14 @@ const Navbar = ({renderActionModal = null}) => {
             </>;
         } else if(["/filemanager"].some((p) => currentPath.startsWith(p))){
             return <>
-                <button onClick={toggleSidebar} className="lg:hidden flex text-black text-left font-inter font-[542] text-[14px] items-center gap-2 transition">
-                    <BsArrowsAngleExpand className="text-black" size={18}/>
+                <button onClick={toggleSidebar} className="lg:hidden flex items-center text-black text-left font-inter font-medium text-[14px] text-[#243874] gap-2 transition">
+                    <BsArrowsAngleExpand className="-rotate-10" size={14}/>
                     Expand
                 </button>
 
                 {/* Tombol Collapse Sidebar untuk Desktop */}
-                <button onClick={toggleCollapse} className="hidden lg:flex text-black text-left font-inter font-[542] text-[14px] items-center gap-2 transition">
-                    <BsArrowsAngleExpand className="text-black" size={18}/>
+                <button onClick={toggleCollapse} className="hidden lg:flex items-center text-black text-left font-inter font-medium text-[14px] text-[#243874] gap-2 transition">
+                    <BsArrowsAngleExpand className="-rotate-10" size={14}/>
                     Expand
                 </button>
 
@@ -43,10 +43,10 @@ const Navbar = ({renderActionModal = null}) => {
             </>;
         } else if(["/users"].some((p) => currentPath.startsWith(p))){
             return <>
-                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-left font-inter font-semibold text-[18px] text-[#243874]">
                     User Management
                 </button>
-                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-left font-inter font-semibold text-[18px] text-[#243874]">
                     User Management
                 </button>
 
@@ -57,11 +57,11 @@ const Navbar = ({renderActionModal = null}) => {
                         type="text"
                         onChange={(e)=>setSearch(e.target.value)}
                         placeholder="Search by name"
-                        className="pl-4 pr-10 py-2 rounded-md bg-gray-200 placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
+                        className="pl-4 pr-10 py-2 rounded-md bg-[#F4F3F3] placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
                     />
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                        className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-black"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -75,10 +75,10 @@ const Navbar = ({renderActionModal = null}) => {
             </>
         } else if(["/role_permissions"].some((p) => currentPath.startsWith(p))){
             return <>
-                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
                    Roles & Permissions
                 </button>
-                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
                    Roles & Permissions
                 </button>
 
@@ -89,11 +89,11 @@ const Navbar = ({renderActionModal = null}) => {
                         type="text"
                         onChange={(e)=>setSearch(e.target.value)}
                         placeholder="Search by name"
-                        className="pl-4 pr-10 py-2 rounded-md bg-gray-200 placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
+                        className="pl-4 pr-10 py-2 rounded-md bg-[#F4F3F3] placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
                     />
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                        className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-black"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -107,10 +107,10 @@ const Navbar = ({renderActionModal = null}) => {
             </>
         } else if(["/logs"].some((p) => currentPath.startsWith(p))){
             return <>
-                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
                    Activity Log History
                 </button>
-                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
                    Activity Log History
                 </button>
 
@@ -121,11 +121,11 @@ const Navbar = ({renderActionModal = null}) => {
                         type="text"
                         onChange={(e)=>setSearch(e.target.value)}
                         placeholder="Search by name"
-                        className="pl-4 pr-10 py-2 rounded-md bg-gray-200 placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
+                        className="pl-4 pr-10 py-2 rounded-md bg-[#F4F3F3] placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
                     />
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                        className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-black"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -139,10 +139,10 @@ const Navbar = ({renderActionModal = null}) => {
             </>
         } else if(["/settings"].some((p) => currentPath.startsWith(p))){
             return <>
-                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
                    Settings
                 </button>
-                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-xl text-left font-semibold text-[#1e3264]">
+                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
                    Settings
                 </button>
             </>
