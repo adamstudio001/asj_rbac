@@ -2,6 +2,7 @@ import { useSidebar } from "@src/Providers/SidebarProvider";
 import { HiHome } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
 import { useSearch } from "@src/Providers/SearchProvider";
+import { BsArrowsAngleExpand } from "react-icons/bs";
 
 const Navbar = ({renderActionModal = null}) => {
     const location = useLocation();
@@ -10,7 +11,7 @@ const Navbar = ({renderActionModal = null}) => {
     const { setSearch } = useSearch();
   
     function renderContent(){
-        if(["/filemanager"].some((p) => currentPath.startsWith(p))){
+        if(["/dashboard"].some((p) => currentPath.startsWith(p))){
             return <>
                 <button onClick={toggleSidebar} className="lg:hidden flex text-black text-left font-inter font-[542] text-[14px] items-center gap-2 transition">
                     <HiHome className="text-[#497fff]" size={20}/>
@@ -21,6 +22,21 @@ const Navbar = ({renderActionModal = null}) => {
                 <button onClick={toggleCollapse} className="hidden lg:flex text-black text-left font-inter font-[542] text-[14px] items-center gap-2 transition">
                     <HiHome className="text-[#497fff]" size={20}/>
                     Home
+                </button>
+
+                {typeof renderActionModal === "function" && renderActionModal()}
+            </>;
+        } else if(["/filemanager"].some((p) => currentPath.startsWith(p))){
+            return <>
+                <button onClick={toggleSidebar} className="lg:hidden flex text-black text-left font-inter font-[542] text-[14px] items-center gap-2 transition">
+                    <BsArrowsAngleExpand className="text-black" size={18}/>
+                    Expand
+                </button>
+
+                {/* Tombol Collapse Sidebar untuk Desktop */}
+                <button onClick={toggleCollapse} className="hidden lg:flex text-black text-left font-inter font-[542] text-[14px] items-center gap-2 transition">
+                    <BsArrowsAngleExpand className="text-black" size={18}/>
+                    Expand
                 </button>
 
                 {typeof renderActionModal === "function" && renderActionModal()}

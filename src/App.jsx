@@ -7,6 +7,7 @@ import { SidebarProvider } from "./Providers/SidebarProvider";
 import RolePermissionPage from "./Page/RolePermissionPage";
 import PanelLayout from "./Template/PanelLayout";
 import SettingPage from "./Page/SettingPage";
+import FileManagementPage from "./Page/FileManagementPage";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
                 <Route path="/" element={<LoginPage />} />
                 <Route element={<PanelLayout />}>
                     <Route path="/dashboard/:folderKeys?" element={<DashboardPage />} />
+                    <Route path="/filemanager/" element={<FileManagementPage />} />
                     <Route path="/users/" element={<UserPage />} />
                     <Route path="/logs/" element={<LogHistoryPage />} />
                     <Route path="/role_permissions/" element={<RolePermissionPage />} />
