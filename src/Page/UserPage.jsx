@@ -6,6 +6,7 @@ import Navbar from "@src/Components/Navbar";
 import { useSearch } from "@src/Providers/SearchProvider";
 import { TableActionMenu } from "@src/Components/TableActionMenu";
 import DeleteModal from "@src/Components/DeleteModal";
+import Pagination from "@src/Components/Pagination";
 import { ToastProvider, useToast } from "@src/Providers/ToastProvider";
 
 const UserPage = () => {
@@ -23,6 +24,8 @@ const UserPageContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const [modeForm, setModeForm] = useState("create");
+  const [page, setPage] = useState(1);
+  const totalPages = 6;
 
   const users = [
     { id: 1, name: "Desy Puji Astuti", email: "admin@gmail.com", phone: "087870590000", position: "HR/GA" },
@@ -52,59 +55,63 @@ const UserPageContent = () => {
 
       <main className="flex-1 items-center p-6 overflow-auto">
         <div className="w-full overflow-x-scroll rounded-lg">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#F3F3F3]">
-              <tr className="border border-gray-200">
-                <th className="px-4 py-3 w-10"></th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Name</th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Email</th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Position</th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Phone</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-gray-50 transition border-b border-gray-200"
-                >
-                  <td className="px-4 py-3">
-                    <TableActionMenu>
-                      <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => {
-                          setIsModalOpen(true);
-                          setModeForm("update");
-                        }}
-                      >
-                        <FaUserEdit className="mr-2 text-gray-500" />
-                        Edit User
-                      </button>
-                      <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => alert("Reset Password")}
-                      >
-                        <FaLock className="mr-2 text-gray-500" />
-                        Reset Password
-                      </button>
-                      <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-50"
-                        onClick={() => setIsModalDeleteOpen(true)}
-                      >
-                        <FaTrash className="mr-2 text-red-500" />
-                        Delete User
-                      </button>
-                    </TableActionMenu>
-                  </td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.name}</td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.email}</td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.position}</td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.phone}</td>
+            <table className="w-full text-left text-sm">
+              <thead className="bg-[#F3F3F3]">
+                <tr className="border border-gray-200">
+                  <th className="px-4 py-3 w-10"></th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Name</th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Email</th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Position</th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Phone</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredUsers.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-gray-50 transition border-b border-gray-200"
+                  >
+                    <td className="px-4 py-3">
+                      <TableActionMenu>
+                        <button
+                          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => {
+                            setIsModalOpen(true);
+                            setModeForm("update");
+                          }}
+                        >
+                          <FaUserEdit className="mr-2 text-gray-500" />
+                          Edit User
+                        </button>
+                        <button
+                          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => alert("Reset Password")}
+                        >
+                          <FaLock className="mr-2 text-gray-500" />
+                          Reset Password
+                        </button>
+                        <button
+                          className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-50"
+                          onClick={() => setIsModalDeleteOpen(true)}
+                        >
+                          <FaTrash className="mr-2 text-red-500" />
+                          Delete User
+                        </button>
+                      </TableActionMenu>
+                    </td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.name}</td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.email}</td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.position}</td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{user.phone}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="w-full">
+            <Pagination className="mt-8" currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+          </div>
       </main>
 
       <ModalCreateUser
