@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialogModal";
 import { useForm } from "react-hook-form";
 import { formatLastSeen } from "@/Common/Utils";
 

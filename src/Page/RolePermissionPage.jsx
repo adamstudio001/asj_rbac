@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
 import { useSearch } from "../Providers/SearchProvider";
 import Navbar from "@src/Components/Navbar";
 import {TableActionMenu} from "@src/Components/TableActionMenu";
@@ -16,10 +14,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { useForm } from "react-hook-form";
+} from "@/components/ui/dialogModal";
+import { useForm, Controller } from "react-hook-form";
 import { ToastProvider, useToast } from "@/Providers/ToastProvider";
 import DeleteModal from "@/Components/DeleteModal";
+import MultipleSelector from "@/Components/ui/multiselect";
+
+const permissions = [
+    { value: "read", label: "read" },
+    { value: "edit", label: "edit" },
+    { value: "delete", label: "delete" },
+    { value: "view", label: "view" },
+];
 
 const RolePermissionPage = () => {
   return (
@@ -37,7 +43,7 @@ const RolePermissionContent = () => {
   const { addToast } = useToast();
 
   const roles = [
-    { id: 1, role: "HR/GA", permission: ["create"]},
+    { id: 1, role: "HR/GA", permission: [permissions[0]]},
     { id: 2, role: "Finance", permission: []},
     { id: 3, role: "Operation", permission: []},
     { id: 4, role: "Developer", permission: []},
@@ -87,21 +93,10 @@ const RolePermissionContent = () => {
                     <TableActionMenu>
                       <button
                         className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => alert("Read")}
-                      >
-                        {/* <FaLock className="mr-2 text-gray-500" /> */}
-                        Read
-                      </button>
-                       <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => alert("View")}
-                      >
-                        {/* <Eye className="mr-2 text-red-500" /> */}
-                        View
-                      </button>
-                      <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => alert("Edit")}
+                        onClick={() => {
+                          setSelectedRole(role);
+                          setIsModalOpen(true);
+                        }}
                       >
                         {/* <FaUserEdit className="mr-2 text-gray-500" /> */}
                         Edit
@@ -117,7 +112,7 @@ const RolePermissionContent = () => {
                   </td>
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{role.role}</td>
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{
-                      role.permission.map(p => <span className="px-2 py-1 bg-green-400 rounded rounded-xl">{p}</span>)  
+                      role.permission.map(p => <span className="px-2 py-1 bg-green-400 rounded rounded-xl">{p.label}</span>)  
                   }</td>
                 </tr>
               ))}
@@ -149,6 +144,7 @@ export default RolePermissionPage;
 
 export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) {
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
@@ -156,6 +152,7 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
   } = useForm({
     defaultValues: {
       role: data?.role ?? "",
+      permission: data?.permission ?? [], // default permission (kosong atau dari data)
     },
   });
 
@@ -164,10 +161,17 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
   useEffect(() => {
     reset({
       role: data?.role ?? "",
+      permission: data?.permission ?? [],
     });
   }, [data, reset]);
 
   const onSubmit = (values) => {
+    if (values.permission.length === 0) {
+      // fallback tambahan (safeguard)
+      addToast("error", "Permission cannot be empty");
+      return;
+    }
+
     console.log(mode === "create" ? "Creating:" : "Editing:", values);
     reset();
     onOpenChange(false);
@@ -176,7 +180,7 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-5xl">
+      <DialogContent className="flex flex-col gap-0 p-0 max-h-[min(640px,80vh)] sm:max-w-md overflow-visible">
         <DialogHeader>
           <DialogTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
             {mode === "create" ? "Add New Role" : "Edit Role"}
@@ -205,10 +209,53 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
                         )}
                       </div>
                     </div>
+                  </div>
 
+                  {/* Permission Field */}
+                  <div className="space-y-6 mt-3">
+                    <div className="flex flex-wrap gap-4">
+                      <div className="flex-1 ">
+                        <Label>Permissions</Label>
+
+                        <Controller
+                          name="permission"
+                          control={control}
+                          rules={{
+                            required: "At least one permission is required",
+                            validate: (value) =>
+                              value.length > 0 || "At least one permission is required",
+                          }}
+                          render={({ field }) => (
+                            <MultipleSelector
+                              {...field}
+                              portal={true}
+                              appendTo={document.body}
+                              className="border-[1.2px] border-black bg-transparent px-3 py-3"
+                              commandProps={{
+                                label: "Select Permission",
+                              }}
+                              defaultOptions={permissions}
+                              placeholder="Select Permission"
+                              hideClearAllButton
+                              hidePlaceholderWhenSelected
+                              emptyIndicator={
+                                <p className="text-center text-sm">
+                                  No results found
+                                </p>
+                              }
+                            />
+                          )}
+                        />
+
+                        {errors.permission && (
+                          <p className="text-sm text-red-500">
+                            {errors.permission.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
-
               </div>
             </DialogDescription>
 

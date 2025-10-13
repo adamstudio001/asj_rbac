@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialogModal";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
 import { useRef, useState } from 'react';
 import { useToast } from "@src/Providers/ToastProvider";

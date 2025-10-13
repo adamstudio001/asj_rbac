@@ -95,12 +95,12 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
 
         <div className="flex flex-col flex-wrap gap-2">
           <hr className="border border-t border-gray-300"/>
-          <button
+          <Link
+              to="/"
               className={`flex items-center gap-3 hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition text-venter`}
-              onClick={()=>{alert("fungsi logout")}} // Tutup sidebar saat di mobile
           >
-            <span className={`w-full ${isCollapsed ? "hidden" : "block"}`}>Logout</span>
-          </button>
+            <span className={`w-full text-center ${isCollapsed ? "hidden" : "block"}`}>Logout</span>
+          </Link>
         </div>
       </div>
 
