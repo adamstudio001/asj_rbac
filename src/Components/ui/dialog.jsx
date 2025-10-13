@@ -45,6 +45,7 @@ function DialogOverlay({
 
 function DialogContent({
   className,
+  showClose = true,
   children,
   ...props
 }) {
@@ -59,13 +60,13 @@ function DialogContent({
         )}
         {...props}>
         {children}
-        <DialogPrimitive.Close
+        {showClose && <DialogPrimitive.Close
           className="group absolute top-3 right-3 flex size-7 items-center justify-center rounded transition-[color,box-shadow] bg-white border border-2 border-black hover:bg-black hover:text-white focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none">
           <XIcon
             size={16}
             className="opacity-60 transition-opacity group-hover:opacity-100" />
           <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
+        </DialogPrimitive.Close>}
       </DialogPrimitive.Content>
     </DialogPortal>
   );

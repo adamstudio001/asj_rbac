@@ -195,7 +195,7 @@ const UserPageContent = () => {
         onClose={() => setIsModalDeleteOpen(false)}
         onConfirm={() => {
           setIsModalDeleteOpen(false);
-          addToast("error", "Delete failed");
+          addToast("success", "Deleted successfully");
         }}
       />
 
@@ -231,6 +231,8 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
     },
   });
 
+  const { addToast } = useToast();
+  
   useEffect(() => {
     reset({
       firstName: data?.firstName ?? "",
@@ -246,8 +248,9 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
 
   const onSubmit = (values) => {
     console.log(mode === "create" ? "Creating:" : "Editing:", values);
-    // reset();
-    // onOpenChange(false);
+    reset();
+    onOpenChange(false);
+    addToast("success", "Save successfully");
   };
 
   return (
@@ -305,8 +308,8 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                       <div className="flex-1 min-w-[250px]">
                         <Label>Whatsapp No</Label>
                         <Input type="text" 
-                          {...register("lastName", {
-                            required: "Last name is required",
+                          {...register("whatsapp", {
+                            required: "Whatsapp is required",
                           })}/>
                           {errors.whatsapp && (
                             <p className="text-sm text-red-500">

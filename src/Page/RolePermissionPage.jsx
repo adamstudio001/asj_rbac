@@ -4,9 +4,33 @@ import { X } from "lucide-react";
 import { useSearch } from "../Providers/SearchProvider";
 import Navbar from "@src/Components/Navbar";
 import {TableActionMenu} from "@src/Components/TableActionMenu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
+import { ToastProvider, useToast } from "@/Providers/ToastProvider";
 
 const RolePermissionPage = () => {
+  return (
+    <ToastProvider>
+      <RolePermissionContent />
+    </ToastProvider>
+  );
+};
+
+const RolePermissionContent = () => {
   const { search, setSearch } = useSearch();
+  const [selectedRole, setSelectedRole] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const roles = [
     { id: 1, role: "HR/GA", permission: ["create"]},
@@ -25,7 +49,19 @@ const RolePermissionPage = () => {
 
   return (
     <>
-      <Navbar/>
+      <Navbar
+        renderActionModal={()=>
+          <button
+            onClick={() => {
+              setSelectedRole(null);
+              setIsModalOpen(true);
+            }}
+            className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition"
+          >
+            + New Role
+          </button>
+        }
+      />
       
       <main className="flex-1 items-center p-6 overflow-auto">
         <div className="w-full overflow-x-scroll rounded-lg">
@@ -79,16 +115,6 @@ const RolePermissionPage = () => {
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{
                       role.permission.map(p => <span className="px-2 py-1 bg-green-400 rounded rounded-xl">{p}</span>)  
                   }</td>
-                  {/* <td className="px-4 py-3 flex items-center gap-4 text-gray-500">
-                    <button onClick={()=>alert("fungsi edit")} className="flex items-center gap-1 hover:text-red-600 transition">
-                      <Pencil size={14} />
-                      <span className="text-sm">Edit</span>
-                    </button>
-                    <button className="flex items-center gap-1 hover:text-red-600 transition">
-                      <FiLock size={14} />
-                      <span onClick={()=>alert("fungsi permission")} className="text-sm">Set Permission</span>
-                    </button>
-                  </td> */}
                 </tr>
               ))}
             </tbody>
@@ -96,158 +122,94 @@ const RolePermissionPage = () => {
         </div>
       </main>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      >
-        <p className="text-gray-700">
-          Ini contoh konten modal seperti di Bootstrap, tapi dengan React + Tailwind.
-        </p>
-      </Modal>
-
+      <ModalRole
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        data={selectedRole}
+        mode={selectedRole ? "edit" : "create"}
+      />
     </>
   );
 };
 
-function Modal({ isOpen, onClose }) {
-  // Close modal on ESC
+export default RolePermissionPage;
+
+export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: {
+      role: data?.role ?? "",
+    },
+  });
+
+  const { addToast } = useToast();
+
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+    reset({
+      role: data?.role ?? "",
+    });
+  }, [data, reset]);
+
+  const onSubmit = (values) => {
+    console.log(mode === "create" ? "Creating:" : "Editing:", values);
+    reset();
+    onOpenChange(false);
+    addToast("success", "Save successfully");
+  };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="fixed inset-0 flex items-center justify-center z-50"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose} // klik di area luar modal menutup modal
-        >
-          {/* Backdrop */}
-          <motion.div
-            className="absolute inset-0 bg-black/80"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-5xl">
+        <DialogHeader>
+          <DialogTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+            {mode === "create" ? "Add New Role" : "Edit Role"}
+          </DialogTitle>
 
-          {/* Modal */}
-          <motion.div
-            className="bg-white rounded-lg shadow-lg w-full p-4 max-w-xl mx-4 z-10"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            onClick={(e) => e.stopPropagation()} // klik di modal tidak menutup
-          >
-            {/* Header */}
-            <div className="flex justify-between items-center text-2xl font-semibold text-center">
-              <h2 className="flex-3">General Information</h2>
-              <button
-                onClick={onClose}
-                className="w-6 h-6 p-[2px] flex justify-center items-center bg-black hover:bg-black/50 rounded-full text-white"
-              >
-                <X size={16} />
-              </button>
-            </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto">
+            <DialogDescription asChild>
+              <div className="px-6 py-4 space-y-8">
+                {/* General Information */}
+                <div>
+                  <div className="space-y-6">
+                    <div className="flex flex-wrap gap-4">
+                      <div className="flex-1 ">
+                        <Label>Role</Label>
+                        <Input
+                          type="text"
+                          {...register("role", {
+                            required: "Role is required",
+                            minLength: { value: 2, message: "Too short" },
+                          })}
+                        />
+                        {errors.role && (
+                          <p className="text-sm text-red-500">
+                            {errors.role.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
-            <div className="flex flex-col gap-8 justify-center py-6">
-              <div className="w-full flex gap-2">
-                <div className="flex-1 flex-col">
-                  <label>First Name</label>
-                  <input
-                    type="text"
-                    className="w-full pl-4 pr-10 py-2 rounded-md border border-black placeholder-gray-500 focus:outline-none focus:border-1 focus:border-[#497fff]"
-                  />
+                  </div>
                 </div>
-                <div className="flex-1 flex-col">
-                  <label>Last Name</label>
-                  <input
-                    type="text"
-                    className="w-full pl-4 pr-10 py-2 rounded-md border border-black placeholder-gray-500 focus:outline-none focus:border-1 focus:border-[#497fff]"
-                  />
-                </div>
+
               </div>
+            </DialogDescription>
 
-              <div className="w-full flex gap-2">
-                <div className="flex-1 flex-col">
-                  <label>Whatsapp No</label>
-                  <input
-                    type="text"
-                    className="w-full pl-4 pr-10 py-2 rounded-md border border-black placeholder-gray-500 focus:outline-none focus:border-1 focus:border-[#497fff]"
-                  />
-                </div>
-                <div className="flex-1 flex-col">
-                  <label>Password</label>
-                  <input
-                    type="text"
-                    className="w-full pl-4 pr-10 py-2 rounded-md border border-black placeholder-gray-500 focus:outline-none focus:border-1 focus:border-[#497fff]"
-                  />
-                </div>
-                <div className="flex-1 flex-col">
-                  <label>Address</label>
-                  <input
-                    type="text"
-                    className="w-full pl-4 pr-10 py-2 rounded-md border border-black placeholder-gray-500 focus:outline-none focus:border-1 focus:border-[#497fff]"
-                  />
-                </div>
-              </div>
-
-              <div className="w-full flex gap-2">
-                <div className="flex-1 flex-col">
-                  <label>Job Type</label>
-                  <input
-                    type="text"
-                    className="w-full pl-4 pr-10 py-2 rounded-md border border-black placeholder-gray-500 focus:outline-none focus:border-1 focus:border-[#497fff]"
-                  />
-                </div>
-                <div className="flex-1 flex-col">
-                  <label>Designation</label>
-                  <input
-                    type="text"
-                    className="w-full pl-4 pr-10 py-2 rounded-md border border-black placeholder-gray-500 focus:outline-none focus:border-1 focus:border-[#497fff]"
-                  />
-                </div>
-              </div>
-
-              <div className="w-full flex gap-2">
-                <div className="flex-1 flex-col">
-                  <label>Select Role</label>
-                  <input
-                    type="text"
-                    className="w-full pl-4 pr-10 py-2 rounded-md border border-black placeholder-gray-500 focus:outline-none focus:border-1 focus:border-[#497fff]"
-                  />
-                </div>
-                <div className="flex-1 flex-col">
-                  <label>Reporting Manager</label>
-                  <input
-                    type="text"
-                    className="w-full pl-4 pr-10 py-2 rounded-md border border-black placeholder-gray-500 focus:outline-none focus:border-1 focus:border-[#497fff]"
-                  />
-                </div>
-              </div>
-
-            </div>
-
-            {/* Body */}
-            <div className="flex justify-center pt-4 max-w-lg mx-auto">
-              <button
-                className="w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white py-4 rounded-xl transition disabled:opacity-50"
-                onClick={()=>{}}
+            <DialogFooter className="px-6 pb-6 items-center">
+              <Button
+                type="submit"
+                className="w-full max-w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
               >
                 Save
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
   );
 }
-
-export default RolePermissionPage;
