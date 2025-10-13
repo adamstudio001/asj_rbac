@@ -97,9 +97,12 @@ const LogHistoryPage = () => {
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.browser}</td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.os}</td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.duration}</td>
-                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px] flex items-center gap-2">
-                        <div className={clsx("w-3 h-3 rounded-full", log.lastSee.end==null? "bg-[#62de00]":"bg-[#ff0405]")}></div>
-                        {formatLastSeen(log.lastSee.start, log.lastSee.end)}
+                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                        <span className={`inline-block align-middle w-3 h-3 rounded-full mr-2 ${log.lastSee.end == null ? 'bg-[#62de00]' : 'bg-[#ff0405]'}`} />
+                        <p className="inline align-middle m-0">
+                          {formatLastSeen(log.lastSee.start, log.lastSee.end)}
+                        </p>
+
                       </td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.role}</td>
                       <td className="px-4 py-3 font-inter text-[14px] text-[#007BFF]">{log.ip}</td>

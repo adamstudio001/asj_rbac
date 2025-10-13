@@ -58,7 +58,7 @@ const DashboardContent = () => {
                 </div>
       )}/>
       <main className="flex-1 overflow-auto items-center p-6">
-          <div className="px-[10vw] w-full">
+          <div className="px-[2cqi] sm:px-[10cqi] w-full">
             {
               !folderKeys?  
               <>
@@ -81,7 +81,7 @@ const DashboardContent = () => {
                 </div>
               </> : 
               <>
-                <NavLink to={`/filemanager/${findParentFolderKey(folderKeys)==null? "":findParentFolderKey(folderKeys)}`} className="flex w-[min-content] items-center gap-1 text-black font-bold px-1 py-2 rounded-md hover:bg-gray-300 transition">
+                <NavLink to={`/dashboard/${findParentFolderKey(folderKeys)==null? "":findParentFolderKey(folderKeys)}`} className="flex w-[min-content] items-center gap-1 text-black font-bold px-1 py-2 rounded-md hover:bg-gray-300 transition">
                   <IoArrowBack />
                   Back
                 </NavLink>
