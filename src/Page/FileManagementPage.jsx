@@ -6,8 +6,10 @@ import { IoIosArrowDown } from "react-icons/io";
 import { LuUpload } from "react-icons/lu";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
 import { formatDate, formatFileSize, formatFileType, getFileIcon } from "../Common/Utils";
-import { ToastProvider } from "@src/Providers/ToastProvider";
+import { ToastProvider, useToast } from "@/Providers/ToastProvider";
 import ModalUpload from "@/Components/ModalUpload";
+import { TableRowActionMenu } from "@/Components/TableRowActionMenu";
+import DeleteModal from "@/Components/DeleteModal";
 
 const FileManagementPage = () => {
   return (
@@ -19,8 +21,10 @@ const FileManagementPage = () => {
 
 const FileManagementContent = () => {
   const { search, setSearch } = useSearch();
+  const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const [page, setPage] = useState(1);
   const totalPages = 6;
+  const { addToast } = useToast();
 
   const files = [
     { id: 1, name: "Laporan Absensi Karyawan", isFolder: true, lastModified: "2025-01-01 10:00:00", fileSize: 20202000000 },
@@ -89,17 +93,6 @@ const FileManagementContent = () => {
             <table className="w-full text-left text-sm">
               <thead className="bg-[#F3F3F3]">
                 <tr className="border border-gray-200">
-                  {/* <th className="px-4 py-3 w-10">
-                    <input
-                    type="checkbox"
-                    onClick={toggleSelectAll}
-                    className="appearance-none w-4 h-4 border border-gray-300 rounded-sm bg-white 
-                      checked:before:pt-[2px] checked:bg-white checked:border-gray-300 
-                      checked:before:content-['✔'] checked:before:text-[8px] 
-                      checked:before:flex checked:before:items-center checked:before:justify-center 
-                      cursor-pointer"
-                  />
-                  </th> */}
                   <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">File Name</th>
                   <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">File Type</th>
                   <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">Last Modified</th>
@@ -108,18 +101,55 @@ const FileManagementContent = () => {
               </thead>
               <tbody>
                 {filteredFiles.map((file) => (
-                  <tr
-                    key={file.id}
-                    className="hover:bg-gray-50 transition border-b border-gray-200"
-                  >
-                    <td className="px-4 py-3 text-gray-800 flex gap-2 items-center">
-                      {getFileIcon(file.name, file.isFolder, 24)}
-                      {file.name}
-                    </td>
-                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatFileType(file.name)}</td>
-                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatDate(file.lastModified)}</td>
-                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatFileSize(file.fileSize)}</td>
-                  </tr>
+                  file.isFolder? 
+                    <tr
+                      key={file.id}
+                      onClick={()=>alert("fitur belum di implementasi")}
+                      className="hover:bg-gray-50 transition border-b border-gray-200"
+                    >
+                      <td className="px-4 py-3 text-gray-800 flex gap-2 items-center">
+                        {getFileIcon(file.name, file.isFolder, 24)}
+                        {file.name}
+                      </td>
+                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatFileType(file.name)}</td>
+                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatDate(file.lastModified)}</td>
+                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatFileSize(file.fileSize)}</td>
+                    </tr> : 
+                    <TableRowActionMenu
+                      key={file.id}
+                      rowCells={
+                        <>
+                          <td className="px-4 py-3 text-gray-800 flex gap-2 items-center">
+                            {getFileIcon(file.name, file.isFolder, 24)}
+                            {file.name}
+                          </td>
+                          <td className="px-4 py-3 font-inter text-[14px]">
+                            {formatFileType(file.name)}
+                          </td>
+                          <td className="px-4 py-3 font-inter text-[14px]">
+                            {formatDate(file.lastModified)}
+                          </td>
+                          <td className="px-4 py-3 font-inter text-[14px]">
+                            {formatFileSize(file.fileSize)}
+                          </td>
+                        </>
+                      }
+                    >
+                      <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => alert("Download")}
+                      >
+                        Download
+                      </button>
+                      <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-50"
+                        onClick={() => {
+                          setIsModalDeleteOpen(true);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </TableRowActionMenu>
                 ))}
               </tbody>
             </table>
@@ -129,6 +159,15 @@ const FileManagementContent = () => {
             <Pagination className="mt-8" currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
       </main>
+
+      <DeleteModal
+          isOpen={isModalDeleteOpen}
+          onClose={() => setIsModalDeleteOpen(false)}
+          onConfirm={() => {
+            setIsModalDeleteOpen(false);
+            addToast("success", "Deleted successfully");
+          }}
+      />
 
       <ModalUpload/>
     </>

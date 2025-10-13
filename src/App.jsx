@@ -17,7 +17,7 @@ export default function App() {
                 <Route path="/" element={<LoginPage />} />
                 <Route element={<PanelLayout />}>
                     <Route path="/dashboard/:folderKeys?" element={<DashboardPage />} />
-                    <Route path="/filemanager/" element={<FileManagementPage />} />
+                    <Route path="/filemanager/:folderKeys?" element={<FileManagementPage />} />
                     <Route path="/users/" element={<UserPage />} />
                     <Route path="/logs/" element={<LogHistoryPage />} />
                     <Route path="/role_permissions/" element={<RolePermissionPage />} />

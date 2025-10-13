@@ -168,7 +168,7 @@ export default function ModalUpload() {
                   <div className="w-full overflow-hidden">
                     {/* Uploading Files */}
                     {uploadingCount > 0 && (
-                      <div className="w-full px-4 sm:px-0">
+                      <div className="w-full">
                         <p className="font-mulish font-bold font-medium mb-2">
                           Uploading - {files.filter(f => f.uploaded).length}/{files.length} files
                         </p>
@@ -226,7 +226,7 @@ export default function ModalUpload() {
               </div>
             </DialogDescription>
 
-            <DialogFooter className="px-6 pb-6">
+            <DialogFooter className="mx-4 sm:mx-6 pb-6">
               <div className="flex flex-wrap items-between gap-4">
                 <Button variant="outline" className="flex-1 min-w-[250px]"  onClick={()=>setIsModalOpen(false)}>
                   <X className="opacity-60" size={16} aria-hidden="true" />

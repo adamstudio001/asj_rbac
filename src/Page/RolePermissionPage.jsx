@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { ToastProvider, useToast } from "@/Providers/ToastProvider";
+import DeleteModal from "@/Components/DeleteModal";
 
 const RolePermissionPage = () => {
   return (
@@ -32,6 +33,9 @@ const RolePermissionContent = () => {
   const { search, setSearch } = useSearch();
   const [selectedRole, setSelectedRole] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
+  const { addToast } = useToast();
+
   const roles = [
     { id: 1, role: "HR/GA", permission: ["create"]},
     { id: 2, role: "Finance", permission: []},
@@ -104,7 +108,7 @@ const RolePermissionContent = () => {
                       </button>
                       <button
                         className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-50"
-                        onClick={() => alert("Delete")}
+                        onClick={() => setIsModalDeleteOpen(true)}
                       >
                         {/* <FaTrash className="mr-2 text-red-500" /> */}
                         Delete
@@ -121,6 +125,15 @@ const RolePermissionContent = () => {
           </table>
         </div>
       </main>
+
+      <DeleteModal
+          isOpen={isModalDeleteOpen}
+          onClose={() => setIsModalDeleteOpen(false)}
+          onConfirm={() => {
+            setIsModalDeleteOpen(false);
+            addToast("success", "Deleted successfully");
+          }}
+      />
 
       <ModalRole
         open={isModalOpen}

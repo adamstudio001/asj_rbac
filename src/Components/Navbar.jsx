@@ -50,7 +50,7 @@ const Navbar = ({renderActionModal = null}) => {
                     User Management
                 </button>
 
-                <div className="w-full sm:w-auto flex items-center gap-3">
+                <div className="flex flex-wrap  w-full sm:w-auto items-center gap-3">
                     {/* Search */}
                     <div className="relative">
                     <input
@@ -82,14 +82,14 @@ const Navbar = ({renderActionModal = null}) => {
                    Roles & Permissions
                 </button>
 
-                <div className="w-full sm:w-auto flex items-center gap-3">
+                <div className="flex flex-wrap  w-full sm:w-auto items-center gap-3">
                     {/* Search */}
                     <div className="relative">
                     <input
                         type="text"
                         onChange={(e)=>setSearch(e.target.value)}
                         placeholder="Search by name"
-                        className="pl-4 pr-10 py-2 rounded-md bg-[#F4F3F3] placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
+                        className="w-full min-w-0  pl-4 pr-10 py-2 rounded-md bg-[#F4F3F3] placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#497fff]"
                     />
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +114,7 @@ const Navbar = ({renderActionModal = null}) => {
                    Activity Log History
                 </button>
 
-                <div className="w-full sm:w-auto flex items-center gap-3">
+                <div className="flex flex-wrap  w-full sm:w-auto items-center gap-3">
                     {/* Search */}
                     <div className="relative">
                     <input
