@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { formatDistanceToNowStrict, isValid } from "date-fns";
-import clsx from "clsx";
 import Navbar from "@src/Components/Navbar";
 import { useSearch } from "@src/Providers/SearchProvider";
+import { formatLastSeen } from "@/Common/Utils";
 
 const LogHistoryPage = () => {
   const { search, setSearch } = useSearch();
@@ -26,43 +25,6 @@ const LogHistoryPage = () => {
     { id: 3, user: "Rahul", browser: "Chrome", os: "Windows", duration: "8 mins", lastSee: {start: "2025-10-07 10:00:00", end: "2025-10-07 10:12:00" }, role: "HR/GA", ip: "8.8.8.8", city: "Bogor" },
     { id: 4, user: "Dika", browser: "Chrome", os: "Windows", duration: "1 mins", lastSee: {start: "2025-10-07 10:12:00", end: null}, role: "HR/GA", ip: "8.8.8.8", city: "Bogor" },
   ];
-
-  function isValidDateTime(dateString) {
-    if(dateString==null){
-      return true;
-    }
-
-    const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
-    if (!regex.test(dateString)) return false;
-
-    const parsed = new Date(dateString);
-    return isValid(parsed);
-  }
-
-  function formatLastSeen(start, end) {
-    if (!isValidDateTime(start) || (end && !isValidDateTime(end))) {
-      return "Invalid date format";
-    }
-
-    const startDate = new Date(start);
-    const endDate = end == null? new Date() : new Date(end);
-
-    const diffSec = Math.floor((endDate - startDate) / 1000);
-
-    const days = Math.floor(diffSec / 86400);
-    const hours = Math.floor((diffSec % 86400) / 3600);
-    const minutes = Math.floor((diffSec % 3600) / 60);
-    const seconds = diffSec % 60;
-
-    if (days === 0 && hours === 0 && minutes === 0) {
-      return `${seconds} seconds ago`;
-    }
-    if (days === 0 && hours === 0) {
-      return `${minutes}:${seconds.toString().padStart(2, "0")} minutes ago`;
-    }
-
-    return formatDistanceToNowStrict(startDate, { addSuffix: true, now: endDate });
-  }
 
   const filteredLogs = logs.filter(log =>
     log.user.toLowerCase().includes(search.toLowerCase())

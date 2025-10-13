@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
+import { formatLastSeen } from "@/Common/Utils";
 
 const UserPage = () => {
   return (
@@ -35,6 +36,7 @@ const UserPageContent = () => {
   const { addToast } = useToast();
 
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
+  const [tick, setTick] = useState(0);
   const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,6 +50,7 @@ const UserPageContent = () => {
       email: "admin@gmail.com",
       whatsapp: "087870590000",
       branch: "Jakarta",
+      lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
       jobPosition: "HR/GA",
     },
     {
@@ -57,6 +60,7 @@ const UserPageContent = () => {
       email: "admin@gmail.com",
       whatsapp: "087870590000",
       branch: "Jakarta",
+      lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
       jobPosition: "Finance",
     },
     {
@@ -66,6 +70,7 @@ const UserPageContent = () => {
       email: "admin@gmail.com",
       whatsapp: "087870590000",
       branch: "Jakarta",
+      lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
       jobPosition: "Operation",
     },
     {
@@ -75,11 +80,20 @@ const UserPageContent = () => {
       email: "admin@gmail.com",
       whatsapp: "087870590000",
       branch: "Jakarta",
+      lastLogin: {start: "2025-10-13 15:00:00", end: null},
       jobPosition: "Operation",
     },
   ];
 
   useEffect(() => setSearch(""), []);
+
+  useEffect(() => {
+      const interval = setInterval(() => {
+        setTick((t) => t + 1);
+      }, 500);
+  
+      return () => clearInterval(interval);
+  }, []);
 
   const filteredUsers = users.filter((user) =>
     user.firstName.toLowerCase().includes(search.toLowerCase())
@@ -117,7 +131,7 @@ const UserPageContent = () => {
                   Position
                 </th>
                 <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                  Phone
+                  Last Seen
                 </th>
               </tr>
             </thead>
@@ -173,7 +187,7 @@ const UserPageContent = () => {
                     {user.jobPosition}
                   </td>
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                    {user.whatsapp}
+                    {formatLastSeen(user.lastLogin.start, user.lastLogin.end)}
                   </td>
                 </tr>
               ))}
@@ -224,7 +238,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
       lastName: data?.lastName ?? "",
       whatsapp: data?.whatsapp ?? "",
       password: data?.password ?? "",
-      address: data?.address ?? "",
+      email: data?.email ?? "",
       jobPosition: data?.jobPosition ?? "",
       branch: data?.branch ?? "",
       role: data?.role ?? "",
@@ -239,7 +253,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
       lastName: data?.lastName ?? "",
       whatsapp: data?.whatsapp ?? "",
       password: data?.password ?? "",
-      address: data?.address ?? "",
+      email: data?.email ?? "",
       jobPosition: data?.jobPosition ?? "",
       branch: data?.branch ?? "",
       role: data?.role ?? "",
@@ -322,6 +336,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         <Label>Password</Label>
                         <Input
                           type="password"
+                          disabled={mode!="create"}
                           {...register("password", {
                             required: "Password is required",
                             minLength: { value: 6, message: "Min 6 chars" },
@@ -335,16 +350,16 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                       </div>
 
                       <div className="flex-1 min-w-[250px]">
-                        <Label>Address</Label>
+                        <Label>Email</Label>
                         <Input
                           type="text"
-                          {...register("address", {
-                            required: "Address is required",
+                          {...register("email", {
+                            required: "Email is required",
                           })}
                         />
-                        {errors.address && (
+                        {errors.email && (
                           <p className="text-sm text-red-500">
-                            {errors.address.message}
+                            {errors.email.message}
                           </p>
                         )}
                       </div>
@@ -379,6 +394,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         <Label>Branch</Label>
                         <Input
                           type="text"
+                          disabled={mode!="create"}
                           {...register("branch", {
                             required: "Branch is required",
                           })}
@@ -396,6 +412,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         <Label>Role</Label>
                         <Input
                           type="text"
+                          disabled={mode!="create"}
                           {...register("role", {
                             required: "Role is required",
                           })}
