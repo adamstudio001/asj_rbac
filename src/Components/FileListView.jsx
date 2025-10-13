@@ -50,7 +50,7 @@ function FileListView({ folderKeys, mode }) {
     <div className="bg-transparent divide-y divide-[#e0e0e0] rounded shadow">
       {sortedFiles.map((file, index) => (
         file.isFolder? 
-        <NavLink key={index} to={`/filemanager/${file.folderKeys}`} className="flex items-center px-4 py-3 hover:bg-gray-50 transition">
+        <NavLink key={index} to={`/dashboard/${file.folderKeys}`} className="flex items-center px-4 py-3 hover:bg-gray-50 transition">
           <div className="text-2xl w-10">{getFileIcon(file.name, file.isFolder, 24)}</div>
           <div className="ml-4 text-left text-[#1A1A1A] text-[13px] leading-[18px] font-inter font-medium">{file.name}</div>
         </NavLink> : 

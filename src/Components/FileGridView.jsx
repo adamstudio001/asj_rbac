@@ -56,7 +56,7 @@ function FileGridView({ folderKeys, mode }) {
         file.isFolder ? (
           <NavLink
             key={index}
-            to={`/filemanager/${file.folderKeys}`}
+            to={`/dashboard/${file.folderKeys}`}
             className="flex flex-row gap-2 bg-[#7979790D] p-4 rounded shadow-md hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
           >
             <div className="text-4xl">{getFileIcon(file.name, file.isFolder)}</div>
