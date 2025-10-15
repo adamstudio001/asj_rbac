@@ -1,7 +1,7 @@
 {
   "name": "asj_rbac",
   "private": true,
-  "version": "0.0.28",
+  "version": "0.0.29",
   "type": "module",
   "homepage": "https://adamf0.github.io/asj_rbac",
   "scripts": {
@@ -14,6 +14,7 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/vite": "^4.1.14",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

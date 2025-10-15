@@ -8,7 +8,7 @@ export default function DeleteModal({ isOpen, onClose, onConfirm }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-4xl w-[360px] p-6 shadow-lg">
         <div className="flex justify-between mb-6">
-          <div className="bg-red-100 text-red-600 p-3 rounded-full">
+          <div className="bg-[#F43F5E] text-white p-3 rounded-full">
             <AlertCircle size={28} />
           </div>
 
@@ -25,7 +25,7 @@ export default function DeleteModal({ isOpen, onClose, onConfirm }) {
             Delete
           </h2>
 
-          <p className="text-leftfont-inter font-normal text-[16px] text-[#475569] mb-5">
+          <p className="text-leftfont-inter font-normal text-[16px] text-[#475569] mb-10">
             Are you sure want to delete this user?
           </p>
         </div>

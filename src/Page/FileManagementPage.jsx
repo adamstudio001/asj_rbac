@@ -10,6 +10,7 @@ import { ToastProvider, useToast } from "@/Providers/ToastProvider";
 import ModalUpload from "@/Components/ModalUpload";
 import { TableRowActionMenu } from "@/Components/TableRowActionMenu";
 import DeleteModal from "@/Components/DeleteModal";
+import EllipsisTooltip from "@/Components/EllipsisTooltip";
 
 const FileManagementPage = () => {
   return (
@@ -93,23 +94,23 @@ const FileManagementContent = () => {
             <table className="w-full text-left text-sm">
               <thead className="bg-[#F3F3F3]">
                 <tr className="border border-gray-200">
-                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">File Name</th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B] min-w-0 w-[250px]">File Name</th>
                   <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">File Type</th>
                   <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">Last Modified</th>
                   <th className="px-4 py-3 font-inter font-medium text-[14px] text-[#5B5B5B]">File Size</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredFiles.map((file) => (
-                  file.isFolder? 
+                {filteredFiles.map((file) => {
+                  return file.isFolder? 
                     <tr
                       key={file.id}
                       onClick={()=>alert("fitur belum di implementasi")}
                       className="hover:bg-gray-50 transition border-b border-gray-200"
                     >
-                      <td className="px-4 py-3 text-gray-800 flex gap-2 items-center">
+                      <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
                         {getFileIcon(file.name, file.isFolder, 24)}
-                        {file.name}
+                        <EllipsisTooltip className={"w-[250px]"}>{file.name}</EllipsisTooltip>
                       </td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatFileType(file.name)}</td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{formatDate(file.lastModified)}</td>
@@ -119,9 +120,9 @@ const FileManagementContent = () => {
                       key={file.id}
                       rowCells={
                         <>
-                          <td className="px-4 py-3 text-gray-800 flex gap-2 items-center">
+                          <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
                             {getFileIcon(file.name, file.isFolder, 24)}
-                            {file.name}
+                            <EllipsisTooltip className={"w-[250px]"}>{file.name}</EllipsisTooltip>
                           </td>
                           <td className="px-4 py-3 font-inter text-[14px]">
                             {formatFileType(file.name)}
@@ -136,13 +137,13 @@ const FileManagementContent = () => {
                       }
                     >
                       <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
                         onClick={() => alert("Download")}
                       >
                         Download
                       </button>
                       <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-50"
+                        className="flex items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
                         onClick={() => {
                           setIsModalDeleteOpen(true);
                         }}
@@ -150,7 +151,7 @@ const FileManagementContent = () => {
                         Delete
                       </button>
                     </TableRowActionMenu>
-                ))}
+                })}
               </tbody>
             </table>
           </div>

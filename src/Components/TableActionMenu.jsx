@@ -52,7 +52,7 @@ export function TableActionMenu({children}){
       {showMenu && (
         <div
           ref={menuRef}
-          className="z-50 bg-white border border-gray-200 rounded-lg shadow-md py-2 w-40"
+          className="z-50 bg-[#EAEAEA] border border-gray-200 rounded-lg shadow-md py-2 w-40"
         >
           {children}
         </div>

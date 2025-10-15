@@ -19,6 +19,8 @@ import { useForm, Controller } from "react-hook-form";
 import { ToastProvider, useToast } from "@/Providers/ToastProvider";
 import DeleteModal from "@/Components/DeleteModal";
 import MultipleSelector from "@/Components/ui/multiselect";
+import EllipsisTooltip from "@/Components/EllipsisTooltip";
+import { v4 as uuidv4 } from 'uuid';
 
 const permissions = [
     { value: "read", label: "read" },
@@ -79,7 +81,7 @@ const RolePermissionContent = () => {
             <thead className="bg-[#F3F3F3]">
               <tr className="border border-gray-200">
                 <th className="px-4 py-3 w-10"></th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Role</th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black min-w-0 w-[250px]">Role</th>
                 <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Permission</th>
               </tr>
             </thead>
@@ -110,9 +112,11 @@ const RolePermissionContent = () => {
                       </button>
                     </TableActionMenu>
                   </td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{role.role}</td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                      <EllipsisTooltip className={"w-[250px]"}>{role.role}</EllipsisTooltip>
+                  </td>
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{
-                      role.permission.map(p => <span className="px-2 py-1 bg-green-400 rounded rounded-xl">{p.label}</span>)  
+                      role.permission.map(p => <span key={uuidv4()} className="px-2 py-1 bg-green-400 rounded rounded-xl">{p.label}</span>)  
                   }</td>
                 </tr>
               ))}

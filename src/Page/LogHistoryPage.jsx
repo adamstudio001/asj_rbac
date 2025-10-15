@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "@src/Components/Navbar";
 import { useSearch } from "@src/Providers/SearchProvider";
 import { formatLastSeen } from "@/Common/Utils";
+import EllipsisTooltip from "@/Components/EllipsisTooltip";
 
 const LogHistoryPage = () => {
   const { search, setSearch } = useSearch();
@@ -39,7 +40,7 @@ const LogHistoryPage = () => {
               <table className="w-full text-left text-sm">
                 <thead className="bg-[#f8f8f8]">
                   <tr className="border border-gray-200">
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">User</th>
+                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black min-w-0 w-[250px]">User</th>
                     <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Browser</th>
                     <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Operating System</th>
                     <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Duration</th>
@@ -55,7 +56,9 @@ const LogHistoryPage = () => {
                       key={log.id}
                       className="hover:bg-gray-50 transition border-b border-gray-200"
                     >
-                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.user}</td>
+                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                        <EllipsisTooltip className={"w-[250px]"}>{log.user}</EllipsisTooltip>
+                      </td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.browser}</td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.os}</td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.duration}</td>
@@ -64,7 +67,6 @@ const LogHistoryPage = () => {
                         <p className="inline align-middle m-0">
                           {formatLastSeen(log.lastSee.start, log.lastSee.end)}
                         </p>
-
                       </td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.role}</td>
                       <td className="px-4 py-3 font-inter text-[14px] text-[#007BFF]">{log.ip}</td>

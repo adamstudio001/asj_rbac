@@ -6,6 +6,9 @@ import { TableActionMenu } from "@src/Components/TableActionMenu";
 import DeleteModal from "@src/Components/DeleteModal";
 import Pagination from "@src/Components/Pagination";
 import { ToastProvider, useToast } from "@src/Providers/ToastProvider";
+import reset from "@assets/reset.svg";
+import trash from "@assets/trash.svg";
+import user_edit from "@assets/user_edit.svg";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +25,7 @@ import {
 } from "@/components/ui/dialogModal";
 import { useForm } from "react-hook-form";
 import { formatLastSeen } from "@/Common/Utils";
+import EllipsisTooltip from "@/Components/EllipsisTooltip";
 
 const UserPage = () => {
   return (
@@ -121,7 +125,7 @@ const UserPageContent = () => {
             <thead className="bg-[#F3F3F3]">
               <tr className="border border-gray-200">
                 <th className="px-4 py-3 w-10"></th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left min-w-0 w-[200px]">
                   Name
                 </th>
                 <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
@@ -145,40 +149,40 @@ const UserPageContent = () => {
                     <TableActionMenu>
                       {/* Edit User */}
                       <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
                         onClick={() => {
                           setSelectedUser(user);
                           setIsModalOpen(true);
                         }}
                       >
-                        <FaUserEdit className="mr-2 text-gray-500" />
+                        <img src={user_edit} alt="download" className="w-4 h-4 hover:text-white"/>
                         Edit User
                       </button>
 
                       {/* Reset Password */}
                       <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
                         onClick={() =>
                           alert(`Reset password for ${user.firstName}`)
                         }
                       >
-                        <FaLock className="mr-2 text-gray-500" />
+                        <img src={reset} alt="download" className="w-4 h-4"/>
                         Reset Password
                       </button>
 
                       {/* Delete User */}
                       <button
-                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-50"
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
                         onClick={() => setIsModalDeleteOpen(true)}
                       >
-                        <FaTrash className="mr-2 text-red-500" />
+                        <img src={trash} alt="download" className="w-4 h-4"/>
                         Delete User
                       </button>
                     </TableActionMenu>
                   </td>
 
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                    {`${user.firstName} ${user.lastName || ""}`.trim()}
+                    <EllipsisTooltip className={"w-[200px]"}>{`${user.firstName} ${user.lastName || ""}`.trim()}</EllipsisTooltip>
                   </td>
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
                     {user.email}
