@@ -32,6 +32,7 @@ const FileManagementContent = () => {
     { id: 2, name: "Reimbursment.xlsx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 10240},
     { id: 3, name: "surat izin cuti.docx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 30000 },
     { id: 4, name: "dokumen operasional.zip", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 645000 },
+    { id: 5, name: "Lorem Ipsum is simply dummy text of the printing and typesetting industry.zip", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 645000 },
   ];
 
   const { 
