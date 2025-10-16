@@ -9,7 +9,7 @@ export default function Toast({ type = "success", message, onClose }) {
 
   const styles = {
     success: "bg-[#C7D2FE]/20 border border-[#5046e6] text-gray-800",
-    error: "bg-[#EB5757]/20 border border-[#eb5758] text-gray-800",
+    error: "bg-[#FFCECE] border border-[#eb5758] text-gray-800",
   };
 
   const iconColor = {
