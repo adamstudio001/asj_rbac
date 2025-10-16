@@ -413,7 +413,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                     
                     <div className="flex flex-wrap gap-4">
                       <div className="flex-1 min-w-[250px]">
-                        <Label>Role</Label>
+                        <Label>Select Role</Label>
                         <Input
                           type="text"
                           disabled={mode!="create"}
