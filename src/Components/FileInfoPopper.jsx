@@ -75,7 +75,7 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu }) => {
           <h3 className="text-lg font-semibold">{file?.name || "File Info"}</h3>
         </div>
 
-        <div className="text-sm overflow-y-auto max-h-80 space-y-4">
+        <div className="text-sm overflow-y-auto scroll-custom max-h-80 space-y-4">
           {/* General Section */}
           <div>
             <h4 className="font-semibold text-[14px] mb-1">General:</h4>

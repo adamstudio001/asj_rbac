@@ -192,7 +192,7 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
             {mode === "create" ? "Add New Role" : "Edit Role"}
           </DialogTitle>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto">
+          <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto scroll-custom">
             <DialogDescription asChild>
               <div className="px-6 py-4 space-y-8">
                 {/* General Information */}

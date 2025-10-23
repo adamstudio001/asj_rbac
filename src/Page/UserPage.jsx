@@ -281,7 +281,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
             {mode === "create" ? "Add New User" : "Edit User"}
           </DialogTitle>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto">
+          <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto scroll-custom">
             <DialogDescription asChild>
               <div className="px-6 pb-8 space-y-8">
                 {/* General Information */}

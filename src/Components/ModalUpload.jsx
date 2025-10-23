@@ -135,7 +135,7 @@ export default function ModalUpload() {
             Upload
           </DialogTitle>
 
-          <div className="overflow-y-auto">
+          <div className="overflow-y-auto scroll-custom">
             <DialogDescription asChild>
               <div className="max-w-lg mx-4 sm:mx-auto py-6 space-y-4">
                 {/* Drag & Drop Area */}

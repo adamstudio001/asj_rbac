@@ -35,7 +35,7 @@ function GetInfoButton({ file, onOpenDialog_ }) {
             File Information
           </DialogTitle>
 
-          <div className="overflow-y-auto">
+          <div className="overflow-y-auto scroll-custom">
             <DialogDescription asChild>
               <div className="px-6 py-4">
                 <div className="space-y-4">

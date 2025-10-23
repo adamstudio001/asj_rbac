@@ -212,7 +212,7 @@ const FileManagementContent = () => {
               {/* </Button> */}
             </DialogClose>
           </div>
-          <div className="px-6 text-sm overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500 space-y-8">
+          <div className="px-6 text-sm overflow-y-auto scroll-custom space-y-8">
           {/* General Section */}
           <div>
             <h3 className="font-inter font-semibold text-[14px] mb-2">General:</h3>
