@@ -14,42 +14,6 @@
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     grid-template-rows: masonry;
   }
-
-  /* Scrollbar horizontal merah dan tersembunyi default */
-  .scroll-custom {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: thin; /* Firefox */
-    scrollbar-color: #1a2f48 transparent; /* Firefox */
-  }
-
-  /* Chrome, Edge, Safari */
-  .scroll-custom::-webkit-scrollbar {
-    height: 8px; /* tinggi scroll horizontal */
-    background: transparent; /* hide default track */
-  }
-
-  .scroll-custom::-webkit-scrollbar-thumb {
-    background-color: #1a2f48; /* warna thumb */
-    border-radius: 4px;
-    transition: opacity 0.3s;
-    opacity: 0; /* hide default */
-  }
-
-  .scroll-custom:hover::-webkit-scrollbar-thumb,
-  .scroll-custom:active::-webkit-scrollbar-thumb {
-    opacity: 1; /* muncul saat hover / scroll */
-  }
-
-  /* IE & Edge Legacy */
-  .scroll-custom {
-    -ms-overflow-style: none; /* hide scrollbar */
-  }
-
-  .scroll-custom::-ms-scrollbar {
-    display: none; /* hide scrollbar IE/Edge */
-  }
 }
 
 @layer utilities {
