@@ -1,7 +1,7 @@
 import { AlertCircle } from "lucide-react";
 import { X } from "lucide-react";
 
-export default function DeleteModal({ isOpen, onClose, onConfirm }) {
+export default function DeleteModal({ message, isOpen, onClose, onConfirm }) {
   if (!isOpen) return null;
 
   return (
@@ -26,7 +26,7 @@ export default function DeleteModal({ isOpen, onClose, onConfirm }) {
           </h2>
 
           <p className="text-leftfont-inter font-normal text-[16px] text-[#475569] mb-10">
-            Are you sure want to delete this user?
+            {message}
           </p>
         </div>
 

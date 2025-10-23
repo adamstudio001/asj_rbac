@@ -76,7 +76,11 @@ export function formatDate(dateString){
   
   hours = hours % 12 || 12; // ubah 0 jadi 12
   
-  return `${year}/${month}/${day} at ${hours}:${minutes} ${ampm}`;
+  return <span className="flex gap-2">
+    <p>{`${year}/${month}/${day}`}</p> 
+    <span className="text-[#e0e0e0] text-[16px]">|</span>
+    <p>{`${hours}:${minutes} ${ampm}`}</p>
+  </span>;
 }
 
 export function isValidDateTime(dateString) {
@@ -115,3 +119,28 @@ export function formatLastSeen(start, end) {
 
     return formatDistanceToNowStrict(startDate, { addSuffix: true, now: endDate });
   }
+
+export function filterAndSortFiles(files, activeFilter) {
+  const isFolderFilter = activeFilter?.group?.label === 'Folders';
+  const searchQuery = activeFilter?.search?.toLowerCase() || '';
+
+  const filteredFiles = files.filter((file) => {
+    // Filter folder
+    if (isFolderFilter) return file.isFolder;
+
+    // Filter ekstensi
+    if (activeFilter?.group?.extensions?.length > 0) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!file.isFolder && activeFilter?.group?.extensions?.includes(ext)) {
+        return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
+      }
+      return false;
+    }
+
+    // Filter search
+    return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
+  });
+
+  // Sort folder ke atas
+  return [...filteredFiles].sort((a, b) => (a.isFolder === b.isFolder ? 0 : a.isFolder ? -1 : 1));
+}

@@ -3,10 +3,21 @@ import Navbar from "@src/Components/Navbar";
 import { useSearch } from "@src/Providers/SearchProvider";
 import { formatLastSeen } from "@/Common/Utils";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialogModal";
 
 const LogHistoryPage = () => {
   const { search, setSearch } = useSearch();
   const [tick, setTick] = useState(0);
+  const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
 
   useEffect(()=>{
     setSearch("");
@@ -69,7 +80,9 @@ const LogHistoryPage = () => {
                         </p>
                       </td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.role}</td>
-                      <td className="px-4 py-3 font-inter text-[14px] text-[#007BFF]">{log.ip}</td>
+                      <td className="px-4 py-3 font-inter text-[14px] text-[#007BFF]">
+                        <button onClick={()=>setIsModalDetailOpen(!isModalDetailOpen)}>{log.ip}</button>
+                      </td>
                       <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.city}</td>
                     </tr>
                   ))}
@@ -77,8 +90,101 @@ const LogHistoryPage = () => {
               </table>
             </div>
         </main>
+
+        <ModalInfoIp
+              open={isModalDetailOpen}
+              onOpenChange={setIsModalDetailOpen}
+            />
     </>
   );
 };
 
 export default LogHistoryPage;
+
+export function ModalInfoIp({ open, onOpenChange, data }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="px-6 py-4 font-inter font-bold text-[26px] text-[#1B2E48]">
+            IP Address Detail
+          </DialogTitle>
+
+          <div className="overflow-y-auto">
+            <DialogDescription asChild>
+              <div className="px-6 py-4">
+                <table className="w-full border-separate border-spacing-y-4">
+                  <tbody>
+                    <tr>
+                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top w-[40%]">
+                        IP Address:
+                      </td>
+                      <td className="py-2 px-4 text-[16px] text-black">
+                        {data?.ip || "123.45.67.89"}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
+                        Country / State / City:
+                      </td>
+                      <td className="py-2 px-4 text-[16px] text-black">
+                        {data?.location || "Indonesia, Jawa Barat, Kota Bogor"}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
+                        Latitude / Longitude (Estimation):
+                      </td>
+                      <td className="py-2 px-4 text-[16px] text-black">
+                        {data?.latlong || "-6.3850, 106.8200"}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
+                        Time Zone & Local Time:
+                      </td>
+                      <td className="py-2 px-4 text-[16px] text-black leading-relaxed">
+                        {data?.timezone || "Asia/Jakarta (UTC+7)"} <br />
+                        {data?.localtime || "2025-10-17 14:30 WIB"}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
+                        ASN Number & ASN Name:
+                      </td>
+                      <td className="py-2 px-4 text-[16px] text-black">
+                        {data?.asn || "ASNA1121, Nama ASN"}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
+                        ISP / Organization:
+                      </td>
+                      <td className="py-2 px-4 text-[16px] text-black">
+                        {data?.isp || "PT. Telkom Indonesia"}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
+                        Postal / ZIP Code:
+                      </td>
+                      <td className="py-2 px-4 text-[16px] text-black">
+                        {data?.zip || "164451"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </DialogDescription>
+          </div>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -25,7 +25,6 @@ const DashboardPage = () => {
 
 const DashboardContent = () => {
   const { folderKeys } = useParams();
-  console.log(folderKeys)
 
   const { 
     isModalOpen, 
@@ -137,136 +136,6 @@ const DashboardContent = () => {
                 </div>
               </>
             }
-
-            {/* <div className="mt-[60px] flex items-center justify-between">
-              <h4 className="text-[#5b5b5b]">Your Workspace</h4> 
-              <div className="flex gap-1">
-                <div className="p-1 rounded bg-[#f1f1f1] text-[#497fff]">
-                  <CiGrid41 size={18} />
-                </div>
-                <div className="p-1 text-[#656565]">
-                  <IoIosList size={18} />
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-[30px] grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
-              <div className="lg:col-span-2 border-[1.5px] border-[#d9d9d9] bg-white shadow-md rounded-xl p-6 self-start">
-                <div className="flex mb-3 items-center justify-between">
-                  <h3>College</h3> 
-                  <button onClick={()=>{}} className="p-1 rounded hover:bg-[#f1f1f1] hover:text-[#497fff]">
-                    <IoIosMore size={18}/>
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-3">
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#497fff] bg-[#f7f9ff]">
-                    <FaFolder />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Assigments</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#497fff] bg-[#f7f9ff]">
-                    <FaFolder />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#ec880c] bg-[#f7f9ff]">
-                    <HiOutlinePresentationChartLine size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.ppt</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <GoDatabase size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <CgFileDocument size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.txt</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <BsFileEarmarkZip size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.pdf.mp3</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <SlPicture size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.jpg</p>
-                  </button>
-                </div>
-              </div>
-              <div className="lg:col-span-2 border-[1.5px] border-[#d9d9d9] bg-white shadow-md rounded-xl p-6 self-start">
-                <div className="flex mb-3  items-center justify-between">
-                  <h3>College</h3> 
-                  <button onClick={()=>{}} className="p-1 rounded hover:bg-[#f1f1f1] hover:text-[#497fff]">
-                    <IoIosMore size={18}/>
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-3">
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#497fff] bg-[#f7f9ff]">
-                    <FaFolder />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Assigments</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#497fff] bg-[#f7f9ff]">
-                    <FaFolder />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#ec880c] bg-[#f7f9ff]">
-                    <HiOutlinePresentationChartLine size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.ppt</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <GoDatabase size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <CgFileDocument size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.txt</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <BsFileEarmarkZip size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.pdf.mp3</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <SlPicture size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.jpg</p>
-                  </button>
-                </div>
-              </div>
-              <div className="lg:col-span-2 border-[1.5px] border-[#d9d9d9] bg-white shadow-md rounded-xl p-6 self-start">
-                <div className="flex mb-3  items-center justify-between">
-                  <h3>College</h3> 
-                  <button onClick={()=>{}} className="p-1 rounded hover:bg-[#f1f1f1] hover:text-[#497fff]">
-                    <IoIosMore size={18}/>
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-3">
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#497fff] bg-[#f7f9ff]">
-                    <FaFolder />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Assigments</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#497fff] bg-[#f7f9ff]">
-                    <FaFolder />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#ec880c] bg-[#f7f9ff]">
-                    <HiOutlinePresentationChartLine size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.ppt</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <GoDatabase size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <CgFileDocument size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.txt</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <BsFileEarmarkZip size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.pdf.mp3</p>
-                  </button>
-                  <button className="flex items-center gap-[0.7rem] text-base px-[1.2rem] py-[.8rem] rounded-lg text-[#3f82ee] bg-[#f7f9ff]">
-                    <SlPicture size={20} />
-                    <p className="text-black truncate overflow-hidden text-ellipsis whitespace-nowrap w-24 text-[14px]">Resert paper lorem ipsum.jpg</p>
-                  </button>
-                </div>
-              </div>
-            </div> */}
-            
           </div>
         </main>
 
@@ -345,7 +214,6 @@ function SectionViewMode({isNested = false, mode=null}){
   } = useFileManager();
 
   function changeMode(target){
-    console.log({target, isNested, mode})
     if(!isNested && mode==null){
       setViewMode(target)
     } else if(isNested && mode=="Folders"){

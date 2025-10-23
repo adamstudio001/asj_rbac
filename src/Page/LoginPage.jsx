@@ -51,7 +51,6 @@ export default function LoginPage() {
   }, [isLoaded]);
 
   const onSubmit = (data) => {
-    console.log("✅ Login Data:", data);
     navigate("/dashboard");
   };
 

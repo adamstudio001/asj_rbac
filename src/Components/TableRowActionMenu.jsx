@@ -7,7 +7,7 @@ export function TableRowActionMenu({ children, rowCells }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const menuRef = useRef(null);
 
-  // 🔹 Setup popper setiap kali showMenu aktif
+  // 🔹 Setup Popper
   useEffect(() => {
     if (showMenu && anchorEl && menuRef.current) {
       createPopper(anchorEl, menuRef.current, {
@@ -17,7 +17,7 @@ export function TableRowActionMenu({ children, rowCells }) {
     }
   }, [showMenu, anchorEl]);
 
-  // 🔹 Tutup saat klik di luar popper
+  // 🔹 Tutup saat klik di luar menu
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -32,7 +32,7 @@ export function TableRowActionMenu({ children, rowCells }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [anchorEl]);
 
-  // 🔹 Klik pada kolom tertentu → popper muncul di posisi itu
+  // 🔹 Toggle menu saat klik sel
   const handleCellClick = (e) => {
     e.stopPropagation();
     setAnchorEl(e.currentTarget);
@@ -66,6 +66,7 @@ export function TableRowActionMenu({ children, rowCells }) {
                   if (child.props.onClick) child.props.onClick(e);
                   setShowMenu(false);
                 },
+                // onOpenDialog_: () => setShowMenu(false), // ✅ aman, bukan event DOM
               })
             )}
           </div>,

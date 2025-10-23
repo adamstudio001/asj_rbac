@@ -11,8 +11,6 @@ import trash from "@assets/trash.svg";
 import user_edit from "@assets/user_edit.svg";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogClose,
@@ -23,9 +21,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialogModal";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { formatLastSeen } from "@/Common/Utils";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
+import WhatsappInput from "@/Components/WhatsappInput";
+import CustomInput from "@/Components/CustomInput";
+import CustomSelect from "@/Components/CustomSelect";
 
 const UserPage = () => {
   return (
@@ -149,7 +150,7 @@ const UserPageContent = () => {
                     <TableActionMenu>
                       {/* Edit User */}
                       <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                         onClick={() => {
                           setSelectedUser(user);
                           setIsModalOpen(true);
@@ -161,7 +162,7 @@ const UserPageContent = () => {
 
                       {/* Reset Password */}
                       <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                         onClick={() =>
                           alert(`Reset password for ${user.firstName}`)
                         }
@@ -172,7 +173,7 @@ const UserPageContent = () => {
 
                       {/* Delete User */}
                       <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                         onClick={() => setIsModalDeleteOpen(true)}
                       >
                         <img src={trash} alt="download" className="w-4 h-4"/>
@@ -209,6 +210,7 @@ const UserPageContent = () => {
 
       {/* Delete Confirmation Modal */}
       <DeleteModal
+        message={"Are you sure want to delete this user?"}
         isOpen={isModalDeleteOpen}
         onClose={() => setIsModalDeleteOpen(false)}
         onConfirm={() => {
@@ -234,6 +236,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset,
   } = useForm({
@@ -265,7 +268,6 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
   }, [data, reset]);
 
   const onSubmit = (values) => {
-    console.log(mode === "create" ? "Creating:" : "Editing:", values);
     reset();
     onOpenChange(false);
     addToast("success", "Save successfully");
@@ -273,7 +275,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-5xl">
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-full sm:max-w-5xl"> {/*max-h-[min(640px,80vh)]*/}
         <DialogHeader>
           <DialogTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
             {mode === "create" ? "Add New User" : "Edit User"}
@@ -281,7 +283,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
 
           <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto">
             <DialogDescription asChild>
-              <div className="px-6 py-4 space-y-8">
+              <div className="px-6 pb-8 space-y-8">
                 {/* General Information */}
                 <div>
                   <h5 className="font-inter font-bold text-lg text-[#1B2E48] pb-4">
@@ -289,89 +291,61 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                   </h5>
 
                   <div className="space-y-6">
+                    {/* --- Row 1 --- */}
                     <div className="flex flex-wrap gap-4">
-                      <div className="flex-1 min-w-[250px]">
-                        <Label>First Name</Label>
-                        <Input
-                          type="text"
-                          {...register("firstName", {
-                            required: "First name is required",
-                            minLength: { value: 2, message: "Too short" },
-                          })}
-                        />
-                        {errors.firstName && (
-                          <p className="text-sm text-red-500">
-                            {errors.firstName.message}
-                          </p>
-                        )}
-                      </div>
+                      <CustomInput
+                        label="First Name"
+                        name="firstName"
+                        register={register}
+                        errors={errors}
+                        rules={{
+                          required: "First name is required",
+                          minLength: { value: 2, message: "Too short" },
+                        }}
+                      />
 
-                      <div className="flex-1 min-w-[250px]">
-                        <Label>Last Name</Label>
-                        <Input
-                          type="text"
-                          {...register("lastName", {
-                            required: "Last name is required",
-                          })}
-                        />
-                        {errors.lastName && (
-                          <p className="text-sm text-red-500">
-                            {errors.lastName.message}
-                          </p>
-                        )}
-                      </div>
+                      <CustomInput
+                        label="Last Name"
+                        name="lastName"
+                        register={register}
+                        errors={errors}
+                        rules={{
+                          required: "Last name is required",
+                        }}
+                      />
                     </div>
 
+                    {/* --- Row 2 --- */}
                     <div className="flex flex-wrap gap-4">
-                      <div className="flex-1 min-w-[250px]">
-                        <Label>Whatsapp No</Label>
-                        <Input type="text" 
-                          {...register("whatsapp", {
-                            required: "Whatsapp is required",
-                          })}/>
-                          {errors.whatsapp && (
-                            <p className="text-sm text-red-500">
-                              {errors.whatsapp.message}
-                            </p>
-                          )}
-                      </div>
+                      <WhatsappInput register={register} errors={errors} />
 
-                      <div className="flex-1 min-w-[250px]">
-                        <Label>Password</Label>
-                        <Input
-                          type="password"
-                          disabled={mode!="create"}
-                          {...register("password", {
-                            required: "Password is required",
-                            minLength: { value: 6, message: "Min 6 chars" },
-                          })}
-                        />
-                        {errors.password && (
-                          <p className="text-sm text-red-500">
-                            {errors.password.message}
-                          </p>
-                        )}
-                      </div>
+                      <CustomInput
+                        label="Password"
+                        name="password"
+                        type="password"
+                        disabled={mode !== "create"}
+                        register={register}
+                        errors={errors}
+                        rules={{
+                          required: "Password is required",
+                          minLength: { value: 6, message: "Min 6 chars" },
+                        }}
+                      />
 
-                      <div className="flex-1 min-w-[250px]">
-                        <Label>Email</Label>
-                        <Input
-                          type="text"
-                          {...register("email", {
-                            required: "Email is required",
-                          })}
-                        />
-                        {errors.email && (
-                          <p className="text-sm text-red-500">
-                            {errors.email.message}
-                          </p>
-                        )}
-                      </div>
+                      <CustomInput
+                        label="Email"
+                        name="email"
+                        register={register}
+                        errors={errors}
+                        rules={{
+                          required: "Email is required",
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* Professional Info */}
+                {/* Professional Information */}
                 <div>
                   <h5 className="font-inter font-bold text-lg text-[#1B2E48] pb-4">
                     Professional Information
@@ -379,54 +353,56 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
 
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-wrap gap-4">
-                      <div className="flex-1 min-w-[250px]">
-                        <Label>Job Position</Label>
-                        <Input
-                          type="text"
-                          {...register("jobPosition", {
-                            required: "Job position is required",
-                          })}
-                        />
-                        {errors.jobPosition && (
-                          <p className="text-sm text-red-500">
-                            {errors.jobPosition.message}
-                          </p>
+                      <Controller
+                        name="jobPosition"
+                        control={control}
+                        rules={{ required: "Job position is required" }}
+                        render={({ field }) => (
+                          <CustomSelect
+                            label="Job Position"
+                            records={["HR/GA", "Legal", "FDA", "Finance", "TAX", "OPS", "Commercial"]}
+                            value={field.value}
+                            disabled={mode !== "create"}
+                            onChange={field.onChange}
+                            error={errors.jobPosition?.message}
+                          />
                         )}
-                      </div>
+                      />
 
-                      <div className="flex-1 min-w-[250px]">
-                        <Label>Branch</Label>
-                        <Input
-                          type="text"
-                          disabled={mode!="create"}
-                          {...register("branch", {
-                            required: "Branch is required",
-                          })}
-                        />
-                        {errors.branch && (
-                          <p className="text-sm text-red-500">
-                            {errors.branch.message}
-                          </p>
+                      <Controller
+                        name="branch"
+                        control={control}
+                        rules={{ required: "Branch is required" }}
+                        render={({ field }) => (
+                          <CustomSelect
+                            label="Work Location / Branch"
+                            records={["Head Office", "Palembang", "Banten", "Surabaya"]}
+                            value={field.value}
+                            disabled={mode !== "create"}
+                            onChange={field.onChange}
+                            error={errors.branch?.message}
+                          />
                         )}
-                      </div>
+                      />
+
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-4">
-                      <div className="flex-1 min-w-[250px]">
-                        <Label>Select Role</Label>
-                        <Input
-                          type="text"
-                          disabled={mode!="create"}
-                          {...register("role", {
-                            required: "Role is required",
-                          })}
-                        />
-                        {errors.role && (
-                          <p className="text-sm text-red-500">
-                            {errors.role.message}
-                          </p>
+                      <Controller
+                        name="role"
+                        control={control}
+                        rules={{ required: "Role is required" }}
+                        render={({ field }) => (
+                          <CustomSelect
+                            label="Select Role"
+                            records={["Admin", "User", "Developer"]}
+                            value={field.value}
+                            disabled={mode !== "create"}
+                            onChange={field.onChange}
+                            error={errors.role?.message}
+                          />
                         )}
-                      </div>
+                      />
                       <div className="flex-1 min-w-[250px]"></div>
                     </div>
                   </div>

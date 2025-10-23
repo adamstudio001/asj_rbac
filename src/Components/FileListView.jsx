@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { filterAndSortFiles } from '@/Common/Utils';
 
 function FileListView({ folderKeys, mode }) {
   const { 
@@ -23,34 +24,7 @@ function FileListView({ folderKeys, mode }) {
     files = files.filter((f) => f.name.toLowerCase().includes(activeFilter.search.toLowerCase()))
   }
 
-  console.log(folderKeys, mode, activeFilter)
-  const isFolderFilter = activeFilter.group?.label === 'Folders';
-  const searchQuery = activeFilter.search?.toLowerCase() || ''; // Ambil search query dan ubah ke lowercase
-
-  // Filter berdasarkan folder, ekstensi, dan pencarian
-  const filteredFiles = files.filter((file) => {
-    // Filter berdasarkan folder
-    if (isFolderFilter) return file.isFolder;
-
-    // Filter berdasarkan ekstensi file
-    if (activeFilter.group?.extensions?.length > 0) {
-      const ext = file.name.split('.').pop().toLowerCase();
-      if (!file.isFolder && activeFilter.group.extensions.includes(ext)) {
-        // Jika ada filter ekstensi, lanjutkan ke pencarian
-        return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
-      }
-      return false;
-    }
-
-    // Filter berdasarkan pencarian
-    return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
-  });
-
-  // Sort folder ke atas
-  const sortedFiles = [...filteredFiles].sort((a, b) => {
-    if (a.isFolder === b.isFolder) return 0;
-    return a.isFolder ? -1 : 1;
-  });
+  const sortedFiles = filterAndSortFiles(files, activeFilter, mode);
 
   return (
     <div className="bg-transparent divide-y divide-[#e0e0e0] rounded shadow">

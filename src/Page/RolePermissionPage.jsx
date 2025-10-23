@@ -21,6 +21,7 @@ import DeleteModal from "@/Components/DeleteModal";
 import MultipleSelector from "@/Components/ui/multiselect";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import { v4 as uuidv4 } from 'uuid';
+import CustomInput from "@/Components/CustomInput";
 
 const permissions = [
     { value: "read", label: "read" },
@@ -94,7 +95,7 @@ const RolePermissionContent = () => {
                   <td className="px-4 py-3">
                     <TableActionMenu>
                       <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                         onClick={() => {
                           setSelectedRole(role);
                           setIsModalOpen(true);
@@ -104,7 +105,7 @@ const RolePermissionContent = () => {
                         Edit
                       </button>
                       <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#979797] hover:bg-[#1B2E48] hover:text-white"
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                         onClick={() => setIsModalDeleteOpen(true)}
                       >
                         {/* <FaTrash className="mr-2 text-red-500" /> */}
@@ -126,6 +127,7 @@ const RolePermissionContent = () => {
       </main>
 
       <DeleteModal
+          message={"Are you sure want to delete this role?"}
           isOpen={isModalDeleteOpen}
           onClose={() => setIsModalDeleteOpen(false)}
           onConfirm={() => {
@@ -198,19 +200,17 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
                   <div className="space-y-6">
                     <div className="flex flex-wrap gap-4">
                       <div className="flex-1 ">
-                        <Label>Role</Label>
-                        <Input
-                          type="text"
-                          {...register("role", {
+                        <CustomInput
+                          label="Role"
+                          name="role"
+                          type="role"
+                          register={register}
+                          errors={errors}
+                          rules={{
                             required: "Role is required",
                             minLength: { value: 2, message: "Too short" },
-                          })}
+                          }}
                         />
-                        {errors.role && (
-                          <p className="text-sm text-red-500">
-                            {errors.role.message}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>
