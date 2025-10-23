@@ -19,6 +19,7 @@ import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
 import { DialogTitle } from "@/Components/ui/dialogModal";
 import BreadcrumbFolder from "@/Components/BreadcrumbFolder";
 import { useNavigate, useParams } from "react-router-dom";
+import FileInfoPopper from "@/Components/FileInfoPopper";
 
 const FileManagementPage = () => {
   return (
@@ -163,15 +164,11 @@ const FileManagementContent = () => {
                     >
                       <img src={Rename} alt="Rename" /> Rename
                     </button>
-                    <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                      onClick={() => {
-                        setSelectedFile(file);
-                        setIsInfoModalOpen(true);
-                      }}
-                    >
-                      <img src={Info} alt="Info" /> Get Info
-                    </button>
+                    <FileInfoPopper 
+                      file={file} 
+                      changeFile={setSelectedFile} 
+                      eventInfoModal={setIsInfoModalOpen} 
+                    />
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                       onClick={() => setIsModalDeleteOpen(true)}
@@ -201,7 +198,7 @@ const FileManagementContent = () => {
 
       {/* Modal Info */}
       <Dialog open={isInfoModalOpen} onOpenChange={() => setIsInfoModalOpen(false)}>
-        <DialogContent className="flex flex-col p-0 max-h-[min(640px,80vh)] sm:max-w-xl">
+        <DialogContent className="flex flex-col p-0 max-h-[min(640px,80vh)] sm:max-w-2xl">
           <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-4">
             {/* <h2 className="text-base font-semibold">
               {selectedFile?.name || "File Info"}
@@ -233,7 +230,7 @@ const FileManagementContent = () => {
                   <tr>
                     <td className="font-normal text-gray-500 text-right align-top pr-3">Where:</td>
                     <td className="font-medium leading-snug break-words">
-                      File Management &gt; Laporan Absensi Karyawan &gt;
+                      File Management &gt; Laporan Absensi Karyawan
                     </td>
                   </tr>
                   <tr>

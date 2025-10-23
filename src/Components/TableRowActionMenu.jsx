@@ -7,7 +7,6 @@ export function TableRowActionMenu({ children, rowCells }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const menuRef = useRef(null);
 
-  // 🔹 Setup Popper
   useEffect(() => {
     if (showMenu && anchorEl && menuRef.current) {
       createPopper(anchorEl, menuRef.current, {
@@ -17,7 +16,6 @@ export function TableRowActionMenu({ children, rowCells }) {
     }
   }, [showMenu, anchorEl]);
 
-  // 🔹 Tutup saat klik di luar menu
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -32,12 +30,13 @@ export function TableRowActionMenu({ children, rowCells }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [anchorEl]);
 
-  // 🔹 Toggle menu saat klik sel
   const handleCellClick = (e) => {
     e.stopPropagation();
     setAnchorEl(e.currentTarget);
     setShowMenu((prev) => !prev);
   };
+
+  const closeMenu = () => setShowMenu(false);
 
   return (
     <>
@@ -60,15 +59,22 @@ export function TableRowActionMenu({ children, rowCells }) {
             className="z-[9999] bg-white border border-gray-200 rounded-lg shadow-md py-2 w-40"
             style={{ position: "absolute" }}
           >
-            {React.Children.map(children, (child) =>
-              React.cloneElement(child, {
+            {React.Children.map(children, (child) => {
+              const isCustomComponent = typeof child.type === "function";
+
+              const extraProps = {
                 onClick: (e) => {
                   if (child.props.onClick) child.props.onClick(e);
                   setShowMenu(false);
                 },
-                // onOpenDialog_: () => setShowMenu(false), // ✅ aman, bukan event DOM
-              })
-            )}
+              };
+
+              if (isCustomComponent) {
+                extraProps.closeMenu = closeMenu;
+              }
+
+              return React.cloneElement(child, extraProps);
+            })}
           </div>,
           document.body
         )}
