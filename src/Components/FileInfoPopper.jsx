@@ -124,11 +124,11 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu }) => {
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Created By:</td>
-                  <td className="font-medium">{file?.createdBy || "-"}</td>
+                  <td className="font-medium"> </td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Last Modified:</td>
-                  <td className="font-medium">{file?.lastModified || "-"}</td>
+                  <td className="font-medium"> </td>
                 </tr>
               </tbody>
             </table>

@@ -265,7 +265,7 @@ const FileManagementContent = () => {
                   <tr>
                     <td className="font-normal text-gray-500 text-right pr-3">Created By:</td>
                     <td className="font-medium">
-                      -
+                      
                     </td>
                   </tr>
                   <tr>
