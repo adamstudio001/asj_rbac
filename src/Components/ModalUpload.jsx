@@ -140,7 +140,7 @@ export default function ModalUpload() {
               <div className="max-w-lg mx-4 sm:mx-auto py-6 space-y-4">
                 {/* Drag & Drop Area */}
                 <div
-                  className={`${files.length === 0 ? `h-[400px]` : ``} bg-[#f8f8ff] rounded-lg p-8 flex flex-col gap-4 items-center justify-center text-center cursor-pointer hover:border-blue-500 transition`}
+                  className={`${files.length === 0 ? `flex-1` : ``} bg-[#f8f8ff] rounded-lg p-8 flex flex-col gap-4 items-center justify-center text-center cursor-pointer hover:border-blue-500 transition`}
                   onClick={handleBrowse}
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
@@ -228,7 +228,10 @@ export default function ModalUpload() {
 
             <DialogFooter className="mx-4 sm:mx-6 pb-6">
               <div className="flex flex-wrap items-between gap-4">
-                <Button variant="outline" className="flex-1 min-w-[250px]"  onClick={()=>setIsModalOpen(false)}>
+                <Button variant="outline" className="flex-1 min-w-[250px]"  onClick={()=>{
+                  setIsModalOpen(false);
+                  setFiles([]);
+                }}>
                   <X className="opacity-60" size={16} aria-hidden="true" />
                   <span>Cancel</span>
                 </Button>

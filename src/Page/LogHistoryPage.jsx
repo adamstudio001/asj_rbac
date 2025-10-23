@@ -47,7 +47,7 @@ const LogHistoryPage = () => {
       <Navbar />
 
       <main className="flex-1 items-center p-6 overflow-auto">
-          <div className="w-full overflow-x-scroll rounded-lg">
+          <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
               <table className="w-full text-left text-sm">
                 <thead className="bg-[#f8f8f8]">
                   <tr className="border border-gray-200">

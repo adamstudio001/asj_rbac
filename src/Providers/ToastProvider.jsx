@@ -26,7 +26,7 @@ export const ToastProvider = ({ children }) => {
       {children}
 
       {/* Stack Toast */}
-      <div className="fixed bottom-5 right-5 flex flex-col gap-3 z-[9999]">
+      <div className="fixed top-20 right-5 flex flex-col gap-3 z-[9999]">
         <AnimatePresence>
           {toasts.map(toast => (
             <Toast

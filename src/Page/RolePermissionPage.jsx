@@ -77,7 +77,7 @@ const RolePermissionContent = () => {
       />
       
       <main className="flex-1 items-center p-6 overflow-auto">
-        <div className="w-full overflow-x-scroll rounded-lg">
+        <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
           <table className="w-full text-left text-sm">
             <thead className="bg-[#F3F3F3]">
               <tr className="border border-gray-200">

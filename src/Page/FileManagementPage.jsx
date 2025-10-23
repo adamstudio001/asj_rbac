@@ -100,7 +100,7 @@ const FileManagementContent = () => {
           </div>
         </div>
 
-        <div className="w-full overflow-x-scroll rounded-lg space-y-6">
+        <div className="w-full overflow-x-scroll scroll-custom rounded-lg space-y-6">
           <BreadcrumbFolder 
             currentKey={folderKeys || null}
             onNavigate={(key) => {
