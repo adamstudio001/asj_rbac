@@ -210,6 +210,7 @@ const UserPageContent = () => {
 
       {/* Delete Confirmation Modal */}
       <DeleteModal
+        titleMessage="Delete User"
         message={"Are you sure want to delete this user?"}
         isOpen={isModalDeleteOpen}
         onClose={() => setIsModalDeleteOpen(false)}

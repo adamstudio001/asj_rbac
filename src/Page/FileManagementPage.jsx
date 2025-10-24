@@ -187,6 +187,7 @@ const FileManagementContent = () => {
 
       {/* Modal Delete */}
       <DeleteModal
+        titleMessage="Delete File"
         message={"Are you sure want to delete this file?"}
         isOpen={isModalDeleteOpen}
         onClose={() => setIsModalDeleteOpen(false)}

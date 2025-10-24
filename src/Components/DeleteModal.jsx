@@ -1,7 +1,7 @@
 import { AlertCircle } from "lucide-react";
 import { X } from "lucide-react";
 
-export default function DeleteModal({ message, isOpen, onClose, onConfirm }) {
+export default function DeleteModal({ titleMessage, message, isOpen, onClose, onConfirm }) {
   if (!isOpen) return null;
 
   return (
@@ -22,7 +22,7 @@ export default function DeleteModal({ message, isOpen, onClose, onConfirm }) {
 
         <div className="flex flex-col gap-1">
           <h2 className="text-left font-inter font-bold text-[20px] text-[#1E293B] mb-2">
-            Delete
+            {titleMessage}
           </h2>
 
           <p className="text-leftfont-inter font-normal text-[16px] text-[#475569] mb-10">

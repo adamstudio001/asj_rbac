@@ -127,6 +127,7 @@ const RolePermissionContent = () => {
       </main>
 
       <DeleteModal
+          titleMessage="Delete Role Permission"
           message={"Are you sure want to delete this role?"}
           isOpen={isModalDeleteOpen}
           onClose={() => setIsModalDeleteOpen(false)}
