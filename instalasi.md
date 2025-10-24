@@ -48,14 +48,13 @@ npm run dev
 
 Langkah-langkah untuk menjalankan proyek di mode production:
 
-# Build Project 
+```bash
 npm run build
-
-# Install dependencies
 npm install -g serve
-
-# Jalankan Project
 serve -s /dist -l 3000 
+```
+
+---
 
 Langkah-langkah untuk menjalankan proyek di mode production (versi docker):
 
