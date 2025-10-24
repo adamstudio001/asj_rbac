@@ -60,6 +60,8 @@ npm install -g serve
 
 # 3️⃣ jalankan project
 serve -s /dist -l 3000 
+
+buka url http://localhost:3000 untuk akses project
 ```
 
 ---
@@ -68,4 +70,6 @@ Langkah-langkah untuk menjalankan proyek di mode production (versi docker):
 
 ```bash
 docker compose up -d
+
+buka url http://localhost:3000 untuk akses project
 ```
