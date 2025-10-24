@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.0.34",
   "type": "module",
-  "homepage": "https://adamf0.github.io/asj_rbac",
   "scripts": {
     "deploy": "gh-pages -d dist",
     "dev": "vite",
