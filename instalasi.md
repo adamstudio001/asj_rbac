@@ -1,8 +1,8 @@
 # 🧱 ASJ RBAC
 
-**Role-Based Access Control (RBAC) System** menggunakan **React + Vite + TailwindCSS**, dirancang untuk performa tinggi dan kemudahan pengembangan.  
-demo: https://adamf0.github.io/asj_rbac
-note:
+**Role-Based Access Control (RBAC) System** menggunakan **React + Vite + TailwindCSS**, dirancang untuk performa tinggi dan kemudahan pengembangan.  <br>
+demo: https://adamf0.github.io/asj_rbac <br>
+note: <br>
 akun login tidak ada karena masih prototype, yang penting masukkan email dengan format benar dan password dengan panjang 6 karakter
 
 ---
