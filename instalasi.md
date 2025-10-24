@@ -59,10 +59,10 @@ npm run build
 npm install -g serve
 
 # 3️⃣ jalankan project
-serve -s /dist -l 3000 
+serve -s dist -l 3000 --single
+```
 
 buka url http://localhost:3000 untuk akses project
-```
 
 ---
 
@@ -70,6 +70,34 @@ Langkah-langkah untuk menjalankan proyek di mode production (versi docker):
 
 ```bash
 docker compose up -d
+```
+
+nginx.conf :
+```bash
+server {
+    listen 80;
+    server_name _;
+
+    # Reverse proxy ke container React (port 3000)
+    location / {
+        proxy_pass http://frontend:3000;
+        proxy_http_version 1.1;
+
+        # Header standar agar React Router tidak error
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Cegah cache & dukung WebSocket (jika dibutuhkan)
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # React Router fallback: semua path diarahkan ke index.html
+        error_page 404 /index.html;
+    }
+}
+```
 
 buka url http://localhost:3000 untuk akses project
-```
