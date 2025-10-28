@@ -7,13 +7,13 @@ import { useFileManager } from "@src/Providers/FileManagerProvider";
 import { NavLink, useParams } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import { getFileIconBig } from '@src/Common/Utils';
-import { v4 as uuidv4 } from 'uuid';
 import Navbar from "@src/Components/Navbar";
 import { LuUpload } from "react-icons/lu";
 import ImgItems from "@assets/item-img.png";
 import { IoIosArrowDown } from "react-icons/io";
 import { ToastProvider } from "@src/Providers/ToastProvider";
 import ModalUpload from "@/Components/ModalUpload";
+import { useAuth } from "@/Providers/AuthProvider";
 
 const DashboardPage = () => {
   return (
@@ -25,6 +25,7 @@ const DashboardPage = () => {
 
 const DashboardContent = () => {
   const { folderKeys } = useParams();
+  const { user } = useAuth();
 
   const { 
     isModalOpen, 
@@ -50,7 +51,7 @@ const DashboardContent = () => {
                         C
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="font-medium text-gray-800">HR/GA</span>
+                        <span className="font-medium text-gray-800">{user?.full_name ?? "Unknown"}</span>
                         <IoIosArrowDown className="w-4 text-[#a5a5a5]"/>
                       </div>
                     </div>

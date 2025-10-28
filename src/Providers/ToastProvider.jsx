@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import Toast from "@src/Components/Toast";
+import { cn } from "@/lib/utils";
 
 const ToastContext = createContext();
 
 export const useToast = () => useContext(ToastContext);
 
-export const ToastProvider = ({ children }) => {
+export const ToastProvider = ({ children, className="top-20 right-5" }) => {
   const [toasts, setToasts] = useState([]);
 
   const addToast = (type, message, duration = 3000) => {
@@ -26,7 +27,7 @@ export const ToastProvider = ({ children }) => {
       {children}
 
       {/* Stack Toast */}
-      <div className="fixed top-20 right-5 flex flex-col gap-3 z-[9999]">
+      <div className={cn("fixed flex flex-col gap-3 z-[9999]", className)}>
         <AnimatePresence>
           {toasts.map(toast => (
             <Toast

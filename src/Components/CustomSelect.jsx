@@ -2,20 +2,54 @@ import React, { useState, useRef, useEffect } from "react";
 import { createPopper } from "@popperjs/core";
 import { TiArrowSortedDown } from "react-icons/ti";
 import { cn } from "@/lib/utils";
+import { isEmpty } from "@/Common/Utils";
+import { useAuth } from "@/Providers/AuthProvider";
+import axios from "axios";
 
-export default function CustomSelect({
+const CustomSelect = React.memo(function CustomSelect({
   label,
-  records,
+  records = null,
+  sourceUrl="",
   value,
   placeholder = "",
   onChange,
   disabled = false,
   error
 }) {
+  const { token } = useAuth();
   const [open, setOpen] = useState(false);
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
   const popperInstance = useRef(null);
+
+  const [loading, setLoading] = useState(false);
+  const [sources, setSource] = useState(records ?? []);
+
+  async function featchSource(){
+    if(records==null && isEmpty(sourceUrl) || records!=null && !isEmpty(sourceUrl)){
+      throw new Error("invalid argument");
+    }
+
+    setLoading(true);
+    try {
+      const res = await axios.get(sourceUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+      });
+      const body = res.data;
+      console.log(body)
+
+      if (body.data) {
+        setSource(body.data);
+      }
+    } catch (err) {
+      console.error(err);
+      setSource([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (open && buttonRef.current && dropdownRef.current) {
@@ -47,6 +81,10 @@ export default function CustomSelect({
   }, [open]);
 
   useEffect(() => {
+    if(records==null && !isEmpty(sourceUrl)){
+      featchSource();
+    }
+    
     const handleClickOutside = (e) => {
       if (
         buttonRef.current &&
@@ -76,22 +114,22 @@ export default function CustomSelect({
           "w-full flex justify-between items-center rounded-md border-[1.2px] px-3 py-4 text-sm text-left border-black bg-white text-[#1B2E48] disabled:cursor-not-allowed disabled:text-gray-500 disabled:bg-gray-100 disabled:border-gray-400"
         )}
       >
-        <span>{value || placeholder}</span>
-        <TiArrowSortedDown className="w-4 h-4 text-black" />
+        <span>{value.label || placeholder}</span>
+        {loading?  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>:<TiArrowSortedDown className="w-4 h-4 text-black" />}
       </button>
 
-      {open && (
+      {(open && !loading) && (
         <div
           ref={dropdownRef}
           className="bg-white border border-[1.2px] border-black rounded-md shadow-lg z-10"
           // style={{ minWidth: buttonRef.current?.offsetWidth }}
         >
           <ul className="max-h-56 overflow-auto py-1">
-            {records.map((record) => {
-              const isSelected = value === record;
+            {sources.map((record) => {
+              const isSelected = value.identifier === record.identifier;
               return (
                 <li
-                  key={record}
+                  key={record.identifier}
                   onClick={() => {
                     onChange(record);
                     setOpen(false);
@@ -100,14 +138,14 @@ export default function CustomSelect({
                 >
                   <div className="flex items-center space-x-2">
                     {isSelected ? (
-                      <div className="relative w-6 h-6">
+                      <div className="relative w-5 h-5">
                         <div className="absolute inset-0 rounded-full border-2 border-black bg-white"></div>
                         <div className="absolute inset-[4px] rounded-full bg-black"></div>
                       </div>
                     ) : (
-                      <div className="w-6 h-6 border-2 border-black rounded-full"></div>
+                      <div className="w-5 h-5 border-2 border-black rounded-full"></div>
                     )}
-                    <span>{record}</span>
+                    <span>{record.label}</span>
                   </div>
                 </li>
               );
@@ -119,4 +157,6 @@ export default function CustomSelect({
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>
   );
-}
+});
+
+export default CustomSelect;

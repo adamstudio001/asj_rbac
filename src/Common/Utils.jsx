@@ -144,3 +144,5 @@ export function filterAndSortFiles(files, activeFilter) {
   // Sort folder ke atas
   return [...filteredFiles].sort((a, b) => (a.isFolder === b.isFolder ? 0 : a.isFolder ? -1 : 1));
 }
+
+export const isEmpty = (str) => !str || str.trim().length === 0;

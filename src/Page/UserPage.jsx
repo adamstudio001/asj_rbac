@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { FaUserEdit, FaLock, FaTrash } from "react-icons/fa";
 import Navbar from "@src/Components/Navbar";
 import { useSearch } from "@src/Providers/SearchProvider";
 import { TableActionMenu } from "@src/Components/TableActionMenu";
@@ -27,6 +26,9 @@ import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import WhatsappInput from "@/Components/WhatsappInput";
 import CustomInput from "@/Components/CustomInput";
 import CustomSelect from "@/Components/CustomSelect";
+import { useAuth } from "@/Providers/AuthProvider";
+import axios from "axios";
+import CustomTextArea from "@/Components/CustomTextArea";
 
 const UserPage = () => {
   return (
@@ -130,7 +132,7 @@ const UserPageContent = () => {
                   Name
                 </th>
                 <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                  Email
+                  Address
                 </th>
                 <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
                   Position
@@ -186,7 +188,7 @@ const UserPageContent = () => {
                     <EllipsisTooltip className={"w-[200px]"}>{`${user.firstName} ${user.lastName || ""}`.trim()}</EllipsisTooltip>
                   </td>
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                    {user.email}
+                    {user.address}
                   </td>
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
                     {user.jobPosition}
@@ -234,6 +236,8 @@ const UserPageContent = () => {
 export default UserPage;
 
 export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) {
+  const [loading, setLoading] = useState(false);
+  
   const {
     register,
     handleSubmit,
@@ -246,7 +250,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
       lastName: data?.lastName ?? "",
       whatsapp: data?.whatsapp ?? "",
       password: data?.password ?? "",
-      email: data?.email ?? "",
+      address: data?.address ?? "",
       jobPosition: data?.jobPosition ?? "",
       branch: data?.branch ?? "",
       role: data?.role ?? "",
@@ -254,6 +258,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
   });
 
   const { addToast } = useToast();
+  const { token } = useAuth();
   
   useEffect(() => {
     reset({
@@ -262,17 +267,57 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
       whatsapp: data?.whatsapp ?? "",
       password: data?.password ?? "",
       email: data?.email ?? "",
+      address: data?.address ?? "",
       jobPosition: data?.jobPosition ?? "",
       branch: data?.branch ?? "",
       role: data?.role ?? "",
     });
   }, [data, reset]);
 
-  const onSubmit = (values) => {
-    reset();
-    onOpenChange(false);
-    addToast("success", "Save successfully");
+  const onSubmit = async (values) => {
+    setLoading(true);
+    // setErrorMessage("");
+    try {
+      const res = await axios.post("http://staging-backend.rbac.asj-shipagency.co.id/api/company/v1/company/1/user", {
+        "first_name": values.firstName,
+        "last_name": values.lastName,
+        "password": values.password,
+        "whatsapp_number": values.password,
+        "email": values.email,
+        "address": values.address,
+        "job_identifier": values.jobPosition?.identifier,
+        "branch_location_identifier": values.branch?.identifier
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }); 
+      const body = res.data;
+      console.log(body)
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+
+    // reset();
+    // onOpenChange(false);
+    // addToast("success", "Save successfully");
   };
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+    }
+  }, [open, reset]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -334,12 +379,25 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                       />
 
                       <CustomInput
-                        label="Email"
+                        label="email"
                         name="email"
                         register={register}
                         errors={errors}
                         rules={{
                           required: "Email is required",
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-4">
+                      <CustomTextArea
+                        label="Address"
+                        name="address"
+                        type="address"
+                        register={register}
+                        errors={errors}
+                        rules={{
+                          required: "Address is required",
                         }}
                       />
                     </div>
@@ -361,7 +419,8 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         render={({ field }) => (
                           <CustomSelect
                             label="Job Position"
-                            records={["HR/GA", "Legal", "FDA", "Finance", "TAX", "OPS", "Commercial"]}
+                            // records={["HR/GA", "Legal", "FDA", "Finance", "TAX", "OPS", "Commercial"]}
+                            sourceUrl="http://staging-backend.rbac.asj-shipagency.co.id/api/helper/v1/job"
                             value={field.value}
                             disabled={mode !== "create"}
                             onChange={field.onChange}
@@ -377,7 +436,8 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         render={({ field }) => (
                           <CustomSelect
                             label="Work Location / Branch"
-                            records={["Head Office", "Palembang", "Banten", "Surabaya"]}
+                            // records={["Head Office", "Palembang", "Banten", "Surabaya"]}
+                            sourceUrl="http://staging-backend.rbac.asj-shipagency.co.id/api/helper/v1/branch-location"
                             value={field.value}
                             disabled={mode !== "create"}
                             onChange={field.onChange}
@@ -396,7 +456,20 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         render={({ field }) => (
                           <CustomSelect
                             label="Select Role"
-                            records={["Admin", "User", "Developer"]}
+                            records={[
+                              {
+                                identifier: "admin", 
+                                label: "Admin",
+                              },
+                              {
+                                identifier: "user", 
+                                label: "User",
+                              },
+                              {
+                                identifier: "developer", 
+                                label: "Developer",
+                              },
+                            ]}
                             value={field.value}
                             disabled={mode !== "create"}
                             onChange={field.onChange}
@@ -414,9 +487,10 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
             <DialogFooter className="px-6 pb-6 items-center">
               <Button
                 type="submit"
+                disabled={loading}
                 className="w-full max-w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
               >
-                Save
+                {loading? "Sending...":"Save"}
               </Button>
             </DialogFooter>
           </form>

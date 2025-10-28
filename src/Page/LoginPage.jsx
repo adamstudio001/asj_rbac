@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { ToastProvider, useToast } from "@/Providers/ToastProvider";
 
 const images = [
   "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4",
@@ -9,11 +11,23 @@ const images = [
   "https://images.unsplash.com/photo-1506765515384-028b60a970df",
 ];
 
-export default function LoginPage() {
+const LoginPage = () => {
+  return (
+    <ToastProvider className="bottom-5 left-5">
+      <LoginContent />
+    </ToastProvider>
+  );
+};
+
+function LoginContent() {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  // const [errorMessage, setErrorMessage] = useState("");
 
   // ✅ React Hook Form setup
   const {
@@ -50,8 +64,40 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [isLoaded]);
 
-  const onSubmit = (data) => {
-    navigate("/dashboard");
+  const onSubmit = async (data) => {
+    setLoading(true);
+    // setErrorMessage("");
+    try {
+      const res = await axios.post("http://staging-backend.rbac.asj-shipagency.co.id/api/company/v1/login", data); 
+      const body = res.data;
+      console.log(body)
+
+      if (body.error) {
+        addToast("error", body.error);
+        // setErrorMessage(body.error);
+      } else if (body.data && body.data.auth) {
+        const auth = body.data.auth;
+        const user = {
+          full_name: body.data.full_name,
+          email: body.data.email,
+          company: body.data.company,
+        };
+
+        sessionStorage.setItem("token", auth.token);
+        sessionStorage.setItem("user", JSON.stringify(user));
+
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+
+      // const msg =
+      //   err.response?.data?.message || "Gagal login, periksa email dan password.";
+      // setErrorMessage("ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isLoaded) {
@@ -89,6 +135,7 @@ export default function LoginPage() {
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
+                value="admin_rbac@yopmail.com"
                 {...register("email", {
                   required: "email harus diisi",
                   pattern: {
@@ -192,9 +239,10 @@ export default function LoginPage() {
             {/* Button */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition"
             >
-              Login
+              {loading ? "Loading..." : "Login"}
             </button>
           </form>
 
@@ -247,3 +295,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export default LoginPage;
