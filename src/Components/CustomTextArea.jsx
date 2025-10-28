@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function CustomTextArea({

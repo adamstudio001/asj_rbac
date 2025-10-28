@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useSearch } from "../Providers/SearchProvider";
 import Navbar from "@src/Components/Navbar";
 import {TableActionMenu} from "@src/Components/TableActionMenu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/Button";
+import { Label } from "@/components/ui/Label";
 import {
   Dialog,
   DialogClose,
@@ -14,11 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialogModal";
+} from "@/components/ui/DialogModal";
 import { useForm, Controller } from "react-hook-form";
 import { ToastProvider, useToast } from "@/Providers/ToastProvider";
 import DeleteModal from "@/Components/DeleteModal";
-import MultipleSelector from "@/Components/ui/multiselect";
+import MultipleSelector from "@/Components/ui/MultipleSelector";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import { v4 as uuidv4 } from 'uuid';
 import CustomInput from "@/Components/CustomInput";

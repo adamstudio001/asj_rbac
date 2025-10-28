@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialogModal";
+} from "@/components/ui/DialogModal";
 
 const LogHistoryPage = () => {
   const { search, setSearch } = useSearch();

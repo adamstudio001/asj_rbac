@@ -9,7 +9,7 @@ import reset from "@assets/reset.svg";
 import trash from "@assets/trash.svg";
 import user_edit from "@assets/user_edit.svg";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import {
   Dialog,
   DialogClose,
@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialogModal";
+} from "@/components/ui/DialogModal";
 import { useForm, Controller } from "react-hook-form";
 import { formatLastSeen } from "@/Common/Utils";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
