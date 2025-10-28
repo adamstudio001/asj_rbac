@@ -4,14 +4,14 @@ import { useSearch } from "@src/Providers/SearchProvider";
 import { formatLastSeen } from "@/Common/Utils";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogModal,
+  DialogModalClose,
+  DialogModalContent,
+  DialogModalDescription,
+  DialogModalFooter,
+  DialogModalHeader,
+  DialogModalTitle,
+  DialogModalTrigger,
 } from "@/components/ui/DialogModal";
 
 const LogHistoryPage = () => {
@@ -103,15 +103,15 @@ export default LogHistoryPage;
 
 export function ModalInfoIp({ open, onOpenChange, data }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="px-6 py-4 font-inter font-bold text-[26px] text-[#1B2E48]">
+    <DialogModal open={open} onOpenChange={onOpenChange}>
+      <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-2xl">
+        <DialogModalHeader>
+          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[26px] text-[#1B2E48]">
             IP Address Detail
-          </DialogTitle>
+          </DialogModalTitle>
 
           <div className="overflow-y-auto">
-            <DialogDescription asChild>
+            <DialogModalDescription asChild>
               <div className="px-6 py-4">
                 <table className="w-full border-separate border-spacing-y-4">
                   <tbody>
@@ -181,10 +181,10 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
                   </tbody>
                 </table>
               </div>
-            </DialogDescription>
+            </DialogModalDescription>
           </div>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+        </DialogModalHeader>
+      </DialogModalContent>
+    </DialogModal>
   );
 }

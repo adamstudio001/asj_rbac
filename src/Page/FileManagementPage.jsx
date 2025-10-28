@@ -15,7 +15,6 @@ import Copy from "@assets/copy.svg";
 import Rename from "@assets/edit.svg";
 import Trash from "@assets/trash.svg";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/Dialog";
-// import { DialogTitle } from "@/Components/ui/DialogModal";
 import BreadcrumbFolder from "@/Components/BreadcrumbFolder";
 import { useNavigate, useParams } from "react-router-dom";
 import FileInfoPopper from "@/Components/FileInfoPopper";

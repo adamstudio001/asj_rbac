@@ -6,31 +6,31 @@ import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-function Dialog({
+function DialogMultiSelect({
   ...props
 }) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
-function DialogTrigger({
+function DialogMultiSelectTrigger({
   ...props
 }) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
-function DialogPortal({
+function DialogMultiSelectPortal({
   ...props
 }) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
-function DialogClose({
+function DialogMultiSelectClose({
   ...props
 }) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-function DialogOverlay({
+function DialogMultiSelectOverlay({
   className,
   ...props
 }) {
@@ -45,7 +45,7 @@ function DialogOverlay({
   );
 }
 
-function DialogContent({
+function DialogMultiSelectContent({
   className,
   children,
   showCloseButton = true,
@@ -75,7 +75,7 @@ function DialogContent({
   );
 }
 
-function DialogHeader({
+function DialogMultiSelectHeader({
   className,
   ...props
 }) {
@@ -87,7 +87,7 @@ function DialogHeader({
   );
 }
 
-function DialogFooter({
+function DialogMultiSelectFooter({
   className,
   ...props
 }) {
@@ -99,7 +99,7 @@ function DialogFooter({
   );
 }
 
-function DialogTitle({
+function DialogMultiSelectTitle({
   className,
   ...props
 }) {
@@ -111,7 +111,7 @@ function DialogTitle({
   );
 }
 
-function DialogDescription({
+function DialogMultiSelectDescription({
   className,
   ...props
 }) {
@@ -124,14 +124,14 @@ function DialogDescription({
 }
 
 export {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
+  DialogMultiSelect,
+  DialogMultiSelectClose,
+  DialogMultiSelectContent,
+  DialogMultiSelectDescription,
+  DialogMultiSelectFooter,
+  DialogMultiSelectHeader,
+  DialogMultiSelectOverlay,
+  DialogMultiSelectPortal,
+  DialogMultiSelectTitle,
+  DialogMultiSelectTrigger,
 }

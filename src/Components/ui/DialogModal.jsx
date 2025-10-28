@@ -4,31 +4,31 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-function Dialog({
+function DialogModal({
   ...props
 }) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
-function DialogTrigger({
+function DialogModalTrigger({
   ...props
 }) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
-function DialogPortal({
+function DialogModalPortal({
   ...props
 }) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
-function DialogClose({
+function DialogModalClose({
   ...props
 }) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-function DialogOverlay({
+function DialogModalOverlay({
   className,
   ...props
 }) {
@@ -43,15 +43,15 @@ function DialogOverlay({
   );
 }
 
-function DialogContent({
+function DialogModalContent({
   className,
   showClose = true,
   children,
   ...props
 }) {
   return (
-    <DialogPortal>
-      <DialogOverlay />
+    <DialogModalPortal>
+      <DialogModalOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
@@ -68,11 +68,11 @@ function DialogContent({
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>}
       </DialogPrimitive.Content>
-    </DialogPortal>
+    </DialogModalPortal>
   );
 }
 
-function DialogHeader({
+function DialogModalHeader({
   className,
   ...props
 }) {
@@ -84,7 +84,7 @@ function DialogHeader({
   );
 }
 
-function DialogFooter({
+function DialogModalFooter({
   className,
   ...props
 }) {
@@ -96,7 +96,7 @@ function DialogFooter({
   );
 }
 
-function DialogTitle({
+function DialogModalTitle({
   className,
   ...props
 }) {
@@ -108,7 +108,7 @@ function DialogTitle({
   );
 }
 
-function DialogDescription({
+function DialogModalDescription({
   className,
   ...props
 }) {
@@ -121,14 +121,14 @@ function DialogDescription({
 }
 
 export {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
+  DialogModal,
+  DialogModalClose,
+  DialogModalContent,
+  DialogModalDescription,
+  DialogModalFooter,
+  DialogModalHeader,
+  DialogModalOverlay,
+  DialogModalPortal,
+  DialogModalTitle,
+  DialogModalTrigger,
 }

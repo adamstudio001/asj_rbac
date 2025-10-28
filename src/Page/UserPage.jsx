@@ -11,14 +11,14 @@ import user_edit from "@assets/user_edit.svg";
 
 import { Button } from "@/components/ui/Button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogModal,
+  DialogModalClose,
+  DialogModalContent,
+  DialogModalDescription,
+  DialogModalFooter,
+  DialogModalHeader,
+  DialogModalTitle,
+  DialogModalTrigger,
 } from "@/components/ui/DialogModal";
 import { useForm, Controller } from "react-hook-form";
 import { formatLastSeen } from "@/Common/Utils";
@@ -320,15 +320,15 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
   }, [open, reset]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-full sm:max-w-5xl"> {/*max-h-[min(640px,80vh)]*/}
-        <DialogHeader>
-          <DialogTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+    <DialogModal open={open} onOpenChange={onOpenChange}>
+      <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-full sm:max-w-5xl"> {/*max-h-[min(640px,80vh)]*/}
+        <DialogModalHeader>
+          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
             {mode === "create" ? "Add New User" : "Edit User"}
-          </DialogTitle>
+          </DialogModalTitle>
 
           <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto scroll-custom">
-            <DialogDescription asChild>
+            <DialogModalDescription asChild>
               <div className="px-6 pb-8 space-y-8">
                 {/* General Information */}
                 <div>
@@ -482,9 +482,9 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                   </div>
                 </div>
               </div>
-            </DialogDescription>
+            </DialogModalDescription>
 
-            <DialogFooter className="px-6 pb-6 items-center">
+            <DialogModalFooter className="px-6 pb-6 items-center">
               <Button
                 type="submit"
                 disabled={loading}
@@ -492,10 +492,10 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
               >
                 {loading? "Sending...":"Save"}
               </Button>
-            </DialogFooter>
+            </DialogModalFooter>
           </form>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+        </DialogModalHeader>
+      </DialogModalContent>
+    </DialogModal>
   );
 }

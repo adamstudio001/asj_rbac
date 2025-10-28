@@ -3,14 +3,14 @@ import { Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Upload from "@assets/upload.svg";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogModal,
+  DialogModalClose,
+  DialogModalContent,
+  DialogModalDescription,
+  DialogModalFooter,
+  DialogModalHeader,
+  DialogModalTitle,
+  DialogModalTrigger,
 } from "@/components/ui/DialogModal";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
 import { useRef, useState } from 'react';
@@ -128,15 +128,15 @@ export default function ModalUpload() {
   const uploadingCount = files.filter(f => !f.uploaded).length;
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-xl" showClose={false}>
-        <DialogHeader>
-          <DialogTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48] text-center">
+    <DialogModal open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-xl" showClose={false}>
+        <DialogModalHeader>
+          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48] text-center">
             Upload
-          </DialogTitle>
+          </DialogModalTitle>
 
           <div className="overflow-y-auto scroll-custom">
-            <DialogDescription asChild>
+            <DialogModalDescription asChild>
               <div className="max-w-lg mx-4 sm:mx-auto py-6 space-y-4">
                 {/* Drag & Drop Area */}
                 <div
@@ -224,9 +224,9 @@ export default function ModalUpload() {
                   </div>
                 )}
               </div>
-            </DialogDescription>
+            </DialogModalDescription>
 
-            <DialogFooter className="mx-4 sm:mx-6 pb-6">
+            <DialogModalFooter className="mx-4 sm:mx-6 pb-6">
               <div className="flex flex-wrap items-between gap-4">
                 <Button variant="outline" className="flex-1 min-w-[250px]"  onClick={()=>{
                   setIsModalOpen(false);
@@ -243,10 +243,10 @@ export default function ModalUpload() {
                     UPLOAD FILES
                 </Button>
               </div>
-            </DialogFooter>
+            </DialogModalFooter>
           </div>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+        </DialogModalHeader>
+      </DialogModalContent>
+    </DialogModal>
   );
 }

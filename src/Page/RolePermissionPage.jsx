@@ -5,14 +5,14 @@ import {TableActionMenu} from "@src/Components/TableActionMenu";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogModal,
+  DialogModalClose,
+  DialogModalContent,
+  DialogModalDescription,
+  DialogModalFooter,
+  DialogModalHeader,
+  DialogModalTitle,
+  DialogModalTrigger,
 } from "@/components/ui/DialogModal";
 import { useForm, Controller } from "react-hook-form";
 import { ToastProvider, useToast } from "@/Providers/ToastProvider";
@@ -185,15 +185,15 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 p-0 max-h-[min(640px,80vh)] sm:max-w-md overflow-visible">
-        <DialogHeader>
-          <DialogTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+    <DialogModal open={open} onOpenChange={onOpenChange}>
+      <DialogModalContent className="flex flex-col gap-0 p-0 max-h-[min(640px,80vh)] sm:max-w-md overflow-visible">
+        <DialogModalHeader>
+          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
             {mode === "create" ? "Add New Role" : "Edit Role"}
-          </DialogTitle>
+          </DialogModalTitle>
 
           <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto scroll-custom">
-            <DialogDescription asChild>
+            <DialogModalDescription asChild>
               <div className="px-6 py-4 space-y-8">
                 {/* General Information */}
                 <div>
@@ -261,19 +261,19 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
                   </div>
                 </div>
               </div>
-            </DialogDescription>
+            </DialogModalDescription>
 
-            <DialogFooter className="px-6 pb-6 items-center">
+            <DialogModalFooter className="px-6 pb-6 items-center">
               <Button
                 type="submit"
                 className="w-full max-w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
               >
                 Save
               </Button>
-            </DialogFooter>
+            </DialogModalFooter>
           </form>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+        </DialogModalHeader>
+      </DialogModalContent>
+    </DialogModal>
   );
 }
