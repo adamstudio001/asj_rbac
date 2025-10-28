@@ -385,6 +385,10 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         errors={errors}
                         rules={{
                           required: "Email is required",
+                          pattern: {
+                            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                            message: "Format email tidak valid",
+                          },
                         }}
                       />
                     </div>

@@ -60,7 +60,7 @@ export const FileManagerProvider = ({ children }) => {
 
     function findFolderRecursive(items, key) {
         for (const item of items) {
-            if (item.isFolder && item.folderKeys === key) {
+            if (item.isFolder && encodeURIComponent(item.folderKeys) === encodeURIComponent(key)) {
                 return item;
             }
             if (item.isFolder && Array.isArray(item.lists)) {

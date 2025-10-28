@@ -30,7 +30,7 @@ function FileListView({ folderKeys, mode }) {
     <div className="bg-transparent divide-y divide-[#e0e0e0] rounded shadow">
       {sortedFiles.map((file, index) => (
         file.isFolder? 
-        <NavLink key={index} to={`/dashboard/${file.folderKeys}`} className="flex items-center px-4 py-3 hover:bg-gray-50 transition">
+        <NavLink key={index} to={`/dashboard/${encodeURIComponent(file.folderKeys)}`} className="flex items-center px-4 py-3 hover:bg-gray-50 transition">
            <div className="text-2xl w-10">{getFileIcon(file.name, file.isFolder, 24)}</div>
            <TooltipProvider delayDuration={0}>
             <Tooltip>

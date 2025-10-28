@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/Components/ui/Tooltip";
+import { cn } from "@/lib/utils";
 
 const EllipsisTooltip = ({ children, className }) => {
   const textRef = useRef(null);
@@ -24,7 +25,7 @@ const EllipsisTooltip = ({ children, className }) => {
           <TooltipTrigger asChild>
             <p
               ref={textRef}
-              className={`truncate overflow-hidden whitespace-nowrap min-w-0 ${className}`}
+              className={cn(`truncate overflow-hidden whitespace-nowrap min-w-0 `, className)}
             >
               {children}
             </p>
@@ -38,7 +39,7 @@ const EllipsisTooltip = ({ children, className }) => {
       ) : (
         <p
           ref={textRef}
-          className={`truncate overflow-hidden whitespace-nowrap min-w-0 ${className}`}
+          className={cn(`truncate overflow-hidden whitespace-nowrap min-w-0 `, className)}
         >
           {children}
         </p>

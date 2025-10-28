@@ -123,7 +123,7 @@ const FileManagementContent = () => {
                     key={file.id}
                     onClick={() => {
                       console.log(file)
-                      navigate(`/filemanager/${file.folderKeys}`);
+                      navigate(`/filemanager/${encodeURIComponent(file.folderKeys)}`);
                     }}
                     className="hover:bg-gray-50 transition border-b border-gray-200"
                   >

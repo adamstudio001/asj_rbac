@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastProvider, useToast } from "@/Providers/ToastProvider";
+import { cn } from "@/lib/utils";
 
 const images = [
   "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4",
@@ -130,11 +131,12 @@ function LoginContent() {
                 id="email"
                 type="email"
                 placeholder="Masukkan email"
-                className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                className={cn(
+                  `w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 `,
                   errors.email
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-blue-500"
-                }`}
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                )}
                 // value="admin_rbac@yopmail.com"
                 {...register("email", {
                   required: "email harus diisi",
@@ -173,11 +175,12 @@ function LoginContent() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Masukkan password"
-                  className={`w-full border rounded-lg px-3 py-2 pr-10 focus:outline-none focus:ring-2 ${
-                    errors.password
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }`}
+                  className={cn(
+                    `w-full border rounded-lg px-3 py-2 pr-10 focus:outline-none focus:ring-2 `,
+                     errors.password
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                  )}
                   {...register("password", {
                     required: "Password harus diisi",
                     minLength: {
@@ -285,9 +288,10 @@ function LoginContent() {
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`w-3 h-3 rounded-full transition ${
+              className={cn(
+                `w-3 h-3 rounded-full transition `,
                 currentIndex === idx ? "bg-white" : "bg-white/50"
-              }`}
+              )}
             ></button>
           ))}
         </div>
