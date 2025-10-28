@@ -135,6 +135,7 @@ function LoginContent() {
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
+                // value="admin_rbac@yopmail.com"
                 {...register("email", {
                   required: "email harus diisi",
                   pattern: {
