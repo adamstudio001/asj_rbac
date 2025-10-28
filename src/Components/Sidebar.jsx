@@ -7,12 +7,15 @@ import { BsPersonLock } from "react-icons/bs";
 import { GoGear } from "react-icons/go";
 import { Link } from "react-router-dom";
 import { IoFileTrayStacked } from "react-icons/io5";
+import { useAuth } from "@/Providers/AuthProvider";
 
 const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const location = useLocation();
   const active = "text-[#497fff] bg-[#e5eaf7]";
   const noactive = "text-[#656565]";
   const currentPath = location.pathname;
+
+  const { logout } = useAuth();
 
   return (
     <>
@@ -95,12 +98,9 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
 
         <div className="flex flex-col flex-wrap gap-2">
           <hr className="border border-t border-gray-300"/>
-          <Link
-              to="/"
-              className={`flex items-center gap-3 hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition text-venter`}
-          >
-            <span className={`w-full text-center ${isCollapsed ? "hidden" : "block"}`}>Logout</span>
-          </Link>
+          <button className={`flex items-center gap-3 hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition text-venter`}>
+            <span className={`w-full text-center ${isCollapsed ? "hidden" : "block"}`} onClick={()=>logout()}>Logout</span>
+          </button>
         </div>
       </div>
 
