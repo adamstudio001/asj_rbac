@@ -4,7 +4,7 @@ import {
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from "@/components/ui/tooltip";
+} from "@/Components/ui/Tooltip";
 
 const EllipsisTooltip = ({ children, className }) => {
   const textRef = useRef(null);

@@ -14,7 +14,7 @@ import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import Copy from "@assets/copy.svg";
 import Rename from "@assets/edit.svg";
 import Trash from "@assets/trash.svg";
-import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/Dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/Components/ui/Dialog";
 import BreadcrumbFolder from "@/Components/BreadcrumbFolder";
 import { useNavigate, useParams } from "react-router-dom";
 import FileInfoPopper from "@/Components/FileInfoPopper";

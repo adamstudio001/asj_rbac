@@ -9,7 +9,7 @@ import {
   DialogMultiSelectDescription,
   DialogMultiSelectHeader,
   DialogMultiSelectTitle,
-} from "@/components/ui/DialogMultiSelect"
+} from "@/Components/ui/DialogMultiSelect"
 
 function Command({
   className,

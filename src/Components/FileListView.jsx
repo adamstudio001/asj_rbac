@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/Components/ui/Tooltip"
 import { filterAndSortFiles } from '@/Common/Utils';
 
 function FileListView({ folderKeys, mode }) {

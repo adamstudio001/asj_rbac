@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/Dialog";
+} from "@/Components/ui/Dialog";
 
 function GetInfoButton({ file, onOpenDialog_ }) {
   const [open, setOpen] = useState(false);

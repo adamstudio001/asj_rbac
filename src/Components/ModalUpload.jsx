@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Trash2, X } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/Components/ui/Button";
 import Upload from "@assets/upload.svg";
 import {
   DialogModal,
@@ -11,7 +11,7 @@ import {
   DialogModalHeader,
   DialogModalTitle,
   DialogModalTrigger,
-} from "@/components/ui/DialogModal";
+} from "@/Components/ui/DialogModal";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
 import { useRef, useState } from 'react';
 import { useToast } from "@src/Providers/ToastProvider";

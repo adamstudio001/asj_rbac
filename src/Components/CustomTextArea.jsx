@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Label } from "@/components/ui/Label";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/Components/ui/Label";
+import { Textarea } from "@/Components/ui/textarea";
 
 export default function CustomTextArea({
   label,

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useSearch } from "../Providers/SearchProvider";
 import Navbar from "@src/Components/Navbar";
 import {TableActionMenu} from "@src/Components/TableActionMenu";
-import { Button } from "@/components/ui/Button";
-import { Label } from "@/components/ui/Label";
+import { Button } from "@/Components/ui/Button";
+import { Label } from "@/Components/ui/Label";
 import {
   DialogModal,
   DialogModalClose,
@@ -13,7 +13,7 @@ import {
   DialogModalHeader,
   DialogModalTitle,
   DialogModalTrigger,
-} from "@/components/ui/DialogModal";
+} from "@/Components/ui/DialogModal";
 import { useForm, Controller } from "react-hook-form";
 import { ToastProvider, useToast } from "@/Providers/ToastProvider";
 import DeleteModal from "@/Components/DeleteModal";

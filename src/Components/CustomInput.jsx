@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/Input";
+import { Label } from "@/Components/ui/label";
+import { Input } from "@/Components/ui/Input";
 
 export default function CustomInput({
   label,
