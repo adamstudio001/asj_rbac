@@ -84,8 +84,8 @@ export function formatDate(dateString){
 }
 
 export function isValidDateTime(dateString) {
-    if(dateString==null){
-      return true;
+    if(isEmpty(dateString)){
+      return false;
     }
 
     const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
@@ -145,4 +145,6 @@ export function filterAndSortFiles(files, activeFilter) {
   return [...filteredFiles].sort((a, b) => (a.isFolder === b.isFolder ? 0 : a.isFolder ? -1 : 1));
 }
 
-export const isEmpty = (str) => !str || str.trim().length === 0;
+export const isEmpty = (str) => !str || str.trim().length === 0 || str === undefined || str===null;
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));

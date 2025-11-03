@@ -11,15 +11,15 @@ import Navbar from "@src/Components/Navbar";
 import { LuUpload } from "react-icons/lu";
 import ImgItems from "@assets/item-img.png";
 import { IoIosArrowDown } from "react-icons/io";
-import { ToastProvider } from "@src/Providers/ToastProvider";
+// import { ToastProvider } from "@src/Providers/ToastProvider";
 import ModalUpload from "@/Components/ModalUpload";
 import { useAuth } from "@/Providers/AuthProvider";
 
 const DashboardPage = () => {
   return (
-    <ToastProvider>
+    // <ToastProvider>
       <DashboardContent />
-    </ToastProvider>
+    // </ToastProvider>
   );
 };
 

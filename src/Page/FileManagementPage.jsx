@@ -6,7 +6,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { LuUpload } from "react-icons/lu";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
 import { filterAndSortFiles, formatDate, formatFileSize, formatFileType, getFileIcon } from "../Common/Utils";
-import { ToastProvider, useToast } from "@/Providers/ToastProvider";
+import { useToast } from "@/Providers/ToastProvider";
 import ModalUpload from "@/Components/ModalUpload";
 import { TableRowActionMenu } from "@/Components/TableRowActionMenu";
 import DeleteModal from "@/Components/DeleteModal";
@@ -21,9 +21,9 @@ import FileInfoPopper from "@/Components/FileInfoPopper";
 
 const FileManagementPage = () => {
   return (
-    <ToastProvider>
+    // <ToastProvider>
       <FileManagementContent />
-    </ToastProvider>
+    // </ToastProvider>
   );
 };
 

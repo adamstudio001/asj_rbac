@@ -8,6 +8,9 @@ import { GoGear } from "react-icons/go";
 import { Link } from "react-router-dom";
 import { IoFileTrayStacked } from "react-icons/io5";
 import { useAuth } from "@/Providers/AuthProvider";
+import { useState } from "react";
+import axios from "axios";
+import { useToast } from "@/Providers/ToastProvider";
 
 const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const location = useLocation();
@@ -15,7 +18,42 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const noactive = "text-[#656565]";
   const currentPath = location.pathname;
 
-  const { logout } = useAuth();
+  const { logout, token, isAdminAccess, isCompanyAccess } = useAuth();
+  const { addToast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const onLogout = async () => {
+    setLoading(true);
+    // setErrorMessage("");
+    // await sleep(2000);
+
+    try {
+      const res = await axios.post("http://staging-backend.rbac.asj-shipagency.co.id/api/v1/logout", {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+      }); 
+      const body = res.data;
+      console.log(body)
+
+      logout();
+      // if (body.error) {
+      //   addToast("error", body.error);
+      //   // setErrorMessage(body.error);
+      // } else if (body.success) {
+      //   logout();
+      // }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+
+      // const msg =
+      //   err.response?.data?.message || "Gagal login, periksa email dan password.";
+      // setErrorMessage("ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -53,26 +91,31 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
                 <span className={`${isCollapsed ? "hidden" : "block"}`}>File Management</span>
               </Link>
             </li>
-            <li>
-              <Link
-                to="/users"
-                className={`flex items-center gap-3 ${["/users"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
-                onClick={toggleSidebar} // Tutup sidebar saat di mobile
-              >
-                <FaRegUser size={18} />
-                <span className={`${isCollapsed ? "hidden" : "block"}`}>Users</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/role_permissions"
-                className={`flex items-center gap-3 ${["/role_permissions"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
-                onClick={toggleSidebar} // Tutup sidebar saat di mobile
-              >
-                <BsPersonLock size={24} />
-                <span className={`${isCollapsed ? "hidden" : "block"}`}>Role & Permissions</span>
-              </Link>
-            </li>
+            {
+            (isAdminAccess() || isCompanyAccess())?
+            <>
+              <li>
+                <Link
+                  to="/users"
+                  className={`flex items-center gap-3 ${["/users"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                  onClick={toggleSidebar} // Tutup sidebar saat di mobile
+                >
+                  <FaRegUser size={18} />
+                  <span className={`${isCollapsed ? "hidden" : "block"}`}>Users</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/role_permissions"
+                  className={`flex items-center gap-3 ${["/role_permissions"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                  onClick={toggleSidebar} // Tutup sidebar saat di mobile
+                >
+                  <BsPersonLock size={24} />
+                  <span className={`${isCollapsed ? "hidden" : "block"}`}>Role & Permissions</span>
+                </Link>
+              </li>
+            </> : <></>
+            }
             <li>
               <Link
                 to="/logs"
@@ -98,8 +141,8 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
 
         <div className="flex flex-col flex-wrap gap-2">
           <hr className="border border-t border-gray-300"/>
-          <button className={`flex items-center gap-3 hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition text-venter`}>
-            <span className={`w-full text-center ${isCollapsed ? "hidden" : "block"}`} onClick={()=>logout()}>Logout</span>
+          <button disabled={loading} className={`flex items-center gap-3 hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition text-venter`}>
+            <span className={`w-full text-center ${isCollapsed ? "hidden" : "block"}`} onClick={()=>onLogout()}>{loading? "Loading...":"Logout"}</span>
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { AlertCircle } from "lucide-react";
 import { X } from "lucide-react";
 
-export default function DeleteModal({ titleMessage, message, isOpen, onClose, onConfirm }) {
+export default function DeleteModal({ titleMessage, message, isOpen, onClose, onConfirm, isLoading = false }) {
   if (!isOpen) return null;
 
   return (
@@ -33,12 +33,14 @@ export default function DeleteModal({ titleMessage, message, isOpen, onClose, on
         <div className="space-y-3">
           <button
             onClick={onClose}
+            disabled={isLoading}
             className="w-full py-2 border border-gray-300 rounded-full text-gray-700 font-medium hover:bg-gray-50 transition"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
+            disabled={isLoading}
             className="w-full py-2 bg-[#1E2B50] text-white rounded-full font-medium hover:opacity-90 transition"
           >
             Yes

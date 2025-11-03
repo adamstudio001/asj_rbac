@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ToastProvider, useToast } from "@/Providers/ToastProvider";
+import { useToast } from "@/Providers/ToastProvider";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/Providers/AuthProvider";
 
 const images = [
   "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4",
@@ -14,14 +15,15 @@ const images = [
 
 const LoginPage = () => {
   return (
-    <ToastProvider className="bottom-5 left-5">
+    <div className="bottom-5 left-5">
       <LoginContent />
-    </ToastProvider>
+    </div>
   );
 };
 
 function LoginContent() {
   const { addToast } = useToast();
+  const { refreshSession } = useAuth();
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -69,7 +71,7 @@ function LoginContent() {
     setLoading(true);
     // setErrorMessage("");
     try {
-      const res = await axios.post("http://staging-backend.rbac.asj-shipagency.co.id/api/company/v1/login", data); 
+      const res = await axios.post("http://staging-backend.rbac.asj-shipagency.co.id/api/v1/login", data); 
       const body = res.data;
       console.log(body)
 
@@ -82,11 +84,15 @@ function LoginContent() {
           full_name: body.data.full_name,
           email: body.data.email,
           company: body.data.company,
+          expires_at: body.data.auth.expires_at,
+          admin_access: body.data.has_admin_access_status? 1:0, 
+          company_access: body.data.has_company_access_status? 1:0,
+          user_access: body.data.has_user_access_status? 1:0,
         };
 
         sessionStorage.setItem("token", auth.token);
         sessionStorage.setItem("user", JSON.stringify(user));
-
+        refreshSession();
         navigate("/dashboard");
       }
     } catch (err) {

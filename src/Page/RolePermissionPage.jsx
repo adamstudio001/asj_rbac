@@ -15,7 +15,7 @@ import {
   DialogModalTrigger,
 } from "@/Components/ui/DialogModal";
 import { useForm, Controller } from "react-hook-form";
-import { ToastProvider, useToast } from "@/Providers/ToastProvider";
+import { useToast } from "@/Providers/ToastProvider";
 import DeleteModal from "@/Components/DeleteModal";
 import MultipleSelector from "@/Components/ui/MultipleSelector";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
@@ -31,9 +31,9 @@ const permissions = [
 
 const RolePermissionPage = () => {
   return (
-    <ToastProvider>
+    // <ToastProvider>
       <RolePermissionContent />
-    </ToastProvider>
+    // </ToastProvider>
   );
 };
 

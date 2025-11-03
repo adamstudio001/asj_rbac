@@ -4,7 +4,7 @@ import { useSearch } from "@src/Providers/SearchProvider";
 import { TableActionMenu } from "@src/Components/TableActionMenu";
 import DeleteModal from "@src/Components/DeleteModal";
 import Pagination from "@src/Components/Pagination";
-import { ToastProvider, useToast } from "@src/Providers/ToastProvider";
+import { useToast } from "@src/Providers/ToastProvider";
 import reset from "@assets/reset.svg";
 import trash from "@assets/trash.svg";
 import user_edit from "@assets/user_edit.svg";
@@ -21,7 +21,7 @@ import {
   DialogModalTrigger,
 } from "@/Components/ui/DialogModal";
 import { useForm, Controller } from "react-hook-form";
-import { formatLastSeen } from "@/Common/Utils";
+import { formatLastSeen, isEmpty } from "@/Common/Utils";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import WhatsappInput from "@/Components/WhatsappInput";
 import CustomInput from "@/Components/CustomInput";
@@ -32,9 +32,9 @@ import CustomTextArea from "@/Components/CustomTextArea";
 
 const UserPage = () => {
   return (
-    <ToastProvider>
+    // <ToastProvider>
       <UserPageContent />
-    </ToastProvider>
+    // </ToastProvider>
   );
 };
 
@@ -43,163 +43,277 @@ const UserPageContent = () => {
   const { addToast } = useToast();
 
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
-  const [tick, setTick] = useState(0);
   const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const totalPages = 6;
+  const [totalPages, setTotalPages] = useState(1);
 
-  const users = [
-    {
-      id: 1,
-      firstName: "Desy",
-      lastName: "Puji Astuti",
-      email: "admin@gmail.com",
-      whatsapp: "087870590000",
-      branch: "Jakarta",
-      lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
-      jobPosition: "HR/GA",
-    },
-    {
-      id: 2,
-      firstName: "Hani",
-      lastName: "Ayu Wulansari",
-      email: "admin@gmail.com",
-      whatsapp: "087870590000",
-      branch: "Jakarta",
-      lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
-      jobPosition: "Finance",
-    },
-    {
-      id: 3,
-      firstName: "Rahul",
-      lastName: "",
-      email: "admin@gmail.com",
-      whatsapp: "087870590000",
-      branch: "Jakarta",
-      lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
-      jobPosition: "Operation",
-    },
-    {
-      id: 4,
-      firstName: "Dika",
-      lastName: "",
-      email: "admin@gmail.com",
-      whatsapp: "087870590000",
-      branch: "Jakarta",
-      lastLogin: {start: "2025-10-13 15:00:00", end: null},
-      jobPosition: "Operation",
-    },
-  ];
+  // const users = [
+  //   {
+  //     id: 1,
+  //     firstName: "Desy",
+  //     lastName: "Puji Astuti",
+  //     email: "admin@gmail.com",
+  //     whatsapp: "087870590000",
+  //     branch: "Jakarta",
+  //     lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
+  //     jobPosition: "HR/GA",
+  //   },
+  //   {
+  //     id: 2,
+  //     firstName: "Hani",
+  //     lastName: "Ayu Wulansari",
+  //     email: "admin@gmail.com",
+  //     whatsapp: "087870590000",
+  //     branch: "Jakarta",
+  //     lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
+  //     jobPosition: "Finance",
+  //   },
+  //   {
+  //     id: 3,
+  //     firstName: "Rahul",
+  //     lastName: "",
+  //     email: "admin@gmail.com",
+  //     whatsapp: "087870590000",
+  //     branch: "Jakarta",
+  //     lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
+  //     jobPosition: "Operation",
+  //   },
+  //   {
+  //     id: 4,
+  //     firstName: "Dika",
+  //     lastName: "",
+  //     email: "admin@gmail.com",
+  //     whatsapp: "087870590000",
+  //     branch: "Jakarta",
+  //     lastLogin: {start: "2025-10-13 15:00:00", end: null},
+  //     jobPosition: "Operation",
+  //   },
+  // ];
 
-  useEffect(() => setSearch(""), []);
+  const { token, isAdminAccess, isCompanyAccess } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [branches, setBranches] = useState([]);
+
+  async function loadData() {
+    if(isAdminAccess() || isCompanyAccess()){
+      setLoading(true);
+      try {
+        const [usersRes, jobsRes, branchesRes] = await Promise.allSettled([
+          axios.get(`http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user?page=${page}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        const users =
+          usersRes.status === "fulfilled"
+            ? usersRes.value.data || null
+            : null;
+
+        const jobs =
+          jobsRes.status === "fulfilled"
+            ? jobsRes.value.data?.data || []
+            : [];
+        const branches =
+          branchesRes.status === "fulfilled"
+            ? branchesRes.value.data?.data || []
+            : [];
+
+        setUsers(users?.data ?? []);
+        setTotalPages(users?.last_page ?? 1);
+        setJobs(jobs);
+        setBranches(branches);
+      } catch (err) {
+        console.error(err);
+        addToast("error", "ada masalah pada aplikasi");
+      } finally {
+        setLoading(false);
+      }
+    }
+  }
+
+  function getJobPosition(value){
+    if(isEmpty(value)){
+      return "";
+    }
+
+    return jobs.find(job => job?.identifier == value);
+  }
+
+  function getBranch(value){
+    if(isEmpty(value)){
+      return "";
+    }
+
+    return branches.find(branch => branch?.identifier == value);
+  }
+
+  function deleteCloseHandler(){
+    if(isAdminAccess() || isCompanyAccess()){
+      setIsModalDeleteOpen(false);
+      setSelectedUser(null)
+    }
+  }
+
+  async function deleteHandler(){
+    if(isAdminAccess() || isCompanyAccess()){
+      setLoading(true);
+      // setErrorMessage("");
+      try {
+        const headers = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        };
+
+        const res = await axios.delete(`http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${selectedUser?.id ?? 0}`, headers); 
+        const body = res.data;
+        console.log(body)
+
+        if (body.error) {
+          addToast("error", body.error);
+        } else if (body.success) {
+          addToast("success", body.success);
+          setIsModalDeleteOpen(false);
+          await loadData();
+        }
+      } catch (err) {
+        console.error(err);
+        addToast("error", "ada masalah pada aplikasi");
+      } finally {
+        setLoading(false);
+      }
+
+      // reset();
+      // onOpenChange(false);
+      // addToast("success", "Save successfully");
+    }
+  };
 
   useEffect(() => {
-      const interval = setInterval(() => {
-        setTick((t) => t + 1);
-      }, 500);
-  
-      return () => clearInterval(interval);
+    setSearch("");
+    loadData();
   }, []);
 
   const filteredUsers = users.filter((user) =>
-    user.firstName.toLowerCase().includes(search.toLowerCase())
+    user.full_name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <>
       <Navbar
         renderActionModal={()=>
-          <button
-            onClick={() => {
-              setSelectedUser(null);
-              setIsModalOpen(true);
-            }}
-            className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition"
-          >
-            + New User
-          </button>
+          (
+            isAdminAccess() || isCompanyAccess()? 
+            <button
+              onClick={() => {
+                setSelectedUser(null);
+                setIsModalOpen(true);
+              }}
+              className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition"
+            >
+              + New User
+            </button> : 
+            <></>
+          )
         }
       />
 
       <main className="flex-1 items-center p-6 overflow-auto">
         <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#F3F3F3]">
-              <tr className="border border-gray-200">
-                <th className="px-4 py-3 w-10"></th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left min-w-0 w-[200px]">
-                  Name
-                </th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                  Address
-                </th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                  Position
-                </th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                  Last Seen
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-gray-50 transition border-b border-gray-200"
-                >
-                  <td className="px-4 py-3">
-                    <TableActionMenu>
-                      {/* Edit User */}
-                      <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <img src={user_edit} alt="download" className="w-4 h-4 hover:text-white"/>
-                        Edit User
-                      </button>
-
-                      {/* Reset Password */}
-                      <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                        onClick={() =>
-                          alert(`Reset password for ${user.firstName}`)
-                        }
-                      >
-                        <img src={reset} alt="download" className="w-4 h-4"/>
-                        Reset Password
-                      </button>
-
-                      {/* Delete User */}
-                      <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                        onClick={() => setIsModalDeleteOpen(true)}
-                      >
-                        <img src={trash} alt="download" className="w-4 h-4"/>
-                        Delete User
-                      </button>
-                    </TableActionMenu>
-                  </td>
-
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                    <EllipsisTooltip className={"w-[200px]"}>{`${user.firstName} ${user.lastName || ""}`.trim()}</EllipsisTooltip>
-                  </td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                    {user.address}
-                  </td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                    {user.jobPosition}
-                  </td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                    {formatLastSeen(user.lastLogin.start, user.lastLogin.end)}
-                  </td>
+          {loading? 
+            <div className="flex items-center justify-center h-screen">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+            </div> : 
+            <table className="w-full text-left text-sm">
+              <thead className="bg-[#F3F3F3]">
+                <tr className="border border-gray-200">
+                  <th className="px-4 py-3 w-10"></th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left min-w-0 w-[200px]">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                    Address
+                  </th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                    Position
+                  </th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                    Last Seen
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredUsers.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-gray-50 transition border-b border-gray-200"
+                  >
+                    <td className="px-4 py-3">
+                      <TableActionMenu>
+                        {/* Edit User */}
+                        <button
+                          className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <img src={user_edit} alt="download" className="w-4 h-4 hover:text-white"/>
+                          Edit User
+                        </button>
+
+                        {/* Reset Password */}
+                        <button
+                          className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                          onClick={() =>
+                            alert(`Reset password for ${user.full_name}`)
+                          }
+                        >
+                          <img src={reset} alt="download" className="w-4 h-4"/>
+                          Reset Password
+                        </button>
+
+                        {/* Delete User */}
+                        <button
+                          className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                          onClick={() => {
+                            setIsModalDeleteOpen(true);
+                            setSelectedUser(user);
+                          }}
+                        >
+                          <img src={trash} alt="download" className="w-4 h-4"/>
+                          Delete User
+                        </button>
+                      </TableActionMenu>
+                    </td>
+
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
+                      <EllipsisTooltip className={"w-[200px]"}>{user.full_name}</EllipsisTooltip>
+                    </td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
+                      {user.address}
+                    </td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
+                      {user.employment.map(e => getJobPosition(e.job_identifier)?.label ?? "")}
+                    </td>
+                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
+                      {formatLastSeen(user?.lastLogin?.start, user?.lastLogin?.end)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
         </div>
 
         <Pagination
@@ -215,11 +329,9 @@ const UserPageContent = () => {
         titleMessage="Delete User"
         message={"Are you sure want to delete this user?"}
         isOpen={isModalDeleteOpen}
-        onClose={() => setIsModalDeleteOpen(false)}
-        onConfirm={() => {
-          setIsModalDeleteOpen(false);
-          addToast("success", "Deleted successfully");
-        }}
+        onClose={() => deleteCloseHandler()}
+        onConfirm={() => deleteHandler()}
+        isLoading={loading}
       />
 
       {/* Add / Edit Modal */}
@@ -228,6 +340,9 @@ const UserPageContent = () => {
         onOpenChange={setIsModalOpen}
         data={selectedUser}
         mode={selectedUser ? "edit" : "create"}
+        jobs={jobs}
+        branches={branches}
+        extraAction={()=>loadData()}
       />
     </>
   );
@@ -235,7 +350,7 @@ const UserPageContent = () => {
 
 export default UserPage;
 
-export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) {
+export function ModalUser({ open, onOpenChange, data = null, mode = "create", jobs = [], branches = [], extraAction = function(){} }) {
   const [loading, setLoading] = useState(false);
   
   const {
@@ -246,14 +361,14 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
     reset,
   } = useForm({
     defaultValues: {
-      firstName: data?.firstName ?? "",
-      lastName: data?.lastName ?? "",
-      whatsapp: data?.whatsapp ?? "",
-      password: data?.password ?? "",
-      address: data?.address ?? "",
-      jobPosition: data?.jobPosition ?? "",
-      branch: data?.branch ?? "",
-      role: data?.role ?? "",
+      firstName: "",
+      lastName: "",
+      whatsapp: "",
+      password: "",
+      address: "",
+      jobPosition: "",
+      branch: "",
+      // role: "",
     },
   });
 
@@ -262,37 +377,58 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
   
   useEffect(() => {
     reset({
-      firstName: data?.firstName ?? "",
-      lastName: data?.lastName ?? "",
-      whatsapp: data?.whatsapp ?? "",
+      firstName: data?.first_name ?? "",
+      lastName: data?.last_name ?? "",
+      whatsapp: data?.whatsapp_number ?? "",
       password: data?.password ?? "",
       email: data?.email ?? "",
       address: data?.address ?? "",
-      jobPosition: data?.jobPosition ?? "",
-      branch: data?.branch ?? "",
-      role: data?.role ?? "",
+      jobPosition: getJobPosition(data?.employment?.[0]?.job_identifier),
+      branch: getBranch(data?.employment?.[0]?.branch_location_identifier),
+      // role: data?.role ?? "",
     });
   }, [data, reset]);
 
+  function getJobPosition(value){
+    if(isEmpty(value)){
+      return "";
+    }
+
+    return jobs.find(job => job?.identifier == value);
+  }
+
+  function getBranch(value){
+    if(isEmpty(value)){
+      return "";
+    }
+
+    return branches.find(branch => branch?.identifier == value);
+  }
+
   const onSubmit = async (values) => {
+    console.log(values)
     setLoading(true);
     // setErrorMessage("");
     try {
-      const res = await axios.post("http://staging-backend.rbac.asj-shipagency.co.id/api/company/v1/company/1/user", {
+      console.log(values)
+      const formData = {
         "first_name": values.firstName,
         "last_name": values.lastName,
         "password": values.password,
-        "whatsapp_number": values.password,
+        "whatsapp_number": values.whatsapp,
         "email": values.email,
         "address": values.address,
-        "job_identifier": values.jobPosition?.identifier,
-        "branch_location_identifier": values.branch?.identifier
-      }, {
+        "job_identifier": values.jobPosition?.identifier ?? "",
+        "branch_location_identifier": values.branch?.identifier ?? ""
+      };
+      const headers = {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }); 
+      };
+
+      const res = mode=="create"? await axios.post("http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user", formData, headers) : await axios.put(`http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${data?.id ?? 0}`, formData, headers); 
       const body = res.data;
       console.log(body)
 
@@ -300,6 +436,8 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
         addToast("error", body.error);
       } else if (body.success) {
         addToast("success", body.success);
+        onOpenChange(false);
+        extraAction();
       }
     } catch (err) {
       console.error(err);
@@ -369,13 +507,16 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         label="Password"
                         name="password"
                         type="password"
-                        disabled={mode !== "create"}
+                        disabled={mode!=="create"}
                         register={register}
                         errors={errors}
-                        rules={{
-                          required: "Password is required",
-                          minLength: { value: 6, message: "Min 6 chars" },
-                        }}
+                        rules={mode=="create"? 
+                          {
+                            required: "Password is required",
+                            minLength: { value: 6, message: "Min 6 chars" },
+                          } : 
+                          {}
+                        }
                       />
 
                       <CustomInput
@@ -423,10 +564,10 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         render={({ field }) => (
                           <CustomSelect
                             label="Job Position"
-                            // records={["HR/GA", "Legal", "FDA", "Finance", "TAX", "OPS", "Commercial"]}
-                            sourceUrl="http://staging-backend.rbac.asj-shipagency.co.id/api/helper/v1/job"
+                            records={jobs}
+                            // sourceUrl="http://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job"
                             value={field.value}
-                            disabled={mode !== "create"}
+                            disabled={mode!=="create"}
                             onChange={field.onChange}
                             error={errors.jobPosition?.message}
                           />
@@ -440,10 +581,10 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                         render={({ field }) => (
                           <CustomSelect
                             label="Work Location / Branch"
-                            // records={["Head Office", "Palembang", "Banten", "Surabaya"]}
-                            sourceUrl="http://staging-backend.rbac.asj-shipagency.co.id/api/helper/v1/branch-location"
+                            records={branches}
+                            // sourceUrl="http://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location"
                             value={field.value}
-                            disabled={mode !== "create"}
+                            disabled={mode!=="create"}
                             onChange={field.onChange}
                             error={errors.branch?.message}
                           />
@@ -452,11 +593,14 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
 
                     </div>
 
-                    <div className="flex flex-wrap gap-4">
+                    {/* <div className="flex flex-wrap gap-4">
                       <Controller
                         name="role"
                         control={control}
-                        rules={{ required: "Role is required" }}
+                        rules={mode=="create"? 
+                          { required: "Role is required" } : 
+                          {}
+                        }
                         render={({ field }) => (
                           <CustomSelect
                             label="Select Role"
@@ -475,14 +619,14 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create" }) 
                               },
                             ]}
                             value={field.value}
-                            disabled={mode !== "create"}
+                            disabled={mode!=="create"}
                             onChange={field.onChange}
                             error={errors.role?.message}
                           />
                         )}
                       />
                       <div className="flex-1 min-w-[250px]"></div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
