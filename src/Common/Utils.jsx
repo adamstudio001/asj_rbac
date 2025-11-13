@@ -126,12 +126,12 @@ export function filterAndSortFiles(files, activeFilter) {
 
   const filteredFiles = files.filter((file) => {
     // Filter folder
-    if (isFolderFilter) return file.isFolder;
+    if (isFolderFilter) return file.type_identifier=="Folder";
 
     // Filter ekstensi
     if (activeFilter?.group?.extensions?.length > 0) {
       const ext = file.name.split('.').pop().toLowerCase();
-      if (!file.isFolder && activeFilter?.group?.extensions?.includes(ext)) {
+      if (file.type_identifier!="Folder" && activeFilter?.group?.extensions?.includes(ext)) {
         return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
       }
       return false;
@@ -142,7 +142,7 @@ export function filterAndSortFiles(files, activeFilter) {
   });
 
   // Sort folder ke atas
-  return [...filteredFiles].sort((a, b) => (a.isFolder === b.isFolder ? 0 : a.isFolder ? -1 : 1));
+  return [...filteredFiles].sort((a, b) => ((a.type_identifier=="Folder") === (b.type_identifier=="Folder") ? 0 : a.type_identifier=="Folder" ? -1 : 1));
 }
 
 export const isEmpty = (str) => !str || str.trim().length === 0 || str === undefined || str===null;

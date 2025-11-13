@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
@@ -12,7 +13,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const [user, setUser] = useState(getStoredUser);
+  const [user, setUser] = useState(getStoredUser());
   const [token, setToken] = useState(() => sessionStorage.getItem("token"));
   const [expired, setExpired] = useState(() => {
     const currentUser = getStoredUser();
@@ -52,6 +53,16 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const isExpired = () => {
+    try {
+      const storedUser = sessionStorage.getItem("user");
+      const info = storedUser ? JSON.parse(storedUser) : null;
+      return info?.expires_at ? new Date(info.expires_at) < new Date() : false;
+    } catch {
+      return false;
+    }
+  };
+
   // Sinkronisasi antar tab
   useEffect(() => {
     const handleStorageChange = (event) => {
@@ -79,29 +90,61 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const refreshSession = () => { 
-    try { 
-      const storedUser = sessionStorage.getItem("user"); 
-      const storedToken = sessionStorage.getItem("token"); 
-      if (storedUser && storedToken) { 
-        const parsedUser = JSON.parse(storedUser); 
-        setUser(parsedUser); 
-        setToken(storedToken); 
-        if (parsedUser.expires_at) { 
-          setExpired(new Date(parsedUser.expires_at) < new Date()); 
-        } 
-      } else { 
-        setUser(null); 
-        setToken(null); 
-        setExpired(false); 
-      } 
-    } catch (error) { 
-      console.error("Error refreshing session:", error); 
-      setUser(null); 
-      setToken(null); 
-      setExpired(false); 
-    } 
-  }; 
+  const refreshSession = async () => {
+  try {
+    const storedUserRaw = sessionStorage.getItem("user");
+    const storedTokenRaw = sessionStorage.getItem("token");
+
+    if (!storedUserRaw || !storedTokenRaw) {
+      console.warn("⚠️ Tidak ada sesi");
+      return;
+    }
+
+    const storedUser = JSON.parse(storedUserRaw);
+    const expiresAt = new Date(storedUser.expires_at);
+    const now = new Date();
+
+    if (expiresAt < now) {
+      console.info("🔄 Token sudah expired, memproses refresh...");
+
+      const res = await axios.post(
+        "http://staging-backend.rbac.asj-shipagency.co.id/api/v1/refresh-token",
+        {},
+        {
+          headers: { Authorization: `Bearer ${storedTokenRaw}` },
+        }
+      );
+
+      const body = res.data;
+      const newToken = body?.data?.auth?.token ?? null;
+      const newExpiresAt = body?.data?.auth?.expires_at ?? null;
+
+      if (newToken && newExpiresAt) {
+        const updatedUser = {
+          ...storedUser,
+          expires_at: newExpiresAt,
+        };
+
+        // Simpan ulang ke sessionStorage
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+        sessionStorage.setItem("token", newToken);
+
+        // Update state React
+        setUser(updatedUser);
+        setToken(newToken);
+        setExpired(new Date(newExpiresAt) < new Date());
+
+        console.info("✅ Session refreshed successfully");
+      } else {
+        console.warn("⚠️ Invalid token structure:", body);
+      }
+    }
+  } catch (error) {
+    console.error("❌ Error refreshing session:", error.response?.data || error.message);
+    logout();
+  }
+};
+
 
   const logout = () => { 
     try { 
@@ -117,7 +160,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, expired, setUser, refreshSession, logout, isAdminAccess, isCompanyAccess, isUserAccess }}>
+    <AuthContext.Provider value={{ user, token, expired, setUser, setToken, refreshSession, logout, isExpired, isAdminAccess, isCompanyAccess, isUserAccess }}>
       {children}
     </AuthContext.Provider>
   );

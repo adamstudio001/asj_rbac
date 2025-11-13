@@ -91,13 +91,17 @@ const UserPageContent = () => {
   //   },
   // ];
 
-  const { token, isAdminAccess, isCompanyAccess } = useAuth();
+  const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } = useAuth();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [branches, setBranches] = useState([]);
 
   async function loadData() {
+    if(isExpired()){
+      refreshSession()
+    }
+
     if(isAdminAccess() || isCompanyAccess()){
       setLoading(true);
       try {
@@ -148,13 +152,13 @@ const UserPageContent = () => {
     return jobs.find(job => job?.identifier == value);
   }
 
-  function getBranch(value){
-    if(isEmpty(value)){
-      return "";
-    }
+  // function getBranch(value){
+  //   if(isEmpty(value)){
+  //     return "";
+  //   }
 
-    return branches.find(branch => branch?.identifier == value);
-  }
+  //   return branches.find(branch => branch?.identifier == value);
+  // }
 
   function deleteCloseHandler(){
     if(isAdminAccess() || isCompanyAccess()){
@@ -164,6 +168,10 @@ const UserPageContent = () => {
   }
 
   async function deleteHandler(){
+    if(isExpired()){
+      refreshSession();
+    }
+
     if(isAdminAccess() || isCompanyAccess()){
       setLoading(true);
       // setErrorMessage("");
@@ -407,6 +415,10 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create", jo
 
   const onSubmit = async (values) => {
     console.log(values)
+    if(isExpired()){
+      refreshSession();
+    }
+    
     setLoading(true);
     // setErrorMessage("");
     try {

@@ -3,6 +3,6 @@ import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function ProtectedRoute() {
-  const { user } = useAuth();
-  return user  ? <Outlet /> : <Navigate to="/" replace />;
+  const { token } = useAuth();
+  return token  ? <Outlet /> : <Navigate to="/" replace />;
 }

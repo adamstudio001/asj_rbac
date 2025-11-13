@@ -5,7 +5,7 @@ import { useSearch } from "@src/Providers/SearchProvider";
 import { IoIosArrowDown } from "react-icons/io";
 import { LuUpload } from "react-icons/lu";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
-import { filterAndSortFiles, formatDate, formatFileSize, formatFileType, getFileIcon } from "../Common/Utils";
+import { filterAndSortFiles, formatDate, formatFileSize, formatFileType, getFileIcon, isEmpty } from "../Common/Utils";
 import { useToast } from "@/Providers/ToastProvider";
 import ModalUpload from "@/Components/ModalUpload";
 import { TableRowActionMenu } from "@/Components/TableRowActionMenu";
@@ -18,6 +18,22 @@ import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/Components/ui
 import BreadcrumbFolder from "@/Components/BreadcrumbFolder";
 import { useNavigate, useParams } from "react-router-dom";
 import FileInfoPopper from "@/Components/FileInfoPopper";
+import { BsPlusLg } from "react-icons/bs";
+import { useAuth } from "@/Providers/AuthProvider";
+import axios from "axios";
+import { useForm } from "react-hook-form";
+import {
+  DialogModal,
+  DialogModalClose,
+  DialogModalContent,
+  DialogModalDescription,
+  DialogModalFooter,
+  DialogModalHeader,
+  DialogModalTitle,
+  DialogModalTrigger,
+} from "@/Components/ui/DialogModal";
+import CustomInput from "@/Components/CustomInput";
+import { Button } from "@/Components/ui/Button";
 
 const FileManagementPage = () => {
   return (
@@ -29,6 +45,7 @@ const FileManagementPage = () => {
 
 const FileManagementContent = () => {
   const { folderKeys } = useParams();
+  const isRoot = isEmpty(folderKeys);
   const navigate = useNavigate();
 
   const { search, setSearch } = useSearch();
@@ -36,34 +53,120 @@ const FileManagementContent = () => {
   const [page, setPage] = useState(1);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const totalPages = 6;
   const { addToast } = useToast();
-  const { setIsModalOpen, getFileDirectory } = useFileManager();
+  const { setIsModalOpen } = useFileManager(); //#getFileDirectory
+
+  const { token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
+  const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
+  const [lists, setLists] = useState([]);
+  const [fileSelected, setFileSelected] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+
+  async function loadData() {
+    if(isExpired()){
+      refreshSession();
+    }
+
+    const url = (isAdminAccess() || isCompanyAccess())? 
+    `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/${!isRoot? `storage/${folderKeys}`:`storage`}?order_by[]=name&sort_by[]=asc`:
+    `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/${!isRoot? `storage/${folderKeys}`:`storage`}?order_by[]=name&sort_by[]=asc`;
+    setLoading(true);
+    try {
+      const request = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const response = request.data;
+
+      if(response?.success){
+        setLists(response?.data ?? []);
+        setTotalPages(response?.last_page ?? 1);
+      }
+      console.log(response.data);
+    } catch (err) {
+      console.error(err);
+      // addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     setSearch("");
   }, []);
 
-  const files = getFileDirectory(folderKeys);
-  const sortedFiles = filterAndSortFiles(files, {
+  useEffect(() => {
+    loadData();
+  }, [folderKeys]);
+
+  // const files = getFileDirectory(lists, folderKeys);
+  const sortedFiles = filterAndSortFiles(lists, {
     search: search,
     group: { extensions: [] }
   });
+
+  async function deleteHandler(){
+    if(isExpired()){
+      refreshSession();
+    }
+
+    const url = `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
+    setLoading(true);
+    setIsModalDeleteOpen(false);
+    try {
+      const request = await axios.delete(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const response = request.data;
+
+      if(response?.success){
+        addToast("success", response?.success);
+        loadData();
+      } else{
+        addToast("errors", response?.error);
+      }
+      console.log(response);
+    } catch (err) {
+      console.error(err);
+      // addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function editHandler(file){
+    if(file.type_identifier=="Folder"){
+      setIsModalFolderOpen(true);
+      setFileSelected(file);
+    }
+  }
 
   return (
     <>
       <Navbar
         renderActionModal={() => (
           <div className="flex items-center gap-8">
-            <button
-              onClick={() => {
-                setIsModalOpen(true);
-              }}
-              className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
-            >
-              <LuUpload size={18} />
-              Upload file
-            </button>
+            <div className="flex items-center gap-4">
+              {(!isRoot || isUserAccess()) && <button
+                onClick={() => {
+                  setIsModalFolderOpen(true);
+                }}
+                className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
+              >
+                <BsPlusLg size={18} />
+                Folder
+              </button>}
+              <button
+                onClick={() => {
+                  setIsModalOpen(true);
+                }}
+                className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
+              >
+                <LuUpload size={18} />
+                Upload file
+              </button>
+            </div>
+
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
                 C
@@ -100,6 +203,7 @@ const FileManagementContent = () => {
 
         <div className="w-full overflow-x-scroll scroll-custom rounded-lg space-y-6">
           <BreadcrumbFolder 
+            lists={lists}
             currentKey={folderKeys || null}
             onNavigate={(key) => {
               if (key) navigate(`/filemanager/${key}`);
@@ -117,36 +221,19 @@ const FileManagementContent = () => {
               </tr>
             </thead>
             <tbody>
-              {sortedFiles.map((file) =>
-                file.isFolder ? (
-                  <tr
-                    key={file.id}
-                    onClick={() => {
-                      console.log(file)
-                      navigate(`/filemanager/${encodeURIComponent(file.folderKeys)}`);
-                    }}
-                    className="hover:bg-gray-50 transition border-b border-gray-200"
-                  >
-                    <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
-                      {getFileIcon(file.name, file.isFolder, 24)}
-                      <EllipsisTooltip className={"w-[250px]"}>{file.name}</EllipsisTooltip>
-                    </td>
-                    <td className="px-4 py-3">{formatFileType(file.name)}</td>
-                    <td className="px-4 py-3">{formatDate(file.lastModified)}</td>
-                    <td className="px-4 py-3">{formatFileSize(file.fileSize)}</td>
-                  </tr>
-                ) : (
+              {sortedFiles.map((file) => 
                   <TableRowActionMenu
                     key={file.id}
+                    refId={file.id}
                     rowCells={
                       <>
                         <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
-                          {getFileIcon(file.name, file.isFolder, 24)}
+                          {getFileIcon(file.name, file.type_identifier=="Folder", 24)}
                           <EllipsisTooltip className={"w-[250px]"}>{file.name}</EllipsisTooltip>
                         </td>
                         <td className="px-4 py-3">{formatFileType(file.name)}</td>
-                        <td className="px-4 py-3">{formatDate(file.lastModified)}</td>
-                        <td className="px-4 py-3">{formatFileSize(file.fileSize)}</td>
+                        <td className="px-4 py-3">{formatDate(file.updated_datetime)}</td>
+                        <td className="px-4 py-3">{formatFileSize(file.size)}</td>
                       </>
                     }
                   >
@@ -158,7 +245,7 @@ const FileManagementContent = () => {
                     </button>
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                      onClick={() => alert("Rename")}
+                      onClick={() => editHandler(file)}
                     >
                       <img src={Rename} alt="Rename" /> Rename
                     </button>
@@ -169,12 +256,14 @@ const FileManagementContent = () => {
                     />
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                      onClick={() => setIsModalDeleteOpen(true)}
+                      onClick={() => {
+                        setFileSelected(file);
+                        setIsModalDeleteOpen(true);
+                      }}
                     >
                       <img src={Trash} alt="Trash" /> Remove
                     </button>
                   </TableRowActionMenu>
-                )
               )}
             </tbody>
           </table>
@@ -189,10 +278,7 @@ const FileManagementContent = () => {
         message={"Are you sure want to delete this file?"}
         isOpen={isModalDeleteOpen}
         onClose={() => setIsModalDeleteOpen(false)}
-        onConfirm={() => {
-          setIsModalDeleteOpen(false);
-          addToast("success", "Deleted successfully");
-        }}
+        onConfirm={() => deleteHandler()}
       />
 
       {/* Modal Info */}
@@ -281,8 +367,142 @@ const FileManagementContent = () => {
 
       {/* Modal Upload */}
       <ModalUpload />
+
+      {/* Modal Folder */}
+      <ModalFolder
+        open={isModalFolderOpen}
+        onOpenChange={setIsModalFolderOpen}
+        folderKeys={folderKeys}
+        data={fileSelected}
+        mode={fileSelected? "edit":"create"}
+        extraAction={()=>loadData()}
+      />
+
     </>
   );
 };
 
 export default FileManagementPage;
+
+export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraAction = function(){} }) {
+  const [loading, setLoading] = useState(false);
+  
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: {
+      folder_name: data?.name ?? "",
+    },
+  });
+
+  const { addToast } = useToast();
+  const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } = useAuth();
+  const isEdit = mode=="edit";
+  
+  useEffect(() => {
+    reset({
+      folder_name: data?.name ?? "",
+    });
+  }, [data, reset]);
+
+  const onSubmit = async (values) => {
+    console.log(values)
+    if(isExpired()){
+      refreshSession();
+    }
+
+    setLoading(true);
+    // setErrorMessage("");
+    try {
+      console.log(values)
+      const formData = {
+        "folder_name": values.folder_name,
+      };
+      const headers = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+
+      const url = (isAdminAccess() || isCompanyAccess())? 
+      (isEdit? 
+        `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`:
+        `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder`
+      ) : 
+      (isEdit?
+        `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}`:
+        `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder`
+      ) ;
+      
+      const res = isEdit? await axios.put(url, formData, headers):await axios.post(url, formData, headers); 
+      const body = res.data;
+      console.log(body)
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+        onOpenChange(false);
+        extraAction();
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+
+    // reset();
+    // onOpenChange(false);
+    // addToast("success", "Save successfully");
+  };
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+    }
+  }, [open, reset]);
+
+  return (
+    <DialogModal open={open} onOpenChange={onOpenChange}>
+      <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-full sm:max-w-5xl"> {/*max-h-[min(640px,80vh)]*/}
+        <DialogModalHeader>
+          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+            {mode=="edit"? `Rename Folder`:`New Folder`}
+          </DialogModalTitle>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto scroll-custom">
+            <DialogModalDescription asChild>
+              <div className="px-6 pb-8 space-y-8">
+                <CustomInput
+                  label="Folder Name"
+                  name="folder_name"
+                  register={register}
+                  errors={errors}
+                  rules={{
+                    required: "Folder name is required",
+                  }}
+                />
+              </div>
+            </DialogModalDescription>
+
+            <DialogModalFooter className="px-6 pb-6 items-center">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full max-w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+              >
+                {loading? "Sending...":"Save"}
+              </Button>
+            </DialogModalFooter>
+          </form>
+        </DialogModalHeader>
+      </DialogModalContent>
+    </DialogModal>
+  );
+}

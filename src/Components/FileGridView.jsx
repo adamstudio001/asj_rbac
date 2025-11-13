@@ -4,13 +4,13 @@ import { NavLink } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { filterAndSortFiles } from '@/Common/Utils';
 
-function FileGridView({ folderKeys, mode }) {
+function FileGridView({ lists, folderKeys, mode }) {
   const { 
       activeFilter, 
       getFileDirectory,
     } = useFileManager();
 
-  let files = getFileDirectory(folderKeys);
+  let files = getFileDirectory(lists, folderKeys);
   if(mode=="Folders"){
     files = files.filter((f) => f.isFolder)
   } else if(mode=="Files"){

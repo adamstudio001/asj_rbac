@@ -9,13 +9,13 @@ import {
 } from "@/Components/ui/Tooltip"
 import { filterAndSortFiles } from '@/Common/Utils';
 
-function FileListView({ folderKeys, mode }) {
+function FileListView({ lists, folderKeys, mode }) {
   const { 
       activeFilter, 
       getFileDirectory,
     } = useFileManager();
 
-  let files = getFileDirectory(folderKeys);
+  let files = getFileDirectory(lists, folderKeys);
   if(mode=="Folders"){
     files = files.filter((f) => f.isFolder)
   } else if(mode=="Files"){

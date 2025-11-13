@@ -2,17 +2,17 @@ import React from "react";
 import { Folder, ChevronRight } from "lucide-react";
 import { useFileManager } from "@/Providers/FileManagerProvider";
 
-export default function BreadcrumbFolder({ currentKey, onNavigate }) {
+export default function BreadcrumbFolder({ lists, currentKey, onNavigate }) {
   const { getDirectory, findParentFolderKey } = useFileManager();
 
   const buildPath = (key) => {
     const path = [];
     let currentKey = key;
     while (currentKey) {
-      const folderName = getDirectory(currentKey);
+      const folderName = getDirectory(lists, currentKey);
       if (!folderName) break;
       path.unshift({ key: currentKey, name: folderName });
-      currentKey = findParentFolderKey(currentKey);
+      currentKey = findParentFolderKey(lists, currentKey);
     }
     return path;
   };

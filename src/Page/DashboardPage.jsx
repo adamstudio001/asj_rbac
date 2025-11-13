@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FileGridView from "@src/Components/FileGridView";
 import FileListView from "@src/Components/FileListView";
 import { IoGridOutline } from "react-icons/io5";
@@ -101,9 +101,9 @@ const DashboardContent = () => {
                 </div>
                 
                 {viewMode === "grid" ? (
-                  <FileGridView folderKeys={folderKeys}/>
+                  <FileGridView lists={[]} folderKeys={folderKeys}/>
                 ) : (
-                  <FileListView folderKeys={folderKeys}/>
+                  <FileListView lists={[]} folderKeys={folderKeys}/>
                 )}
               </div> : 
               <>

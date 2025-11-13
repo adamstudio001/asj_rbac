@@ -23,7 +23,7 @@ const LoginPage = () => {
 
 function LoginContent() {
   const { addToast } = useToast();
-  const { refreshSession } = useAuth();
+  const { setUser, setToken } = useAuth();
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -84,7 +84,7 @@ function LoginContent() {
           full_name: body.data.full_name,
           email: body.data.email,
           company: body.data.company,
-          expires_at: body.data.auth.expires_at,
+          expires_at: new Date(Date.now() + 2 * 60 * 1000), //body.data.auth.expires_at
           admin_access: body.data.has_admin_access_status? 1:0, 
           company_access: body.data.has_company_access_status? 1:0,
           user_access: body.data.has_user_access_status? 1:0,
@@ -92,7 +92,9 @@ function LoginContent() {
 
         sessionStorage.setItem("token", auth.token);
         sessionStorage.setItem("user", JSON.stringify(user));
-        refreshSession();
+        setToken(auth.token);
+        setUser(JSON.stringify(user));
+
         navigate("/dashboard");
       }
     } catch (err) {
