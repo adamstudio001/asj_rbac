@@ -6,6 +6,10 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   base: "/asj_rbac/",
+  server: {
+    host: true,
+    allowedHosts: ['*']
+  },
   plugins: [react(), tailwindcss(),],
   resolve: {
     alias: {
