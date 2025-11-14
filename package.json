@@ -1,9 +1,9 @@
 {
   "name": "asj_rbac",
   "private": true,
-  "version": "0.0.37",
+  "version": "0.0.38",
   "type": "module",
-  "homepage": "https://adamf0.github.io/asj_rbac",
+  "homepage": "https://adamstudio001.github.io/asj_rbac",
   "scripts": {
     "deploy": "gh-pages -d dist",
     "dev": "vite",
