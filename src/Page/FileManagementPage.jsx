@@ -69,8 +69,8 @@ const FileManagementContent = () => {
     }
 
     const url = (isAdminAccess() || isCompanyAccess())? 
-    `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/${!isRoot? `storage/${folderKeys}`:`storage`}?order_by[]=name&sort_by[]=asc`:
-    `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/${!isRoot? `storage/${folderKeys}`:`storage`}?order_by[]=name&sort_by[]=asc`;
+    `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/${!isRoot? `storage/${folderKeys}`:`storage`}?order_by[]=name&sort_by[]=asc`:
+    `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/${!isRoot? `storage/${folderKeys}`:`storage`}?order_by[]=name&sort_by[]=asc`;
     setLoading(true);
     try {
       const request = await axios.get(url, {
@@ -110,7 +110,7 @@ const FileManagementContent = () => {
       refreshSession();
     }
 
-    const url = `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
+    const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
     setLoading(true);
     setIsModalDeleteOpen(false);
     try {
@@ -431,12 +431,12 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
 
       const url = (isAdminAccess() || isCompanyAccess())? 
       (isEdit? 
-        `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`:
-        `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder`
+        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`:
+        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder`
       ) : 
       (isEdit?
-        `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}`:
-        `http://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder`
+        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}`:
+        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder`
       ) ;
       
       const res = isEdit? await axios.put(url, formData, headers):await axios.post(url, formData, headers); 

@@ -71,7 +71,7 @@ function LoginContent() {
     setLoading(true);
     // setErrorMessage("");
     try {
-      const res = await axios.post("http://staging-backend.rbac.asj-shipagency.co.id/api/v1/login", data); 
+      const res = await axios.post("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/login", data); 
       const body = res.data;
       console.log(body)
 

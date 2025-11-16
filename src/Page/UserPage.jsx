@@ -106,13 +106,13 @@ const UserPageContent = () => {
       setLoading(true);
       try {
         const [usersRes, jobsRes, branchesRes] = await Promise.allSettled([
-          axios.get(`http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user?page=${page}`, {
+          axios.get(`https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user?page=${page}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job", {
+          axios.get("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location", {
+          axios.get("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -183,7 +183,7 @@ const UserPageContent = () => {
           },
         };
 
-        const res = await axios.delete(`http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${selectedUser?.id ?? 0}`, headers); 
+        const res = await axios.delete(`https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${selectedUser?.id ?? 0}`, headers); 
         const body = res.data;
         console.log(body)
 
@@ -440,7 +440,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create", jo
         },
       };
 
-      const res = mode=="create"? await axios.post("http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user", formData, headers) : await axios.put(`http://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${data?.id ?? 0}`, formData, headers); 
+      const res = mode=="create"? await axios.post("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user", formData, headers) : await axios.put(`https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${data?.id ?? 0}`, formData, headers); 
       const body = res.data;
       console.log(body)
 
@@ -577,7 +577,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create", jo
                           <CustomSelect
                             label="Job Position"
                             records={jobs}
-                            // sourceUrl="http://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job"
+                            // sourceUrl="https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job"
                             value={field.value}
                             disabled={mode!=="create"}
                             onChange={field.onChange}
@@ -594,7 +594,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create", jo
                           <CustomSelect
                             label="Work Location / Branch"
                             records={branches}
-                            // sourceUrl="http://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location"
+                            // sourceUrl="https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location"
                             value={field.value}
                             disabled={mode!=="create"}
                             onChange={field.onChange}

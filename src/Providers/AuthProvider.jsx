@@ -108,7 +108,7 @@ export function AuthProvider({ children }) {
       console.info("🔄 Token sudah expired, memproses refresh...");
 
       const res = await axios.post(
-        "http://staging-backend.rbac.asj-shipagency.co.id/api/v1/refresh-token",
+        "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/refresh-token",
         {},
         {
           headers: { Authorization: `Bearer ${storedTokenRaw}` },
