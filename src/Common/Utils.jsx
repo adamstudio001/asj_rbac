@@ -126,7 +126,7 @@ export function filterAndSortFiles(files, activeFilter) {
 
   const filteredFiles = files.filter((file) => {
     // Filter folder
-    if (isFolderFilter) return file.type_identifier=="Folder";
+    if (isFolderFilter) return file.type_identifier.toLowerCase()=="folder";
 
     // Filter ekstensi
     if (activeFilter?.group?.extensions?.length > 0) {

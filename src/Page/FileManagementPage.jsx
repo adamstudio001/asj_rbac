@@ -135,7 +135,7 @@ const FileManagementContent = () => {
   }
 
   function editHandler(file){
-    if(file.type_identifier=="Folder"){
+    if(file.type_identifier.toLowerCase()=="folder"){
       setIsModalFolderOpen(true);
       setFileSelected(file);
     }
@@ -228,7 +228,7 @@ const FileManagementContent = () => {
                     rowCells={
                       <>
                         <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
-                          {getFileIcon(file.name, file.type_identifier=="Folder", 24)}
+                          {getFileIcon(file.name, file.type_identifier.toLowerCase()=="folder", 24)}
                           <EllipsisTooltip className={"w-[250px]"}>{file.name}</EllipsisTooltip>
                         </td>
                         <td className="px-4 py-3">{formatFileType(file.name)}</td>
