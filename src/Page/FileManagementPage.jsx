@@ -56,7 +56,7 @@ const FileManagementContent = () => {
   const { addToast } = useToast();
   const { setIsModalOpen } = useFileManager(); //#getFileDirectory
 
-  const { token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
+  const { user, token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
   const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
   const [lists, setLists] = useState([]);
   const [fileSelected, setFileSelected] = useState(null);
@@ -172,7 +172,7 @@ const FileManagementContent = () => {
                 C
               </div>
               <div className="flex items-center gap-1">
-                <span className="font-medium text-gray-800">HR/GA</span>
+                <span className="font-medium text-gray-800">{user?.full_name ?? "Unknown"}</span>
                 <IoIosArrowDown className="w-4 text-[#a5a5a5]" />
               </div>
             </div>
