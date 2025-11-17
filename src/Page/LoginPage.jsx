@@ -93,7 +93,7 @@ function LoginContent() {
         sessionStorage.setItem("token", auth.token);
         sessionStorage.setItem("user", JSON.stringify(user));
         setToken(auth.token);
-        setUser(JSON.stringify(user));
+        setUser(user);
 
         navigate("/dashboard");
       }

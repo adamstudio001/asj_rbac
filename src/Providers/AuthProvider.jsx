@@ -6,14 +6,21 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const getStoredUser = () => {
     try {
-      const storedUser = sessionStorage.getItem("user");
-      return storedUser ? JSON.parse(storedUser) : null;
-    } catch {
+      const raw = sessionStorage.getItem("user");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+
+      if (typeof parsed === "object" && parsed !== null) {
+        return parsed;
+      }
+
+      return null;
+    } catch (err) {
       return null;
     }
   };
 
-  const [user, setUser] = useState(getStoredUser());
+  const [user, setUser] = useState(() => getStoredUser());
   const [token, setToken] = useState(() => sessionStorage.getItem("token"));
   const [expired, setExpired] = useState(() => {
     const currentUser = getStoredUser();
