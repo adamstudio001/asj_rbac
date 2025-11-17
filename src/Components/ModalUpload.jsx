@@ -131,10 +131,29 @@ export default function ModalUpload({refreshData=()=>{},idFolder=null, token=nul
     for (const f of notUploaded) {
       const fileId = f.id;
 
+      if (f.file.size > 1 * 1024 * 1024) {
+        setFiles(prev =>
+          prev.map(fileObj =>
+            fileObj.id === fileId
+              ? {
+                  ...fileObj,
+                  uploading: false,
+                  uploaded: false,
+                  error: "error.max_size",
+                  progress: 0
+                }
+              : fileObj
+          )
+        );
+
+        addToast("error", `${f.path} — file too large (max 10MB)`);
+
+        continue; // ⬅️ skip upload
+      }
       // tandai file sedang upload
       setFiles((prev) =>
         prev.map((fileObj) =>
-          fileObj.id === fileId ? { ...fileObj, uploading: true } : fileObj
+          fileObj.id === fileId ? { ...fileObj, uploading: true, error: null } : fileObj
         )
       );
 
@@ -157,13 +176,26 @@ export default function ModalUpload({refreshData=()=>{},idFolder=null, token=nul
         );
         const res = response.data;
         if(res.error){
+          setFiles(prev =>
+            prev.map(fileObj =>
+              fileObj.id === fileId
+                ? {
+                    ...fileObj,
+                    uploading: false,
+                    uploaded: false,
+                    error: res.error,
+                    progress: 0
+                  }
+                : fileObj
+            )
+          );
           addToast("error", res.error);
         } else{
           // sukses upload
           setFiles((prev) =>
             prev.map((fileObj) =>
               fileObj.id === fileId
-                ? { ...fileObj, uploaded: true, uploading: false, progress: 100 }
+                ? { ...fileObj, uploaded: true, uploading: false, progress: 100, error: null }
                 : fileObj
             )
           );
@@ -176,7 +208,7 @@ export default function ModalUpload({refreshData=()=>{},idFolder=null, token=nul
         setFiles((prev) =>
           prev.map((fileObj) =>
             fileObj.id === fileId
-              ? { ...fileObj, uploading: false, progress: 0 }
+              ? { ...fileObj, uploading: false, progress: 0, error: "error.common" }
               : fileObj
           )
         );
@@ -190,6 +222,23 @@ export default function ModalUpload({refreshData=()=>{},idFolder=null, token=nul
   };
 
   const uploadingCount = files.filter((f) => !f.uploaded).length;
+
+  function renderError(message){
+    if(message){
+      let msg = message;
+      if(message=="error.max_size"){
+        msg = "ukuran file lebih dari 1mb";
+      } else if(message=="error.common"){
+        msg = "ada masalah teknis saaat upload";
+      }
+      return msg && <>
+        <br/>
+        <p className="text-red-500">{msg}</p>
+      </>;
+    }
+
+    return <></>
+  }
 
   return (
     <DialogModal open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -250,9 +299,12 @@ export default function ModalUpload({refreshData=()=>{},idFolder=null, token=nul
                       .filter(f => !f.uploaded)
                       .map((f) => (
                         <div key={f.id} className="mb-2">
-                          <div className="relative border border-gray-400 rounded p-2 mb-2 text-sm">
+                          <div className={`relative border ${f?.error? `border-red-400`:`border-gray-400`} rounded p-2 mb-2 text-sm`}>
                             <div className="flex justify-between">
-                              <span className="truncate">{f.path}</span>
+                              <span className="truncate">
+                                {f.path}
+                                {f?.error && renderError(f?.error)}
+                              </span>
                               <button
                                 onClick={() => handleRemove(f)}
                                 className="w-5 h-5 bg-gray-300 hover:bg-black rounded-full text-white flex justify-center items-center"
@@ -261,12 +313,12 @@ export default function ModalUpload({refreshData=()=>{},idFolder=null, token=nul
                               </button>
                             </div>
 
-                            <div className="absolute ml-[-8px] w-[100%] h-1 bg-gray-200 rounded mt-1">
+                            {!f?.error && <div className="absolute ml-[-8px] w-[100%] h-1 bg-gray-200 rounded mt-1">
                               <div
                                 className="h-1 bg-blue-500 rounded transition-all duration-200"
                                 style={{ width: `${f.progress}%` }}
                               ></div>
-                            </div>
+                            </div>}
                           </div>
                         </div>
                       ))}
@@ -284,7 +336,7 @@ export default function ModalUpload({refreshData=()=>{},idFolder=null, token=nul
                           key={f.id}
                           className="flex justify-between items-center border border-[#11AF22] border-[1.2px] rounded p-2 mb-2 text-sm"
                         >
-                          <span className="truncate">{f.path}</span>
+                          <span className="truncate">{f.path} {f?.error ?? "lah2"}</span>
                           <button
                             onClick={() => handleRemove(f)}
                             className="text-[#E41D1D] bg-[#FFF3F3] p-[6px] rounded-full"
