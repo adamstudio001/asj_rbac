@@ -14,8 +14,8 @@ import { useToast } from "@/Providers/ToastProvider";
 
 const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const location = useLocation();
-  const active = "text-[#497fff] bg-[#e5eaf7]";
-  const noactive = "text-[#656565]";
+  const active = "bg-[#272E3A1A] text-[#515560]";
+  const noactive = "bg-[#F8F8F8] text-[#515151]";
   const currentPath = location.pathname;
 
   const { logout, token, isAdminAccess, isCompanyAccess } = useAuth();
@@ -74,7 +74,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
             <li>
               <Link
                 to="/dashboard"
-                className={`flex items-center gap-3 ${["/dashboard"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                className={`flex items-center gap-3 ${["/dashboard"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                 onClick={toggleSidebar} // Tutup sidebar saat di mobile
               >
                 <LiaHomeSolid size={24} />
@@ -84,7 +84,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
             <li>
               <Link
                 to="/filemanager"
-                className={`flex items-center gap-3 ${["/filemanager"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                className={`flex items-center gap-3 ${["/filemanager"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                 onClick={toggleSidebar} // Tutup sidebar saat di mobile
               >
                 <IoFileTrayStacked size={18} />
@@ -97,7 +97,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
               <li>
                 <Link
                   to="/users"
-                  className={`flex items-center gap-3 ${["/users"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                  className={`flex items-center gap-3 ${["/users"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                   onClick={toggleSidebar} // Tutup sidebar saat di mobile
                 >
                   <FaRegUser size={18} />
@@ -107,7 +107,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
               <li>
                 <Link
                   to="/role_permissions"
-                  className={`flex items-center gap-3 ${["/role_permissions"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                  className={`flex items-center gap-3 ${["/role_permissions"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                   onClick={toggleSidebar} // Tutup sidebar saat di mobile
                 >
                   <BsPersonLock size={24} />
@@ -119,7 +119,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
             <li>
               <Link
                 to="/logs"
-                className={`flex items-center gap-3 ${["/logs"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                className={`flex items-center gap-3 ${["/logs"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                 onClick={toggleSidebar} // Tutup sidebar saat di mobile
               >
                 <IoNotificationsOutline size={24} />
@@ -129,7 +129,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
             <li>
               <Link
                 to="/settings"
-                className={`flex items-center gap-3 ${["/settings"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition`}
+                className={`flex items-center gap-3 ${["/settings"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                 onClick={toggleSidebar} // Tutup sidebar saat di mobile
               >
                 <GoGear size={24} />
@@ -141,7 +141,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
 
         <div className="flex flex-col flex-wrap gap-2">
           <hr className="border border-t border-gray-300"/>
-          <button disabled={loading} className={`flex items-center gap-3 hover:bg-[#e5eaf7] hover:text-[#497fff] p-3 rounded-lg transition text-venter`}>
+          <button disabled={loading} className={`flex items-center gap-3 hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition text-venter`}>
             <span className={`w-full text-center ${isCollapsed ? "hidden" : "block"}`} onClick={()=>onLogout()}>{loading? "Loading...":"Logout"}</span>
           </button>
         </div>

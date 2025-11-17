@@ -78,7 +78,7 @@ export function TableRowActionMenu({ refId, children, rowCells }) {
         createPortal(
           <div
             ref={menuRef}
-            className="z-[9999] bg-white border border-gray-200 rounded-lg shadow-md py-2 w-40"
+            className="z-[9999] bg-white border border-gray-200 rounded-lg shadow-md px-1 py-2 w-40"
             style={{ position: "absolute" }}
           >
             {React.Children.map(children, (child) => {

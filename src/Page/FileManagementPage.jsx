@@ -256,13 +256,13 @@ const FileManagementContent = () => {
                     }
                   >
                     <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                       onClick={() => alert("Copy")}
                     >
                       <img src={Copy} alt="copy" /> Copy
                     </button>
                     <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                       onClick={() => editHandler(file)}
                     >
                       <img src={Rename} alt="Rename" /> Rename
@@ -273,7 +273,7 @@ const FileManagementContent = () => {
                       eventInfoModal={setIsInfoModalOpen} 
                     />
                     <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                       onClick={() => {
                         setFileSelected(file);
                         setIsModalDeleteOpen(true);
