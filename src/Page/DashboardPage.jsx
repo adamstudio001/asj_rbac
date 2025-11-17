@@ -25,7 +25,7 @@ const DashboardPage = () => {
 
 const DashboardContent = () => {
   const { folderKeys } = useParams();
-  const { user } = useAuth();
+  const { user, token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
 
   const { 
     isModalOpen, 
@@ -42,7 +42,10 @@ const DashboardContent = () => {
     <>
       <Navbar renderActionModal={()=> (
         <div className="flex items-center gap-8">
-                    <button onClick={()=>setIsModalOpen(!isModalOpen)} className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition">
+                    <button onClick={()=>{
+                      alert("feature in development");
+                      // setIsModalOpen(!isModalOpen);
+                    }} className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition">
                     <LuUpload size={18}/> 
                     Upload file
                     </button>
@@ -140,7 +143,7 @@ const DashboardContent = () => {
           </div>
         </main>
 
-      <ModalUpload/>
+      <ModalUpload refreshData={()=>{}} idFolder={folderKeys} token={token} isAdmin={isAdminAccess()} isCompany={isCompanyAccess()} isUser={isUserAccess()}/>
     </>
   );
 };

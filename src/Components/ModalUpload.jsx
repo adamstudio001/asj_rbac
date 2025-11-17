@@ -14,8 +14,9 @@ import { useFileManager } from "@src/Providers/FileManagerProvider";
 import { useRef, useState } from "react";
 import { useToast } from "@src/Providers/ToastProvider";
 import { cn } from "@/lib/utils";
+import axios from "axios";
 
-export default function ModalUpload() {
+export default function ModalUpload({refreshData=()=>{},idFolder=null, token=null, isAdmin=false, isCompany=false, isUser=false}) {
   const { isModalOpen, setIsModalOpen } = useFileManager();
   const { addToast } = useToast();
 
@@ -118,49 +119,74 @@ export default function ModalUpload() {
   };
 
   // 🚀 Simulasi upload
-  const handleUploadFiles = () => {
+  const handleUploadFiles = async () => {
+    console.log(`idFolder: ${idFolder}`)
+    if (!idFolder || idFolder === null || idFolder === undefined || idFolder === Object) {
+      addToast("error", "Folder tujuan belum dipilih.");
+      throw new Error("Invalid folder ID");
+    }
+
     const notUploaded = files.filter((f) => !f.uploaded && !f.uploading);
 
-    notUploaded.forEach((f, relIndex) => {
+    for (const f of notUploaded) {
       const fileId = f.id;
+
+      // tandai file sedang upload
       setFiles((prev) =>
         prev.map((fileObj) =>
           fileObj.id === fileId ? { ...fileObj, uploading: true } : fileObj
         )
       );
 
-      const timeoutId = setTimeout(() => {
-        let progress = 0;
-        const intervalId = setInterval(() => {
-          progress += 10;
+      try {
+        const url = (isAdmin || isCompany)? 
+        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${idFolder}/file`:
+        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${idFolder}/file`;
+        const formData = new FormData();
+        formData.append("file", f.file); // ⬅️ WAJIB file field name = "file"
 
+        const response = await axios.post(
+          url,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        const res = response.data;
+        if(res.error){
+          addToast("error", res.error);
+        } else{
+          // sukses upload
           setFiles((prev) =>
             prev.map((fileObj) =>
               fileObj.id === fileId
-                ? { ...fileObj, progress: Math.min(progress, 100) }
+                ? { ...fileObj, uploaded: true, uploading: false, progress: 100 }
                 : fileObj
             )
           );
+          
+          addToast("success", `Uploaded: ${f.path}`);
+          refreshData();
+        }
+      } catch (err) {
+        // upload gagal
+        setFiles((prev) =>
+          prev.map((fileObj) =>
+            fileObj.id === fileId
+              ? { ...fileObj, uploading: false, progress: 0 }
+              : fileObj
+          )
+        );
 
-          if (progress >= 100) {
-            clearInterval(intervalId);
-            delete uploadRefs.current[fileId];
-            setFiles((prev) =>
-              prev.map((fileObj) =>
-                fileObj.id === fileId
-                  ? { ...fileObj, uploaded: true, uploading: false, progress: 100 }
-                  : fileObj
-              )
-            );
-            addToast("success", `Uploaded ${f.path}`);
-          }
-        }, 200);
-
-        uploadRefs.current[fileId] = { ...(uploadRefs.current[fileId] || {}), intervalId };
-      }, relIndex * 1000);
-
-      uploadRefs.current[fileId] = { ...(uploadRefs.current[fileId] || {}), timeoutId };
-    });
+        addToast(
+          "error",
+          `Failed: ${f.path} — ${err?.response?.data?.message || err.message}`
+        );
+      }
+    }
   };
 
   const uploadingCount = files.filter((f) => !f.uploaded).length;
@@ -177,7 +203,7 @@ export default function ModalUpload() {
         </DialogModalHeader>
 
         {/* BODY (SCROLLABLE) */}
-        <DialogModalDescription asChild className="flex flex-col overflow-y-auto scroll-custom mx-4 sm:mx-auto">
+        <DialogModalDescription asChild className="flex flex-col mx-4 sm:mx-auto">
           <div className="flex-1 max-w-lg pb-6 space-y-4">
             {/* Drag & Drop Area */}
             <div

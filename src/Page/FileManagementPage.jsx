@@ -58,6 +58,7 @@ const FileManagementContent = () => {
 
   const { user, token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
   const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
+  const [isModalRenameFileOpen, setIsModalRenameFileOpen] = useState(false);
   const [lists, setLists] = useState([]);
   const [fileSelected, setFileSelected] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -110,7 +111,9 @@ const FileManagementContent = () => {
       refreshSession();
     }
 
-    const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
+    const url = (isAdminAccess() || isCompanyAccess())? 
+    `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${fileSelected.id}`:
+    `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
     setLoading(true);
     setIsModalDeleteOpen(false);
     try {
@@ -138,6 +141,9 @@ const FileManagementContent = () => {
     if(file.type_identifier.toLowerCase()=="folder"){
       setIsModalFolderOpen(true);
       setFileSelected(file);
+    } else{
+      setIsModalRenameFileOpen(true);
+      setFileSelected(file);
     }
   }
 
@@ -156,7 +162,7 @@ const FileManagementContent = () => {
                 <BsPlusLg size={18} />
                 Folder
               </button>}
-              <button
+              {folderKeys && <button
                 onClick={() => {
                   setIsModalOpen(true);
                 }}
@@ -164,7 +170,7 @@ const FileManagementContent = () => {
               >
                 <LuUpload size={18} />
                 Upload file
-              </button>
+              </button>}
             </div>
 
             <div className="flex items-center gap-2">
@@ -366,7 +372,7 @@ const FileManagementContent = () => {
       </Dialog>
 
       {/* Modal Upload */}
-      <ModalUpload />
+      <ModalUpload refreshData={()=>loadData()} idFolder={folderKeys} token={token} isAdmin={isAdminAccess()} isCompany={isCompanyAccess()} isUser={isUserAccess()}/>
 
       {/* Modal Folder */}
       <ModalFolder
@@ -375,6 +381,14 @@ const FileManagementContent = () => {
         folderKeys={folderKeys}
         data={fileSelected}
         mode={fileSelected? "edit":"create"}
+        extraAction={()=>loadData()}
+      />
+
+      <ModalRenameFile
+        open={isModalRenameFileOpen}
+        onOpenChange={setIsModalRenameFileOpen}
+        folderKeys={folderKeys}
+        data={fileSelected}
         extraAction={()=>loadData()}
       />
 
@@ -402,6 +416,7 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
   const { addToast } = useToast();
   const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } = useAuth();
   const isEdit = mode=="edit";
+  const isRoot = !folderKeys || folderKeys === null || folderKeys === undefined || folderKeys === Object;
   
   useEffect(() => {
     reset({
@@ -429,15 +444,28 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
         },
       };
 
-      const url = (isAdminAccess() || isCompanyAccess())? 
-      (isEdit? 
-        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`:
-        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder`
-      ) : 
-      (isEdit?
-        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}`:
-        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder`
-      ) ;
+      let url = null;
+      if((isAdminAccess() || isCompanyAccess())){
+        if(isEdit){
+          url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`;
+        } else{
+          url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder`;
+        }
+      } else{
+        if(isRoot){
+          if(isEdit){
+            alert("fitur edit root folder belum ada");
+          } else{
+            url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/root/folder`;
+          }
+        } else{
+          if(isEdit){
+            url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}`
+          } else{
+            url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder`;
+          }
+        }
+      }
       
       const res = isEdit? await axios.put(url, formData, headers):await axios.post(url, formData, headers); 
       const body = res.data;
@@ -486,6 +514,122 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
                   errors={errors}
                   rules={{
                     required: "Folder name is required",
+                  }}
+                />
+              </div>
+            </DialogModalDescription>
+
+            <DialogModalFooter className="px-6 pb-6 items-center">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full max-w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+              >
+                {loading? "Sending...":"Save"}
+              </Button>
+            </DialogModalFooter>
+          </form>
+        </DialogModalHeader>
+      </DialogModalContent>
+    </DialogModal>
+  );
+}
+
+export function ModalRenameFile({ open, onOpenChange, folderKeys, data, extraAction = function(){} }) {
+  const [loading, setLoading] = useState(false);
+  
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: {
+      folder_name: data?.name ?? "",
+    },
+  });
+
+  const { addToast } = useToast();
+  const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } = useAuth();
+  
+  useEffect(() => {
+    reset({
+      folder_name: data?.name ?? "",
+    });
+  }, [data, reset]);
+
+  const onSubmit = async (values) => {
+    console.log(values)
+    if(isExpired()){
+      refreshSession();
+    }
+
+    setLoading(true);
+    // setErrorMessage("");
+    try {
+      console.log(values)
+      const formData = {
+        "folder_name": values.folder_name,
+      };
+      const headers = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+
+      const url = (isAdminAccess() || isCompanyAccess())? 
+      `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`:
+      `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}` ;
+      
+      const res = await axios.put(url, formData, headers); 
+      const body = res.data;
+      console.log(body)
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+        onOpenChange(false);
+        extraAction();
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+
+    // reset();
+    // onOpenChange(false);
+    // addToast("success", "Save successfully");
+  };
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+    }
+  }, [open, reset]);
+
+  return (
+    <DialogModal open={open} onOpenChange={onOpenChange}>
+      <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-full sm:max-w-5xl"> {/*max-h-[min(640px,80vh)]*/}
+        <DialogModalHeader>
+          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+            Rename File
+          </DialogModalTitle>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto scroll-custom">
+            <DialogModalDescription asChild>
+              <div className="px-6 pb-8 space-y-8">
+                <CustomInput
+                  label="File Name"
+                  name="folder_name"
+                  register={register}
+                  errors={errors}
+                  rules={{
+                    required: "File name is required",
                   }}
                 />
               </div>
