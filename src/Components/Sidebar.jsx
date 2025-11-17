@@ -59,7 +59,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
     <>
       {/* Sidebar */}
       <div
-        className={`fixed lg:relative top-0 left-0 h-[-webkit-fill-available] overflow-y-auto scroll-custom bg-gray-100 border-r-2 border-gray-100 transition-all duration-300 ease-in-out z-50 p-3 flex flex-col justify-between
+        className={`fixed lg:relative top-0 left-0 h-[-webkit-fill-available] overflow-y-auto scroll-custom bg-[#E3E3E3] border-r-2 border-[#E3E3E3] transition-all duration-300 ease-in-out z-50 p-3 flex flex-col justify-between
           ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 
           ${isCollapsed ? "w-18" : "w-64"}`}
       >
