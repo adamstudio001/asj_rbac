@@ -131,7 +131,7 @@ export function filterAndSortFiles(files, activeFilter) {
     // Filter ekstensi
     if (activeFilter?.group?.extensions?.length > 0) {
       const ext = file.name.split('.').pop().toLowerCase();
-      if (file.type_identifier!="Folder" && activeFilter?.group?.extensions?.includes(ext)) {
+      if (file.type_identifier.toLowerCase()!="folder" && activeFilter?.group?.extensions?.includes(ext)) {
         return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
       }
       return false;
@@ -142,7 +142,7 @@ export function filterAndSortFiles(files, activeFilter) {
   });
 
   // Sort folder ke atas
-  return [...filteredFiles].sort((a, b) => ((a.type_identifier=="Folder") === (b.type_identifier=="Folder") ? 0 : a.type_identifier=="Folder" ? -1 : 1));
+  return [...filteredFiles].sort((a, b) => ((a.type_identifier.toLowerCase()=="folder") === (b.type_identifier.toLowerCase()=="folder") ? 0 : a.type_identifier=="Folder" ? -1 : 1));
 }
 
 export const isEmpty = (str) => !str || str.trim().length === 0 || str === undefined || str===null;

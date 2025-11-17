@@ -111,13 +111,25 @@ const FileManagementContent = () => {
       refreshSession();
     }
 
-    const url = (isAdminAccess() || isCompanyAccess())? 
-    `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${fileSelected.id}`:
-    `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
+    let urlDelete = null; //[check] masih belum bedain antara delete folder dengan file
+    if(fileSelected.type_identifier.toLowerCase()=="folder"){
+      if(isAdminAccess() || isCompanyAccess()){
+        urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;    
+      } else{
+        urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
+      }
+    } else{
+      if(isAdminAccess() || isCompanyAccess()){
+        urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/file/${fileSelected.id}`;    
+      } else{
+        urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/file/${fileSelected.id}`;
+      }
+    }
+
     setLoading(true);
     setIsModalDeleteOpen(false);
     try {
-      const request = await axios.delete(url, {
+      const request = await axios.delete(urlDelete, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const response = request.data;
@@ -579,9 +591,9 @@ export function ModalRenameFile({ open, onOpenChange, folderKeys, data, extraAct
         },
       };
 
-      const url = (isAdminAccess() || isCompanyAccess())? 
-      `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`:
-      `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}` ;
+      const url = (isAdminAccess() || isCompanyAccess())? //[check] masih salah url
+      `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/file/${data.id}`:
+      `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/file/${data.id}` ;
       
       const res = await axios.put(url, formData, headers); 
       const body = res.data;
