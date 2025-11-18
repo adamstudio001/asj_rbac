@@ -34,6 +34,8 @@ import {
 } from "@/Components/ui/DialogModal";
 import CustomInput from "@/Components/CustomInput";
 import { Button } from "@/Components/ui/Button";
+import { IoDownload } from "react-icons/io5";
+import { Download } from "lucide-react";
 
 const FileManagementPage = () => {
   return (
@@ -59,6 +61,7 @@ const FileManagementContent = () => {
   const { user, token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
   const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
   const [isModalRenameFileOpen, setIsModalRenameFileOpen] = useState(false);
+  const [isModalLoading, setIsModalLoading] = useState(false);
   const [lists, setLists] = useState([]);
   const [fileSelected, setFileSelected] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -107,6 +110,11 @@ const FileManagementContent = () => {
   });
 
   async function deleteHandler(){
+    if(!fileSelected){
+      addToast("error", "belum pilih file/folder yang di hapus");
+      return;
+    }
+
     if(isExpired()){
       refreshSession();
     }
@@ -150,12 +158,65 @@ const FileManagementContent = () => {
   }
 
   function editHandler(file){
+    if(!file){
+      addToast("error", "belum pilih file/folder yang di edit");
+      return;
+    }
+
     if(file.type_identifier.toLowerCase()=="folder"){
       setIsModalFolderOpen(true);
       setFileSelected(file);
     } else{
       setIsModalRenameFileOpen(true);
       setFileSelected(file);
+    }
+  }
+
+  async function downloadHandler(file) {
+    if(!file){
+      addToast("error", "belum pilih file/folder yang di download");
+      return;
+    }
+
+    if (isExpired()) {
+      await refreshSession();
+    }
+
+    const urlDownload = (isAdminAccess() || isCompanyAccess())
+      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${file.id}/url-download`
+      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${file.id}/url-download`;
+
+    const newTab = window.open("about:blank");
+    if (!newTab) {
+      addToast("error", "Popup diblokir. Izinkan pop-up untuk website ini.");
+      return;
+    }
+
+    setIsModalLoading(true);
+
+    try {
+      const { data: response } = await axios.get(urlDownload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response?.success) {
+        newTab.location.href = response.data.download_url;
+      } else {
+        newTab.close();
+        addToast("error", response?.error);
+      }
+
+    } catch (err) {
+      newTab.close();
+
+      addToast(
+        "error",
+        err?.response?.data?.error ||
+        err?.message ||
+        "Terjadi masalah saat mengambil file."
+      );
+    } finally {
+      setIsModalLoading(false);
     }
   }
 
@@ -260,6 +321,12 @@ const FileManagementContent = () => {
                       onClick={() => alert("Copy")}
                     >
                       <img src={Copy} alt="copy" /> Copy
+                    </button>
+                    <button
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                      onClick={() => downloadHandler(file)}
+                    >
+                      <Download size={18}/> Download
                     </button>
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
@@ -403,6 +470,8 @@ const FileManagementContent = () => {
         data={fileSelected}
         extraAction={()=>loadData()}
       />
+
+      <ModalLoader show={isModalLoading}/>
 
     </>
   );
@@ -660,5 +729,19 @@ export function ModalRenameFile({ open, onOpenChange, folderKeys, data, extraAct
         </DialogModalHeader>
       </DialogModalContent>
     </DialogModal>
+  );
+}
+
+export function ModalLoader({ show = false}) {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-full px-6 py-3 flex items-center gap-3 shadow-xl">
+        <span className="text-gray-700 font-medium">Loading...</span>
+
+        <div className="w-6 h-6 border-4 border-gray-300 border-t-[#1e293b] rounded-full animate-spin"></div>
+      </div>
+    </div>
   );
 }
