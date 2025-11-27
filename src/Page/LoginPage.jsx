@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useToast } from "@/Providers/ToastProvider";
-import { cn } from "@/lib/utils";
+import { cn, getInformation } from "@/lib/utils";
 import { useAuth } from "@/Providers/AuthProvider";
 
 const images = [
@@ -71,9 +71,12 @@ function LoginContent() {
     setLoading(true);
     // setErrorMessage("");
     try {
+      const info = await getInformation();
+      console.log(info);
+
       const res = await axios.post("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/login", data); 
       const body = res.data;
-      console.log(body)
+      console.log(body);
 
       if (body.error) {
         addToast("error", body.error);
