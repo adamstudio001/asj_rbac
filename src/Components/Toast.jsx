@@ -22,8 +22,12 @@ export default function Toast({ type = "success", message, onClose }) {
       className={`flex items-center justify-between w-[300px] rounded-xl px-4 py-3 shadow-md ${styles[type]}`}
     >
       <div className="flex items-center gap-2">
-        <Info size={18} className={iconColor[type]} />
-        <span className="font-inter text-[14px]">{message}</span>
+        <Info
+          size={20}
+          strokeWidth={2}
+          className={`${iconColor[type]} shrink-0`}
+        />
+        <span className="font-inter text-[14px] break-all whitespace-pre-wrap">{message}</span>
       </div>
       <button onClick={onClose}>
         <X size={16} className="text-gray-500 hover:text-gray-700" />
