@@ -404,7 +404,9 @@ const FileManagementContent = () => {
 
   function renderPaging(){
     if(isLoad){
-      return  <div className="skeleton h-4 w-32"></div>;
+      return  <div className="flex items-center justify-center">
+          <div className="skeleton h-4 w-32 mt-8"></div>
+        </div>;
     } else if(error){
       return <></>;
     }

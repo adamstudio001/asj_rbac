@@ -42,6 +42,8 @@ const UserPageContent = () => {
   const { search, setSearch } = useSearch();
   const { addToast } = useToast();
 
+  const [isLoad, setIsLoad] = useState(false);
+  const [error, setError] = useState(false);
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -103,44 +105,46 @@ const UserPageContent = () => {
     }
 
     if(isAdminAccess() || isCompanyAccess()){
-      setLoading(true);
-      try {
-        const [usersRes, jobsRes, branchesRes] = await Promise.allSettled([
-          axios.get(`https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user?page=${page}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+      setIsLoad(true);
+      setTimeout(async ()=>{
+        try {
+          const [usersRes, jobsRes, branchesRes] = await Promise.allSettled([
+            axios.get(`https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user?page=${page}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
 
-        const users =
-          usersRes.status === "fulfilled"
-            ? usersRes.value.data || null
-            : null;
+          const users =
+            usersRes.status === "fulfilled"
+              ? usersRes.value.data || null
+              : null;
 
-        const jobs =
-          jobsRes.status === "fulfilled"
-            ? jobsRes.value.data?.data || []
-            : [];
-        const branches =
-          branchesRes.status === "fulfilled"
-            ? branchesRes.value.data?.data || []
-            : [];
+          const jobs =
+            jobsRes.status === "fulfilled"
+              ? jobsRes.value.data?.data || []
+              : [];
+          const branches =
+            branchesRes.status === "fulfilled"
+              ? branchesRes.value.data?.data || []
+              : [];
 
-        setUsers(users?.data ?? []);
-        setTotalPages(users?.last_page ?? 1);
-        setJobs(jobs);
-        setBranches(branches);
-      } catch (err) {
-        console.error(err);
-        addToast("error", "ada masalah pada aplikasi");
-      } finally {
-        setLoading(false);
-      }
+          setUsers(users?.data ?? []);
+          setTotalPages(users?.last_page ?? 1);
+          setJobs(jobs);
+          setBranches(branches);
+        } catch (err) {
+          console.error(err);
+          addToast("error", "ada masalah pada aplikasi");
+        } finally {
+          setIsLoad(false);
+        }
+      }, 1500)
     }
   }
 
@@ -216,6 +220,169 @@ const UserPageContent = () => {
     user.full_name.toLowerCase().includes(search.toLowerCase())
   );
 
+  function renderTable(){
+    if(isLoad){
+      return  <table className="w-full table-auto border-collapse">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-3 w-10"></th>
+                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left min-w-0 w-[200px]">
+                      Name
+                    </th>
+                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                      Address
+                    </th>
+                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                      Position
+                    </th>
+                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                      Last Seen
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array(3).fill(null).map((_, i) => (
+                    <tr key={i}>
+                      <td className="border px-4 py-2">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>;
+    }
+    
+    return <table className="w-full text-left text-sm">
+            <thead className="bg-[#F3F3F3]">
+              <tr className="border border-gray-200">
+                  <th className="px-4 py-3 w-10"></th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left min-w-0 w-[200px]">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                    Address
+                  </th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                    Position
+                  </th>
+                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                    Last Seen
+                  </th>
+              </tr>
+            </thead>
+            <tbody> 
+              {error? 
+                    <tr>
+                      <td colSpan={5} className="text-center flex-col gap-2">
+                        <p>{error}</p>
+                        <button
+                            className="
+                              px-3 py-1
+                              rounded
+                              border-0
+                              hover:border hover:border-gray-400
+                              active:border active:border-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-gray-400
+                              transition-all duration-150
+                            "
+                            onClick={()=>loadData()}
+                          >
+                            Klik muat ulang
+                          </button>
+                      </td>
+                    </tr> : 
+                    filteredUsers.map((user) => (
+                      <tr
+                        key={user.id}
+                        className="hover:bg-gray-50 transition border-b border-gray-200"
+                      >
+                        <td className="px-4 py-3">
+                          <TableActionMenu>
+                            {/* Edit User */}
+                            <button
+                              className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setIsModalOpen(true);
+                              }}
+                            >
+                              <img src={user_edit} alt="download" className="w-4 h-4 hover:text-white"/>
+                              Edit User
+                            </button>
+
+                            {/* Reset Password */}
+                            <button
+                              className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                              onClick={() =>
+                                alert(`Reset password for ${user.full_name}`)
+                              }
+                            >
+                              <img src={reset} alt="download" className="w-4 h-4"/>
+                              Reset Password
+                            </button>
+
+                            {/* Delete User */}
+                            <button
+                              className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                              onClick={() => {
+                                setIsModalDeleteOpen(true);
+                                setSelectedUser(user);
+                              }}
+                            >
+                              <img src={trash} alt="download" className="w-4 h-4"/>
+                              Delete User
+                            </button>
+                          </TableActionMenu>
+                        </td>
+
+                        <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
+                          <EllipsisTooltip className={"w-[200px]"}>{user.full_name}</EllipsisTooltip>
+                        </td>
+                        <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
+                          {user.address}
+                        </td>
+                        <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
+                          {user.employment.map(e => getJobPosition(e.job_identifier)?.label ?? "")}
+                        </td>
+                        <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
+                          {formatLastSeen(user?.lastLogin?.start, user?.lastLogin?.end)}
+                        </td>
+                      </tr>
+                    ))
+              }
+            </tbody>
+          </table>
+  }
+
+  function renderPaging(){
+      if(isLoad){
+        return  <div className="flex items-center justify-center">
+          <div className="skeleton h-4 w-32 mt-8"></div>
+        </div>;
+      } else if(error){
+        return <></>;
+      }
+  
+      return <Pagination
+          className="mt-8"
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+    }
+
   return (
     <>
       <Navbar
@@ -238,98 +405,10 @@ const UserPageContent = () => {
 
       <main className="flex-1 items-center p-6 overflow-auto">
         <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
-          {loading? 
-            <div className="flex items-center justify-center h-screen">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-            </div> : 
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[#F3F3F3]">
-                <tr className="border border-gray-200">
-                  <th className="px-4 py-3 w-10"></th>
-                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left min-w-0 w-[200px]">
-                    Name
-                  </th>
-                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                    Address
-                  </th>
-                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                    Position
-                  </th>
-                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                    Last Seen
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="hover:bg-gray-50 transition border-b border-gray-200"
-                  >
-                    <td className="px-4 py-3">
-                      <TableActionMenu>
-                        {/* Edit User */}
-                        <button
-                          className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setIsModalOpen(true);
-                          }}
-                        >
-                          <img src={user_edit} alt="download" className="w-4 h-4 hover:text-white"/>
-                          Edit User
-                        </button>
-
-                        {/* Reset Password */}
-                        <button
-                          className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                          onClick={() =>
-                            alert(`Reset password for ${user.full_name}`)
-                          }
-                        >
-                          <img src={reset} alt="download" className="w-4 h-4"/>
-                          Reset Password
-                        </button>
-
-                        {/* Delete User */}
-                        <button
-                          className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                          onClick={() => {
-                            setIsModalDeleteOpen(true);
-                            setSelectedUser(user);
-                          }}
-                        >
-                          <img src={trash} alt="download" className="w-4 h-4"/>
-                          Delete User
-                        </button>
-                      </TableActionMenu>
-                    </td>
-
-                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                      <EllipsisTooltip className={"w-[200px]"}>{user.full_name}</EllipsisTooltip>
-                    </td>
-                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                      {user.address}
-                    </td>
-                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                      {user.employment.map(e => getJobPosition(e.job_identifier)?.label ?? "")}
-                    </td>
-                    <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
-                      {formatLastSeen(user?.lastLogin?.start, user?.lastLogin?.end)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          }
+          {renderTable()}
         </div>
 
-        <Pagination
-          className="mt-8"
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        {renderPaging()}
       </main>
 
       {/* Delete Confirmation Modal */}
@@ -381,7 +460,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create", jo
   });
 
   const { addToast } = useToast();
-  const { token } = useAuth();
+  const { token, isExpired } = useAuth();
   
   useEffect(() => {
     reset({
