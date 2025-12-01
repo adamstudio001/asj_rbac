@@ -217,11 +217,11 @@ const FileManagementContent = () => {
       ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${file.id}/url-download`
       : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${file.id}/url-download`;
 
-    const newTab = window.open("about:blank");
-    if (!newTab) {
-      addToast("error", "Popup diblokir. Izinkan pop-up untuk website ini.");
-      return;
-    }
+    // const newTab = window.open("about:blank");
+    // if (!newTab) {
+    //   addToast("error", "Popup diblokir. Izinkan pop-up untuk website ini.");
+    //   return;
+    // }
 
     setIsModalLoading(true);
 
@@ -231,14 +231,34 @@ const FileManagementContent = () => {
       });
 
       if (response?.success) {
-        newTab.location.href = response.data.download_url;
+        const urlTarget = response.data.download_url;
+
+        const blobResponse = await axios.get(urlTarget, {
+          responseType: "blob",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const blob = new Blob([blobResponse.data]);
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = blobUrl;
+
+        // fallback nama file
+        a.download = file.name || "downloaded_file";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        // bersihkan
+        window.URL.revokeObjectURL(blobUrl);
       } else {
-        newTab.close();
+        // newTab.close();
         addToast("error", response?.error);
       }
 
     } catch (err) {
-      newTab.close();
+      // newTab.close();
 
       addToast(
         "error",
@@ -398,7 +418,7 @@ const FileManagementContent = () => {
         renderActionModal={() => (
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4">
-              {(!isRoot || isUserAccess()) && <button
+              {(!isRoot || (isUserAccess() || isCompanyAccess())) && <button
                 onClick={() => {
                   setIsModalFolderOpen(true);
                 }}
