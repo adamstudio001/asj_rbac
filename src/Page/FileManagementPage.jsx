@@ -63,36 +63,67 @@ const FileManagementContent = () => {
   const [isModalRenameFileOpen, setIsModalRenameFileOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [lists, setLists] = useState([]);
+  const [listsPath, setListsPath] = useState([]);
   const [fileSelected, setFileSelected] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isLoad, setIsLoad] = useState(false);
+  const [error, setError] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
 
   async function loadData() {
-    if(isExpired()){
+    if (isExpired()) {
       refreshSession();
     }
 
-    const url = (isAdminAccess() || isCompanyAccess())? 
-    `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/${!isRoot? `storage/${folderKeys}`:`storage`}?order_by[]=name&sort_by[]=asc`:
-    `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/${!isRoot? `storage/${folderKeys}`:`storage`}?order_by[]=name&sort_by[]=asc`;
-    setLoading(true);
-    try {
-      const request = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const response = request.data;
+    const baseUrl = (isAdminAccess() || isCompanyAccess())
+      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
+      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
 
-      if(response?.success){
-        setLists(response?.data ?? []);
-        setTotalPages(response?.last_page ?? 1);
+    const url = `${baseUrl}/${!isRoot ? `storage/${folderKeys}` : `storage`}?order_by[]=name&sort_by[]=asc`;
+
+    // --- Breadcrumb URL hanya jika folderKeys punya nilai ---
+    const hasFolder = folderKeys !== undefined && folderKeys !== null && folderKeys !== "";
+    const urlBreadcrumb = hasFolder ? `${baseUrl}/storage/${folderKeys}/path` : null;
+
+    setIsLoad(true);
+
+    setTimeout(async () => {
+      try {
+        // --- Buat array promise dinamis ---
+        const promises = [
+          axios.get(url, { headers: { Authorization: `Bearer ${token}` } })
+        ];
+
+        if (hasFolder) {
+          promises.push(
+            axios.get(urlBreadcrumb, { headers: { Authorization: `Bearer ${token}` } })
+          );
+        } else {
+          // Push resolved promise berisi array kosong untuk breadcrumb
+          promises.push(Promise.resolve({ data: { success: true, data: [] } }));
+        }
+
+        // === Jalankan paralel ===
+        const [resList, resBreadcrumb] = await Promise.all(promises);
+
+        const dataList = resList.data;
+        const dataBreadcrumb = resBreadcrumb.data;
+
+        if (!dataList?.success || !dataBreadcrumb?.success) {
+          throw new Error("One of the API responses returned unsuccessful status.");
+        }
+
+        setLists(dataList?.data ?? []);
+        setTotalPages(dataList?.last_page ?? 1);
+        setListsPath(dataBreadcrumb?.data ?? []);
+
+      } catch (err) {
+        console.error(err);
+        setError("Terjadi kesalahan saat memuat data.");
+      } finally {
+        setIsLoad(false);
       }
-      console.log(response.data);
-    } catch (err) {
-      console.error(err);
-      // addToast("error", "ada masalah pada aplikasi");
-    } finally {
-      setLoading(false);
-    }
+    }, 1500);
   }
 
   useEffect(() => {
@@ -220,6 +251,147 @@ const FileManagementContent = () => {
     }
   }
 
+  function renderBreadCrumb(){
+    if(isLoad){
+      return  <div className="skeleton h-4 w-32"></div>;
+    } else if(error){
+      return <></>;
+    }
+
+    return <BreadcrumbFolder 
+            lists={listsPath}
+            onNavigate={(key) => {
+              if (key) navigate(`/filemanager/${key}`);
+              else navigate(`/filemanager`);
+            }}
+          />;
+  }
+  function renderTable(){
+    if(isLoad){
+      return  <table className="w-full table-auto border-collapse">
+                <thead>
+                  <tr>
+                    <th className="border px-4 py-2">File Name</th>
+                    <th className="border px-4 py-2">File Type</th>
+                    <th className="border px-4 py-2">Last Modified</th>
+                    <th className="border px-4 py-2">File Size</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array(3).fill(null).map((_, i) => (
+                    <tr key={i}>
+                      <td className="border px-4 py-2">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>;
+    }
+    
+    return <table className="w-full text-left text-sm">
+            <thead className="bg-[#F3F3F3]">
+              <tr className="border border-gray-200">
+                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B] w-[250px]">File Name</th>
+                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">File Type</th>
+                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">Last Modified</th>
+                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">File Size</th>
+              </tr>
+            </thead>
+            <tbody> 
+              {error? 
+                    <tr>
+                      <td colSpan={5} className="text-center flex-col gap-2">
+                        <p>{error}</p>
+                        <button
+                            className="
+                              px-3 py-1
+                              rounded
+                              border-0
+                              hover:border hover:border-gray-400
+                              active:border active:border-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-gray-400
+                              transition-all duration-150
+                            "
+                            onClick={()=>loadData()}
+                          >
+                            Klik muat ulang
+                          </button>
+                      </td>
+                    </tr> : 
+                    sortedFiles.map((file) => 
+                    <TableRowActionMenu
+                      key={file.id}
+                      refId={file.id}
+                      rowCells={
+                        <>
+                          <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
+                            {getFileIcon(file.name, file.type_identifier.toLowerCase()=="folder", 24)}
+                            <EllipsisTooltip className={"w-[250px]"}>{file.name}</EllipsisTooltip>
+                          </td>
+                          <td className="px-4 py-3">{formatFileType(file.name)}</td>
+                          <td className="px-4 py-3">{formatDate(file.updated_datetime)}</td>
+                          <td className="px-4 py-3">{formatFileSize(file.size)}</td>
+                        </>
+                      }
+                    >
+                      <button
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                        onClick={() => alert("Copy")}
+                      >
+                        <img src={Copy} alt="copy" /> Copy
+                      </button>
+                      <button
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                        onClick={() => downloadHandler(file)}
+                      >
+                        <Download size={18}/> Download
+                      </button>
+                      <button
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                        onClick={() => editHandler(file)}
+                      >
+                        <img src={Rename} alt="Rename" /> Rename
+                      </button>
+                      <FileInfoPopper 
+                        file={file} 
+                        changeFile={setSelectedFile} 
+                        eventInfoModal={setIsInfoModalOpen} 
+                      />
+                      <button
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                        onClick={() => {
+                          setFileSelected(file);
+                          setIsModalDeleteOpen(true);
+                        }}
+                      >
+                        <img src={Trash} alt="Trash" /> Remove
+                      </button>
+                    </TableRowActionMenu>
+              )}
+            </tbody>
+          </table>
+  }
+
+  function renderPaging(){
+    if(isLoad){
+      return  <div className="skeleton h-4 w-32"></div>;
+    } else if(error){
+      return <></>;
+    }
+
+    return <Pagination className="mt-8" currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+  }
+
   return (
     <>
       <Navbar
@@ -281,80 +453,12 @@ const FileManagementContent = () => {
         </div>
 
         <div className="w-full overflow-x-scroll scroll-custom rounded-lg space-y-6">
-          <BreadcrumbFolder 
-            lists={lists}
-            currentKey={folderKeys || null}
-            onNavigate={(key) => {
-              if (key) navigate(`/filemanager/${key}`);
-              else navigate(`/filemanager`);
-            }}
-          />
+          {renderBreadCrumb()}
 
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#F3F3F3]">
-              <tr className="border border-gray-200">
-                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B] w-[250px]">File Name</th>
-                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">File Type</th>
-                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">Last Modified</th>
-                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">File Size</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedFiles.map((file) => 
-                  <TableRowActionMenu
-                    key={file.id}
-                    refId={file.id}
-                    rowCells={
-                      <>
-                        <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
-                          {getFileIcon(file.name, file.type_identifier.toLowerCase()=="folder", 24)}
-                          <EllipsisTooltip className={"w-[250px]"}>{file.name}</EllipsisTooltip>
-                        </td>
-                        <td className="px-4 py-3">{formatFileType(file.name)}</td>
-                        <td className="px-4 py-3">{formatDate(file.updated_datetime)}</td>
-                        <td className="px-4 py-3">{formatFileSize(file.size)}</td>
-                      </>
-                    }
-                  >
-                    <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                      onClick={() => alert("Copy")}
-                    >
-                      <img src={Copy} alt="copy" /> Copy
-                    </button>
-                    <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                      onClick={() => downloadHandler(file)}
-                    >
-                      <Download size={18}/> Download
-                    </button>
-                    <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                      onClick={() => editHandler(file)}
-                    >
-                      <img src={Rename} alt="Rename" /> Rename
-                    </button>
-                    <FileInfoPopper 
-                      file={file} 
-                      changeFile={setSelectedFile} 
-                      eventInfoModal={setIsInfoModalOpen} 
-                    />
-                    <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                      onClick={() => {
-                        setFileSelected(file);
-                        setIsModalDeleteOpen(true);
-                      }}
-                    >
-                      <img src={Trash} alt="Trash" /> Remove
-                    </button>
-                  </TableRowActionMenu>
-              )}
-            </tbody>
-          </table>
+          {renderTable()}
         </div>
 
-        <Pagination className="mt-8" currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        {renderPaging()}
       </main>
 
       {/* Modal Delete */}
