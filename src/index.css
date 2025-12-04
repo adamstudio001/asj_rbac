@@ -8,6 +8,23 @@
 @custom-variant dark (&:is(.dark *));
 
 @layer utilities {
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(200,200,200,0.2) 0%, rgba(200,200,200,0.5) 50%, rgba(200,200,200,0.2) 100%);
+  animation: shimmerMove 1s linear infinite;
+}
+
+
+@keyframes shimmerMove {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(250%); }
+}
+
+
+.animate-shimmer-red {
+  background: linear-gradient(90deg, rgba(255,80,80,0.2) 0%, rgba(255,0,0,0.6) 50%, rgba(255,80,80,0.2) 100%);
+  animation: shimmerMove 0.9s linear infinite;
+}
+
   /* Skeleton dasar: box abu-abu */
 .skeleton {
   position: relative;

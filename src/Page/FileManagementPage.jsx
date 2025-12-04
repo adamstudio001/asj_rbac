@@ -5,7 +5,7 @@ import { useSearch } from "@src/Providers/SearchProvider";
 import { IoIosArrowDown } from "react-icons/io";
 import { LuUpload } from "react-icons/lu";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
-import { filterAndSortFiles, formatDate, formatFileSize, formatFileType, getFileIcon, isEmpty } from "../Common/Utils";
+import { buildHeaders, filterAndSortFiles, formatDate, formatFileSize, formatFileType, getFileIcon, isEmpty } from "../Common/Utils";
 import { useToast } from "@/Providers/ToastProvider";
 import ModalUpload from "@/Components/ModalUpload";
 import { TableRowActionMenu } from "@/Components/TableRowActionMenu";
@@ -168,8 +168,11 @@ const FileManagementContent = () => {
     setLoading(true);
     setIsModalDeleteOpen(false);
     try {
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
       const request = await axios.delete(urlDelete, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: headers
       });
       const response = request.data;
 
@@ -226,9 +229,16 @@ const FileManagementContent = () => {
     setIsModalLoading(true);
 
     try {
-      const { data: response } = await axios.get(urlDownload, {
-        headers: { Authorization: `Bearer ${token}` },
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const { data: response } = await axios.post(urlDownload, {}, {
+        headers: headers
       });
+      console.log(response, {
+          responseType: "blob",
+          headers: { Authorization: `Bearer ${token}` },
+      })
 
       if (response?.success) {
         const urlTarget = response.data.download_url;
@@ -423,6 +433,7 @@ const FileManagementContent = () => {
               {(!isRoot || (isUserAccess() || isCompanyAccess())) && <button
                 onClick={() => {
                   setIsModalFolderOpen(true);
+                  setFileSelected(null);
                 }}
                 className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
               >
@@ -577,7 +588,13 @@ const FileManagementContent = () => {
       </Dialog>
 
       {/* Modal Upload */}
-      <ModalUpload refreshData={()=>loadData()} idFolder={folderKeys} token={token} isAdmin={isAdminAccess()} isCompany={isCompanyAccess()} isUser={isUserAccess()}/>
+      <ModalUpload 
+        refreshData={()=>loadData()} 
+        idFolder={folderKeys} 
+        token={token} 
+        isAdmin={isAdminAccess()} 
+        isCompany={isCompanyAccess()} 
+        isUser={isUserAccess()}/>
 
       {/* Modal Folder */}
       <ModalFolder
@@ -632,7 +649,6 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
   }, [data, reset]);
 
   const onSubmit = async (values) => {
-    console.log(values)
     if(isExpired()){
       refreshSession();
     }
@@ -644,13 +660,7 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
       const formData = {
         "folder_name": values.folder_name,
       };
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      };
-
+      
       let url = null;
       if((isAdminAccess() || isCompanyAccess())){
         if(isEdit){
@@ -674,7 +684,14 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
         }
       }
       
-      const res = isEdit? await axios.put(url, formData, headers):await axios.post(url, formData, headers); 
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const res = isEdit? await axios.put(url, formData, {
+        headers: headers
+      }):await axios.post(url, formData, {
+        headers: headers
+      }); 
       const body = res.data;
       console.log(body)
 
@@ -753,7 +770,7 @@ export function ModalRenameFile({ open, onOpenChange, folderKeys, data, extraAct
     reset,
   } = useForm({
     defaultValues: {
-      folder_name: data?.name ?? "",
+      file_name: data?.name ?? "",
     },
   });
 
@@ -762,12 +779,11 @@ export function ModalRenameFile({ open, onOpenChange, folderKeys, data, extraAct
   
   useEffect(() => {
     reset({
-      folder_name: data?.name ?? "",
+      file_name: data?.name ?? "",
     });
   }, [data, reset]);
 
   const onSubmit = async (values) => {
-    console.log(values)
     if(isExpired()){
       refreshSession();
     }
@@ -777,20 +793,18 @@ export function ModalRenameFile({ open, onOpenChange, folderKeys, data, extraAct
     try {
       console.log(values)
       const formData = {
-        "folder_name": values.folder_name,
+        "file_name": values.file_name,
       };
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      };
-
       const url = (isAdminAccess() || isCompanyAccess())? //[check] masih salah url
       `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/file/${data.id}`:
       `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/file/${data.id}` ;
       
-      const res = await axios.put(url, formData, headers); 
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const res = await axios.put(url, formData, {
+        headers: headers
+      }); 
       const body = res.data;
       console.log(body)
 
@@ -832,7 +846,7 @@ export function ModalRenameFile({ open, onOpenChange, folderKeys, data, extraAct
               <div className="px-6 pb-8 space-y-8">
                 <CustomInput
                   label="File Name"
-                  name="folder_name"
+                  name="file_name"
                   register={register}
                   errors={errors}
                   rules={{

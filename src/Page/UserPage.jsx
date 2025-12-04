@@ -21,7 +21,7 @@ import {
   DialogModalTrigger,
 } from "@/Components/ui/DialogModal";
 import { useForm, Controller } from "react-hook-form";
-import { formatLastSeen, isEmpty } from "@/Common/Utils";
+import { buildHeaders, formatLastSeen, isEmpty } from "@/Common/Utils";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import WhatsappInput from "@/Components/WhatsappInput";
 import CustomInput from "@/Components/CustomInput";
@@ -45,8 +45,8 @@ const UserPageContent = () => {
   const [isLoad, setIsLoad] = useState(false);
   const [error, setError] = useState(false);
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
-  const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -180,14 +180,12 @@ const UserPageContent = () => {
       setLoading(true);
       // setErrorMessage("");
       try {
-        const headers = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        };
+        const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+        const headers = buildHeaders(info, token);
 
-        const res = await axios.delete(`https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${selectedUser?.id ?? 0}`, headers); 
+        const res = await axios.delete(`https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${selectedUser?.id ?? 0}`, {
+          headers: headers
+        }); 
         const body = res.data;
         console.log(body)
 
@@ -212,6 +210,7 @@ const UserPageContent = () => {
   };
 
   useEffect(() => {
+    console.log(sessionStorage.getItem("info"));
     setSearch("");
     loadData();
   }, []);
@@ -381,7 +380,7 @@ const UserPageContent = () => {
           totalPages={totalPages}
           onPageChange={setPage}
         />
-    }
+  }
 
   return (
     <>
@@ -460,7 +459,7 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create", jo
   });
 
   const { addToast } = useToast();
-  const { token, isExpired } = useAuth();
+  const { token, isExpired, refreshSession } = useAuth();
   
   useEffect(() => {
     reset({
@@ -493,35 +492,45 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create", jo
   }
 
   const onSubmit = async (values) => {
-    console.log(values)
-    if(isExpired()){
+    if (isExpired()) {
       refreshSession();
     }
-    
+
     setLoading(true);
-    // setErrorMessage("");
+
     try {
-      console.log(values)
+      console.log(values);
       const formData = {
-        "first_name": values.firstName,
-        "last_name": values.lastName,
-        "password": values.password,
-        "whatsapp_number": values.whatsapp,
-        "email": values.email,
-        "address": values.address,
-        "job_identifier": values.jobPosition?.identifier ?? "",
-        "branch_location_identifier": values.branch?.identifier ?? ""
-      };
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        first_name: values.firstName,
+        last_name: values.lastName,
+        password: values.password,
+        whatsapp_number: values.whatsapp,
+        email: values.email,
+        address: values.address,
+        job_identifier: values.jobPosition?.identifier ?? "",
+        branch_location_identifier: values.branch?.identifier ?? ""
       };
 
-      const res = mode=="create"? await axios.post("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user", formData, headers) : await axios.put(`https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${data?.id ?? 0}`, formData, headers); 
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const baseUrl =
+        "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user";
+
+      const url =
+        mode === "create" ? baseUrl : `${baseUrl}/${data?.id ?? 0}`;
+
+      const method = mode === "create" ? "post" : "put";
+
+      const res = await axios({
+        method,
+        url,
+        data: formData,
+        headers
+      });
+
       const body = res.data;
-      console.log(body)
+      console.log(body);
 
       if (body.error) {
         addToast("error", body.error);
@@ -530,16 +539,13 @@ export function ModalUser({ open, onOpenChange, data = null, mode = "create", jo
         onOpenChange(false);
         extraAction();
       }
+
     } catch (err) {
       console.error(err);
       addToast("error", "ada masalah pada aplikasi");
     } finally {
       setLoading(false);
     }
-
-    // reset();
-    // onOpenChange(false);
-    // addToast("success", "Save successfully");
   };
 
   useEffect(() => {

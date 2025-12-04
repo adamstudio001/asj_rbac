@@ -96,29 +96,40 @@ export function isValidDateTime(dateString) {
   }
 
 export function formatLastSeen(start, end) {
-    if (!isValidDateTime(start) || (end && !isValidDateTime(end))) {
-      return "Invalid date format";
-    }
+  const startDate = new Date(start);
+  const endDate = end ? new Date(end) : new Date();
 
-    const startDate = new Date(start);
-    const endDate = end == null? new Date() : new Date(end);
-
-    const diffSec = Math.floor((endDate - startDate) / 1000);
-
-    const days = Math.floor(diffSec / 86400);
-    const hours = Math.floor((diffSec % 86400) / 3600);
-    const minutes = Math.floor((diffSec % 3600) / 60);
-    const seconds = diffSec % 60;
-
-    if (days === 0 && hours === 0 && minutes === 0) {
-      return `${seconds} seconds ago`;
-    }
-    if (days === 0 && hours === 0) {
-      return `${minutes}:${seconds.toString().padStart(2, "0")} minutes ago`;
-    }
-
-    return formatDistanceToNowStrict(startDate, { addSuffix: true, now: endDate });
+  // Validasi tanggal robust
+  if (!isValid(startDate) || !isValid(endDate)) {
+    return "Invalid date format";
   }
+
+  let diffSec = Math.floor((endDate - startDate) / 1000);
+
+  // Jika end < start → anggap 0
+  if (diffSec < 0) diffSec = 0;
+
+  const days = Math.floor(diffSec / 86400);
+  const hours = Math.floor((diffSec % 86400) / 3600);
+  const minutes = Math.floor((diffSec % 3600) / 60);
+  const seconds = diffSec % 60;
+
+  // 0–59 detik
+  if (days === 0 && hours === 0 && minutes === 0) {
+    return `${seconds} seconds ago`;
+  }
+
+  // Menit dan detik → mm:ss minutes ago
+  if (days === 0 && hours === 0) {
+    return `${minutes}:${seconds.toString().padStart(2, "0")} minutes ago`;
+  }
+
+  // Jika sudah lewat jam/hari → gunakan date-fns
+  return formatDistanceToNowStrict(startDate, {
+    addSuffix: true,
+    now: endDate,
+  });
+}
 
 export function filterAndSortFiles(files, activeFilter) {
   const isFolderFilter = activeFilter?.group?.label === 'Folders';
@@ -147,4 +158,39 @@ export function filterAndSortFiles(files, activeFilter) {
 
 export const isEmpty = (str) => !str || str.trim().length === 0 || str === undefined || str===null;
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+export function buildHeaders(old, token) {
+    let latitude = old.lat;
+    let longitude = old.lng;
+
+    // Extract ASN number: "AS24203 PT XL Axiata" → 24203
+    let asnNumber = null;
+    if (old.org) {
+      const match = old.org.match(/AS(\d+)/i);
+      if (match) asnNumber = match[1];
+    }
+
+    // Extract ISP: "AS24203 PT XL Axiata" → "PT XL Axiata"
+    let isp = null;
+    if (old.org) {
+      const parts = old.org.split(" ");
+      parts.shift(); // remove "AS24203"
+      isp = parts.join(" ");
+    }
+
+    return {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      ip_address: old.ip || null,
+      country: old.country || null,
+      state: old.region || null,
+      city: old.city || null,
+      latitude: latitude,
+      longitude: longitude,
+      asn_number: asnNumber,
+      asn_organization: old.org || null,
+      isp: isp,
+      postal_code: old.postal || null
+    };
+}
+
+// const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));

@@ -14,6 +14,7 @@ import { IoIosArrowDown } from "react-icons/io";
 // import { ToastProvider } from "@src/Providers/ToastProvider";
 import ModalUpload from "@/Components/ModalUpload";
 import { useAuth } from "@/Providers/AuthProvider";
+import axios from "axios";
 
 const DashboardPage = () => {
   return (
@@ -37,6 +38,56 @@ const DashboardContent = () => {
     getDirectory,
     findParentFolderKey
   } = useFileManager();
+
+  const [groupFilters, setGroupFilters] = useState([]);
+  const [lists, setLists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  async function loadData() {
+      setLoading(true);
+      setError(null);
+
+      setTimeout(async ()=>{
+        try {
+          // PARALLEL REQUEST
+          const [filtersRes, listRes] = await Promise.all([
+            axios.get(
+              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-type",
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            Promise.resolve({ data: { data: [] } })
+          ]);
+
+          if(filtersRes && listRes){
+            // MAP FILTERS
+            const mappedFilters = filtersRes.data.data.map((item) => ({
+              label: item.label,
+              identifier: item.identifier,
+              extensions: item.extension ?? [],
+            }));
+
+            setGroupFilters(mappedFilters);
+            setLists(listRes.data.data ?? []);
+          } else{
+            setError("ada masalah dalam load data");
+          }
+        } catch (err) {
+          addToast(
+            "error",
+            err?.response?.data?.error ||
+            err?.message ||
+            "Terjadi masalah saat mengambil file."
+          );
+        } finally {
+          setLoading(false);
+        }
+      },1500);
+  }
+  
+  useEffect(() => {
+    loadData();
+  }, [token, folderKeys]);
 
   return (
     <>
@@ -100,13 +151,17 @@ const DashboardContent = () => {
                     <h1 className="text-sm font-medium text-black font-inter text-[14px] leading-[100%]">Files</h1>
                     <SectionViewMode />
                   </div>
-                  <SectionGroupFilter />
+                  <SectionGroupFilter 
+                    groupFilters={groupFilters}
+                    loading={loading}
+                    error={error}
+                  />
                 </div>
                 
                 {viewMode === "grid" ? (
-                  <FileGridView lists={[]} folderKeys={folderKeys}/>
+                  <FileGridView lists={lists} folderKeys={folderKeys}/>
                 ) : (
-                  <FileListView lists={[]} folderKeys={folderKeys}/>
+                  <FileListView lists={lists} folderKeys={folderKeys}/>
                 )}
               </div> : 
               <>
@@ -119,9 +174,9 @@ const DashboardContent = () => {
                   </div>
                   
                   {viewModeFolders === "grid" ? (
-                    <FileGridView folderKeys={folderKeys} mode="Folders"/>
+                    <FileGridView lists={lists} folderKeys={folderKeys} mode="Folders"/>
                   ) : (
-                    <FileListView folderKeys={folderKeys} mode="Folders"/>
+                    <FileListView lists={lists} folderKeys={folderKeys} mode="Folders"/>
                   )}
                 </div>
                 <div className="py-6 space-y-4">
@@ -253,59 +308,49 @@ function SectionViewMode({isNested = false, mode=null}){
           </div>
 }
 
-function SectionGroupFilter(){
-  const { 
-    activeFilter, 
-    setActiveFilter,
-  } = useFileManager();
+function SectionGroupFilter({ groupFilters, loading, error }) {
+  const { activeFilter, setActiveFilter } = useFileManager();
 
-  const list_group_filters = [
-    {
-      label: 'Documents',
-      extensions: ['doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
-    },
-    {
-      label: 'Photos',
-      extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'],
-    },
-    {
-      label: 'Videos',
-      extensions: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
-    },
-    {
-      label: 'Compressed ZIPs',
-      extensions: ['zip'],
-    },
-    {
-      label: 'Audio',
-      extensions: ['mp3'],
-    },
-    {
-      label: 'Folders',
-      extensions: [],
-    },
-    {
-      label: 'Select type type',
-      extensions: [],
-    },
-  ];
-  
-  return  <div className="flex flex-wrap gap-3">
-            {list_group_filters.map((filter) => (
-              <button
-                key={filter.label}
-                onClick={()=>{
-                  setActiveFilter((prev) => ({
-                    ...prev,
-                    group: prev.group?.label===filter.label? null:filter,
-                  }))
-                }}
-                className={`${activeFilter.group?.label === filter.label? "text-[#497fff] bg-[#e1e7f4]":"border border-gray-300 text-gray-700"} rounded-lg px-4 py-2 font-dmSans font-medium text-[12px] hover:bg-gray-100`}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
+  if (loading) {
+    return <div className="flex flex-wrap gap-3">
+      <div className="skeleton h-6 w-16"></div>
+      <div className="skeleton h-6 w-16"></div>
+      <div className="skeleton h-6 w-16"></div>
+      <div className="skeleton h-6 w-16"></div>
+    </div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-sm">{error}</div>;
+  }
+
+  if (!groupFilters.length) {
+    return <div className="text-gray-500 text-sm">No filters available</div>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      {groupFilters.map((filter) => (
+        <button
+          key={filter.identifier}
+          onClick={() =>
+            setActiveFilter((prev) => ({
+              ...prev,
+              group: prev.group?.identifier === filter.identifier ? null : filter,
+            }))
+          }
+          className={`${
+            activeFilter.group?.identifier === filter.identifier
+              ? "text-[#497fff] bg-[#e1e7f4]"
+              : "border border-gray-300 text-gray-700"
+          } rounded-lg px-4 py-2 font-dmSans text-[12px] hover:bg-gray-100`}
+        >
+          {filter.label}
+        </button>
+      ))}
+    </div>
+  );
 }
+
 
 export default DashboardPage;

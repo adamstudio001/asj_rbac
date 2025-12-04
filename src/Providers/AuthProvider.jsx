@@ -156,13 +156,14 @@ export function AuthProvider({ children }) {
   const logout = () => { 
     try { 
       sessionStorage.removeItem("user"); 
-      sessionStorage.removeItem("token"); 
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("info"); 
     } catch (error) { 
       console.error("Error removing session:", error); 
     } finally { 
       setUser(null); 
       setToken(null); 
-      setExpired(false); 
+      setExpired(false);
     } 
   };
 

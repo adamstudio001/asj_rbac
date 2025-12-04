@@ -94,6 +94,7 @@ function LoginContent() {
           user_access: body.data.has_user_access_status? 1:0,
         };
 
+        sessionStorage.setItem("info", JSON.stringify(info));
         sessionStorage.setItem("token", auth.token);
         sessionStorage.setItem("user", JSON.stringify(user));
         setToken(auth.token);

@@ -1,28 +1,77 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "@src/Components/Navbar";
 import { useSearch } from "@src/Providers/SearchProvider";
+import { useAuth } from "@/Providers/AuthProvider";
 import { formatLastSeen } from "@/Common/Utils";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import {
   DialogModal,
-  DialogModalClose,
   DialogModalContent,
   DialogModalDescription,
-  DialogModalFooter,
   DialogModalHeader,
   DialogModalTitle,
-  DialogModalTrigger,
 } from "@/Components/ui/DialogModal";
+import Pagination from "@/Components/Pagination";
 
 const LogHistoryPage = () => {
   const { search, setSearch } = useSearch();
-  const [tick, setTick] = useState(0);
+  const { token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
+
+  const [_, setTick] = useState(0);
   const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
+  const [modalData, setModalData] = useState(null);
 
-  useEffect(()=>{
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [logs, setLogs] = useState([]);
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Base URL sesuai role
+  const baseUrl =
+    isAdminAccess() || isCompanyAccess()
+      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/log?page=1&order_by[]=full_name&sort_by[]=ASC`
+      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/log?page=1&order_by[]=full_name&sort_by[]=ASC`;
+
+  const fetchLogs = async () => {
+    try {
+      if (isExpired()) await refreshSession();
+
+      setLoading(true);
+      setError("");
+
+      const res = await fetch(`${baseUrl}/log?page=1&order_by[]=full_name&sort_by[]=ASC`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response?.success) {
+        const json = await res.json();
+        setLogs(json.data || []);
+        setTotalPages(json?.last_page ?? 1);
+      } else{
+        addToast("error", response?.error);
+      }
+    } catch (err) {
+      addToast(
+        "error",
+        err?.response?.data?.error ||
+        err?.message ||
+        "Terjadi masalah saat mengambil file."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     setSearch("");
-  },[]);
+    fetchLogs();
+  }, []);
 
+  // Tick untuk update last seen
   useEffect(() => {
     const interval = setInterval(() => {
       setTick((t) => t + 1);
@@ -31,70 +80,161 @@ const LogHistoryPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const logs = [
-    { id: 1, user: "Desy Puji Astuti", browser: "Chrome", os: "Mac OS", duration: "27 mins", lastSee: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"}, role: "HR/GA", ip: "8.8.8.8", city: "Bogor" },
-    { id: 2, user: "Hani Ayu Wulasari", browser: "Safari", os: "Windows", duration: "11 mins", lastSee: {start: "2025-10-01 01:00:00", end: "2025-10-07 10:12:00" }, role: "HR/GA", ip: "8.8.8.8", city: "Bogor" },
-    { id: 3, user: "Rahul", browser: "Chrome", os: "Windows", duration: "8 mins", lastSee: {start: "2025-10-07 10:00:00", end: "2025-10-07 10:12:00" }, role: "HR/GA", ip: "8.8.8.8", city: "Bogor" },
-    { id: 4, user: "Dika", browser: "Chrome", os: "Windows", duration: "1 mins", lastSee: {start: "2025-10-07 10:12:00", end: null}, role: "HR/GA", ip: "8.8.8.8", city: "Bogor" },
-  ];
-
-  const filteredLogs = logs.filter(log =>
-    log.user.toLowerCase().includes(search.toLowerCase())
+  const filteredLogs = logs.filter((log) =>
+    (log.full_name || "").toLowerCase().includes(search.toLowerCase())
   );
+
+  const openModal = (item) => {
+    setModalData(item);
+    setIsModalDetailOpen(true);
+  };
+
+  function renderTable() {
+    if(loading){
+      return <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-[#f8f8f8]">
+            <tr className="border border-gray-200">
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">User</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">Browser</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">OS</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">Last Seen</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">Position</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">IP</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">City</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {error? 
+                    <tr>
+                      <td colSpan={7} className="text-center flex-col gap-2">
+                        <p>{error}</p>
+                        <button
+                            className="
+                              px-3 py-1
+                              rounded
+                              border-0
+                              hover:border hover:border-gray-400
+                              active:border active:border-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-gray-400
+                              transition-all duration-150
+                            "
+                            onClick={()=>loadData()}
+                          >
+                            Klik muat ulang
+                          </button>
+                      </td>
+                    </tr> : 
+                    filteredLogs.map((log) => (
+                    <tr key={log.id} className="hover:bg-gray-50 transition border-b border-gray-200">
+                      <td className="px-4 py-3">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="px-4 py-3">
+                      <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="px-4 py-3 text-[#007BFF]">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="skeleton h-4 w-full"></div>
+                      </td>
+                    </tr>
+                    ))
+              }
+          </tbody>
+        </table>
+      </div>;
+    }
+    return (
+      <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-[#f8f8f8]">
+            <tr className="border border-gray-200">
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">User</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">Browser</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">OS</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">Last Seen</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">Position</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">IP</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">City</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filteredLogs.map((log) => (
+              <tr key={log.id} className="hover:bg-gray-50 transition border-b border-gray-200">
+                <td className="px-4 py-3">
+                  <EllipsisTooltip className={"w-[200px]"}>{log.full_name}</EllipsisTooltip>
+                </td>
+
+                <td className="px-4 py-3">{log.browser_name || "-"}</td>
+                <td className="px-4 py-3">{log.os_name || "-"}</td>
+
+                <td className="px-4 py-3">
+                  {log.latest_log_datetime
+                    ? formatLastSeen(log.latest_log_datetime, null)
+                    : "-"}
+                </td>
+
+                <td className="px-4 py-3">{log.job_identifier || "-"}</td>
+
+                <td className="px-4 py-3 text-[#007BFF]">
+                  <button onClick={() => openModal(log)}>
+                    {log.ip_address || "-"}
+                  </button>
+                </td>
+
+                <td className="px-4 py-3">{log.city || "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  function renderPaging(){
+        if(loading){
+          return  <div className="flex items-center justify-center">
+            <div className="skeleton h-4 w-32 mt-8"></div>
+          </div>;
+        } else if(error){
+          return <></>;
+        }
+    
+        return <Pagination
+            className="mt-8"
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+  }
 
   return (
     <>
       <Navbar />
 
       <main className="flex-1 items-center p-6 overflow-auto">
-          <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-[#f8f8f8]">
-                  <tr className="border border-gray-200">
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black min-w-0 w-[250px]">User</th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Browser</th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Operating System</th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Duration</th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Last Seen (?)</th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Role</th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">IP Address</th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">City</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredLogs.map((log) => (
-                    <tr
-                      key={log.id}
-                      className="hover:bg-gray-50 transition border-b border-gray-200"
-                    >
-                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                        <EllipsisTooltip className={"w-[250px]"}>{log.user}</EllipsisTooltip>
-                      </td>
-                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.browser}</td>
-                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.os}</td>
-                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.duration}</td>
-                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                        <span className={`inline-block align-middle w-3 h-3 rounded-full mr-2 ${log.lastSee.end == null ? 'bg-[#62de00]' : 'bg-[#ff0405]'}`} />
-                        <p className="inline align-middle m-0">
-                          {formatLastSeen(log.lastSee.start, log.lastSee.end)}
-                        </p>
-                      </td>
-                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.role}</td>
-                      <td className="px-4 py-3 font-inter text-[14px] text-[#007BFF]">
-                        <button onClick={()=>setIsModalDetailOpen(!isModalDetailOpen)}>{log.ip}</button>
-                      </td>
-                      <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{log.city}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-        </main>
+        {renderTable()}
+        {renderPaging()}
+      </main>
 
-        <ModalInfoIp
-              open={isModalDetailOpen}
-              onOpenChange={setIsModalDetailOpen}
-            />
+      {(!loading && !error) && <ModalInfoIp
+        open={isModalDetailOpen}
+        onOpenChange={setIsModalDetailOpen}
+        data={modalData}
+      />}
     </>
   );
 };
@@ -102,12 +242,14 @@ const LogHistoryPage = () => {
 export default LogHistoryPage;
 
 export function ModalInfoIp({ open, onOpenChange, data }) {
+  if (!open) return null;
+
   return (
     <DialogModal open={open} onOpenChange={onOpenChange}>
       <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-2xl">
         <DialogModalHeader>
           <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[26px] text-[#1B2E48]">
-            IP Address Detail
+            API Base URL Detail
           </DialogModalTitle>
 
           <div className="overflow-y-auto">
@@ -116,11 +258,11 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
                 <table className="w-full border-separate border-spacing-y-4">
                   <tbody>
                     <tr>
-                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top w-[40%]">
+                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap w-[40%] align-top">
                         IP Address:
                       </td>
                       <td className="py-2 px-4 text-[16px] text-black">
-                        {data?.ip || "123.45.67.89"}
+                        {data?.ip_address || "-"}
                       </td>
                     </tr>
 
@@ -128,17 +270,8 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
                       <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
                         Country / State / City:
                       </td>
-                      <td className="py-2 px-4 text-[16px] text-black">
-                        {data?.location || "Indonesia, Jawa Barat, Kota Bogor"}
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
-                        Latitude / Longitude (Estimation):
-                      </td>
-                      <td className="py-2 px-4 text-[16px] text-black">
-                        {data?.latlong || "-6.3850, 106.8200"}
+                      <td className="py-2 px-4 text-[16px] text-black break-all">
+                        {data?.country || "-"}, {data?.state || "-"}, {data?.city || "-"}
                       </td>
                     </tr>
 
@@ -146,9 +279,10 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
                       <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
                         Time Zone & Local Time:
                       </td>
-                      <td className="py-2 px-4 text-[16px] text-black leading-relaxed">
-                        {data?.timezone || "Asia/Jakarta (UTC+7)"} <br />
-                        {data?.localtime || "2025-10-17 14:30 WIB"}
+                      <td className="py-2 px-4 text-[16px] text-black">
+                        {data?.latest_log_datetime
+                        ? formatLastSeen(data?.latest_log_datetime, null)
+                        : "-"}
                       </td>
                     </tr>
 
@@ -156,17 +290,17 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
                       <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
                         ASN Number & ASN Name:
                       </td>
-                      <td className="py-2 px-4 text-[16px] text-black">
-                        {data?.asn || "ASNA1121, Nama ASN"}
+                      <td className="py-2 px-4 text-[16px] text-black leading-relaxed">
+                        {data?.asn_number || "-"} / {data?.asn_organization || "-"}
                       </td>
                     </tr>
 
                     <tr>
                       <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
-                        ISP / Organization:
+                        ISP:
                       </td>
-                      <td className="py-2 px-4 text-[16px] text-black">
-                        {data?.isp || "PT. Telkom Indonesia"}
+                      <td className="py-2 px-4 text-[16px] text-black leading-relaxed">
+                        {data?.isp || "-"}
                       </td>
                     </tr>
 
@@ -174,8 +308,8 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
                       <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
                         Postal / ZIP Code:
                       </td>
-                      <td className="py-2 px-4 text-[16px] text-black">
-                        {data?.zip || "164451"}
+                      <td className="py-2 px-4 text-[16px] text-black leading-relaxed">
+                        {data?.postal_code || "-"}
                       </td>
                     </tr>
                   </tbody>
