@@ -389,6 +389,7 @@ const UserPageContent = () => {
           (
             isAdminAccess() || isCompanyAccess()? 
             <button
+              disabled={!isLoad && !error}
               onClick={() => {
                 setSelectedUser(null);
                 setIsModalOpen(true);
