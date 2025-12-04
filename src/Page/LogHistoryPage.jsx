@@ -12,8 +12,10 @@ import {
   DialogModalTitle,
 } from "@/Components/ui/DialogModal";
 import Pagination from "@/Components/Pagination";
+import { useToast } from "@/Providers/ToastProvider";
 
 const LogHistoryPage = () => {
+  const { addToast } = useToast();
   const { search, setSearch } = useSearch();
   const { token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
 

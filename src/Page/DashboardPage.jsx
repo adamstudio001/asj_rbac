@@ -15,6 +15,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import ModalUpload from "@/Components/ModalUpload";
 import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
+import { useToast } from "@/Providers/ToastProvider";
 
 const DashboardPage = () => {
   return (
@@ -25,6 +26,7 @@ const DashboardPage = () => {
 };
 
 const DashboardContent = () => {
+  const { addToast } = useToast();
   const { folderKeys } = useParams();
   const { user, token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
 
