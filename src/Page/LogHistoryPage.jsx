@@ -13,6 +13,7 @@ import {
 } from "@/Components/ui/DialogModal";
 import Pagination from "@/Components/Pagination";
 import { useToast } from "@/Providers/ToastProvider";
+import axios from "axios";
 
 const LogHistoryPage = () => {
   const { addToast } = useToast();
@@ -43,18 +44,17 @@ const LogHistoryPage = () => {
       setLoading(true);
       setError("");
 
-      const res = await fetch(`${baseUrl}/log?page=1&order_by[]=full_name&sort_by[]=ASC`, {
+      const response = await axios.get(`${baseUrl}/log?page=${page}&order_by[]=full_name&sort_by[]=ASC`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      if (response?.success) {
-        const json = await res.json();
-        setLogs(json.data || []);
-        setTotalPages(json?.last_page ?? 1);
+      const res = response.data;
+      if (res?.success) {
+        setLogs(res.data || []);
+        setTotalPages(res?.last_page ?? 1);
       } else{
-        addToast("error", response?.error);
+        addToast("error", res?.error);
       }
     } catch (err) {
       addToast(
@@ -70,8 +70,12 @@ const LogHistoryPage = () => {
 
   useEffect(() => {
     setSearch("");
-    fetchLogs();
+    // fetchLogs();
   }, []);
+
+  useEffect(() => {
+    fetchLogs(page);
+  }, [page]);
 
   // Tick untuk update last seen
   useEffect(() => {
