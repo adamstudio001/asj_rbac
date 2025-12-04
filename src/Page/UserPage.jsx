@@ -389,12 +389,12 @@ const UserPageContent = () => {
           (
             isAdminAccess() || isCompanyAccess()? 
             <button
-              disabled={!isLoad && !error}
+              disabled={isLoad}
               onClick={() => {
                 setSelectedUser(null);
                 setIsModalOpen(true);
               }}
-              className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition"
+              className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] disabled:pointer-events-none disabled:opacity-50 transition"
             >
               + New User
             </button> : 
