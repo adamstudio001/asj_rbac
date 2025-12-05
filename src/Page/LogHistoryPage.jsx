@@ -38,34 +38,36 @@ const LogHistoryPage = () => {
       : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/log?page=1&order_by[]=full_name&sort_by[]=ASC`;
 
   const fetchLogs = async () => {
-    try {
-      if (isExpired()) await refreshSession();
+    setTimeout(async ()=>{
+      try {
+        if (isExpired()) await refreshSession();
 
-      setLoading(true);
-      setError("");
+        setLoading(true);
+        setError("");
 
-      const response = await axios.get(`${baseUrl}/log?page=${page}&order_by[]=full_name&sort_by[]=ASC`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const res = response.data;
-      if (res?.success) {
-        setLogs(res.data || []);
-        setTotalPages(res?.last_page ?? 1);
-      } else{
-        addToast("error", res?.error);
+        const response = await axios.get(`${baseUrl}/log?page=${page}&order_by[]=full_name&sort_by[]=ASC`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const res = response.data;
+        if (res?.success) {
+          setLogs(res.data || []);
+          setTotalPages(res?.last_page ?? 1);
+        } else{
+          addToast("error", res?.error);
+        }
+      } catch (err) {
+        addToast(
+          "error",
+          err?.response?.data?.error ||
+          err?.message ||
+          "Terjadi masalah saat mengambil file."
+        );
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      addToast(
-        "error",
-        err?.response?.data?.error ||
-        err?.message ||
-        "Terjadi masalah saat mengambil file."
-      );
-    } finally {
-      setLoading(false);
-    }
+    },1500);
   };
 
   useEffect(() => {
