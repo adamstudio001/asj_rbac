@@ -15,6 +15,7 @@ import { useRef, useState } from "react";
 import { useToast } from "@src/Providers/ToastProvider";
 import { cn } from "@/lib/utils";
 import axios from "axios";
+import { buildHeaders } from "@/Common/Utils";
 
 export default function ModalUpload({
   refreshData = () => {},
@@ -153,15 +154,15 @@ export default function ModalUpload({
       formData.append("file", f.file);
 
       try {
+        const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+        const headers = buildHeaders(info, token);
+
         const url = (isAdmin || isCompany)
           ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${idFolder}/file`
           : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${idFolder}/file`;
 
         const response = await axios.post(url, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: headers,
           onUploadProgress: (p) => {
             const progress = Math.round((p.loaded * 100) / p.total);
             setFileState(fileId, { progress });
