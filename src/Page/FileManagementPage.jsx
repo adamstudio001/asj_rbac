@@ -299,12 +299,12 @@ const FileManagementContent = () => {
   function renderTable(){
     if(isLoad){
       return  <table className="w-full table-auto border-collapse">
-                <thead>
-                  <tr>
-                    <th className="border px-4 py-2">File Name</th>
-                    <th className="border px-4 py-2">File Type</th>
-                    <th className="border px-4 py-2">Last Modified</th>
-                    <th className="border px-4 py-2">File Size</th>
+                <thead className="bg-[#F3F3F3]">
+                  <tr className="border border-gray-200">
+                    <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B] w-[250px]">File Name</th>
+                    <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">File Type</th>
+                    <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">Last Modified</th>
+                    <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">File Size</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -222,21 +222,21 @@ const UserPageContent = () => {
   function renderTable(){
     if(isLoad){
       return  <table className="w-full table-auto border-collapse">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-3 w-10"></th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left min-w-0 w-[200px]">
-                      Name
-                    </th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                      Address
-                    </th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                      Position
-                    </th>
-                    <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
-                      Last Seen
-                    </th>
+                <thead className="bg-[#F3F3F3]">
+                  <tr className="border border-gray-200">
+                      <th className="px-4 py-3 w-10"></th>
+                      <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left min-w-0 w-[200px]">
+                        Name
+                      </th>
+                      <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                        Address
+                      </th>
+                      <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                        Position
+                      </th>
+                      <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                        Last Seen
+                      </th>
                   </tr>
                 </thead>
                 <tbody>
