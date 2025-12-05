@@ -134,8 +134,8 @@ const LogHistoryPage = () => {
                           </button>
                       </td>
                     </tr> : 
-                    filteredLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-gray-50 transition border-b border-gray-200">
+                    Array(3).fill(null).map((_, i) => (
+                    <tr key={i} className="hover:bg-gray-50 transition border-b border-gray-200">
                       <td className="px-4 py-3">
                         <div className="skeleton h-4 w-full"></div>
                       </td>
