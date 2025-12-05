@@ -79,7 +79,7 @@ const LogHistoryPage = () => {
     fetchLogs(page);
   }, [page]);
 
-  // Tick untuk update last seen
+  // Tick untuk update last activity
   useEffect(() => {
     const interval = setInterval(() => {
       setTick((t) => t + 1);
@@ -106,7 +106,7 @@ const LogHistoryPage = () => {
               <th className="px-4 py-3 font-inter font-medium text-[14px]">User</th>
               <th className="px-4 py-3 font-inter font-medium text-[14px]">Browser</th>
               <th className="px-4 py-3 font-inter font-medium text-[14px]">OS</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">Last Seen</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">Last Activity</th>
               <th className="px-4 py-3 font-inter font-medium text-[14px]">Position</th>
               <th className="px-4 py-3 font-inter font-medium text-[14px]">IP</th>
               <th className="px-4 py-3 font-inter font-medium text-[14px]">City</th>
