@@ -137,11 +137,11 @@ export default function ModalUpload({
   const uploadSingleFile = async (f) => {
     const fileId = f.id;
 
-    if (f.file.size > 1 * 1024 * 1024) {
-      setFileState(fileId, { status: "error", error: "error.max_size" });
-      addToast("error", `${f.path} — file too large (max 1MB)`);
-      return;
-    }
+    // if (f.file.size > 1 * 1024 * 1024) {
+    //   setFileState(fileId, { status: "error", error: "error.max_size" });
+    //   addToast("error", `${f.path} — file too large (max 1MB)`);
+    //   return;
+    // }
 
     // 1️⃣ STATE: uploading (shimmer)
     setFileState(fileId, { status: "uploading", progress: 0 });
