@@ -186,10 +186,10 @@ export function buildHeaders(old, token) {
       city: old.city || null,
       latitude: latitude,
       longitude: longitude,
-      asn_number: asnNumber,
-      asn_organization: old.org || null,
+      "asn-number": asnNumber,
+      "asn_organization": old.org || null,
       isp: isp,
-      postal_code: old.postal || null
+      "postal-code": old.postal || null
     };
 }
 
