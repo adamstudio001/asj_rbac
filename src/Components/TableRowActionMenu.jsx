@@ -3,7 +3,7 @@ import { createPopper } from "@popperjs/core";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
-export function TableRowActionMenu({ refId, children, rowCells }) {
+export function TableRowActionMenu({ isFolder = true, refId, children, rowCells }) {
   const [showMenu, setShowMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const menuRef = useRef(null);
@@ -51,7 +51,9 @@ export function TableRowActionMenu({ refId, children, rowCells }) {
   const handleCellDoubleClick = (e) => {
     e.stopPropagation();
     closeMenu();
-    navigate(`/filemanager/${encodeURIComponent(refId)}`);
+    if(isFolder){
+      navigate(`/filemanager/${encodeURIComponent(refId)}`);
+    }
     // alert("Double click terdeteksi pada baris!");
   };
 

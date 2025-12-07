@@ -109,7 +109,7 @@ const FileManagementContent = () => {
         const dataList = resList.data;
         const dataBreadcrumb = resBreadcrumb.data;
 
-        if (!dataList?.success || !dataBreadcrumb?.success) {
+        if ((!dataList?.success && !dataBreadcrumb?.success) || !dataList?.success) {
           throw new Error("One of the API responses returned unsuccessful status.");
         }
 
@@ -361,6 +361,7 @@ const FileManagementContent = () => {
                     sortedFiles.map((file) => 
                     <TableRowActionMenu
                       key={file.id}
+                      isFolder={file.type_identifier.toLowerCase()=="folder"}
                       refId={file.id}
                       rowCells={
                         <>
