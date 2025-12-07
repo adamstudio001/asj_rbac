@@ -109,7 +109,8 @@ const FileManagementContent = () => {
         const dataList = resList.data;
         const dataBreadcrumb = resBreadcrumb.data;
 
-        if ((!dataList?.success && !dataBreadcrumb?.success) || !dataList?.success) {
+        console.log(dataList?.success, dataBreadcrumb?.success) //undefined undefined
+        if ((isEmpty(dataList?.success) && isEmpty(dataBreadcrumb?.success)) || isEmpty(dataList?.success)) {
           throw new Error("One of the API responses returned unsuccessful status.");
         }
 
