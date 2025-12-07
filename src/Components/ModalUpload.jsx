@@ -143,6 +143,7 @@ export default function ModalUpload({
     //   return;
     // }
 
+    console.log(f.file)
     // 1️⃣ STATE: uploading (shimmer)
     setFileState(fileId, { status: "uploading", progress: 0 });
 
@@ -155,7 +156,7 @@ export default function ModalUpload({
 
       try {
         const info = JSON.parse(sessionStorage.getItem("info") || "{}");
-        const headers = buildHeaders(info, token);
+        const headers = buildHeaders(info, token, false);
 
         const url = (isAdmin || isCompany)
           ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${idFolder}/file`

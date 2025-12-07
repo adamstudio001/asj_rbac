@@ -158,7 +158,7 @@ export function filterAndSortFiles(files, activeFilter) {
 
 export const isEmpty = (str) => !str || str.trim().length === 0 || str === undefined || str===null;
 
-export function buildHeaders(old, token) {
+export function buildHeaders(old, token, isjson = true) {
     let latitude = old.lat;
     let longitude = old.lng;
 
@@ -177,9 +177,8 @@ export function buildHeaders(old, token) {
       isp = parts.join(" ");
     }
 
-    return {
+    const base = {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
       ip_address: old.ip || null,
       country: old.country || null,
       state: old.region || null,
@@ -187,10 +186,17 @@ export function buildHeaders(old, token) {
       latitude: latitude,
       longitude: longitude,
       "asn-number": asnNumber,
-      "asn_organization": old.org || null,
+      "asn-organization": old.org || null,
       isp: isp,
-      "postal-code": old.postal || null
+      "postal-code": old.postal || null,
     };
+
+    // ONLY set JSON content-type if needed
+    if (isjson) {
+      base["Content-Type"] = "application/json";
+    }
+
+    return base;
 }
 
 // const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
