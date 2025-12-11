@@ -131,18 +131,45 @@ export function formatLastSeen(start, end) {
   });
 }
 
+// export function filterAndSortFiles(files, activeFilter) {
+//   const isFolderFilter = activeFilter?.group?.label === 'Folders';
+//   const searchQuery = activeFilter?.search?.toLowerCase() || '';
+
+//   const filteredFiles = files.filter((file) => {
+//     // Filter folder
+//     if (isFolderFilter) return file.type_identifier.toLowerCase()=="folder";
+
+//     // Filter ekstensi
+//     if (activeFilter?.group?.extensions?.length > 0) {
+//       const ext = file.name.split('.').pop().toLowerCase();
+//       if (file.type_identifier.toLowerCase()!="folder" && activeFilter?.group?.extensions?.includes(ext)) {
+//         return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
+//       }
+//       return false;
+//     }
+
+//     // Filter search
+//     return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
+//   });
+
+//   // Sort folder ke atas
+//   return [...filteredFiles].sort((a, b) => ((a.type_identifier.toLowerCase()=="folder") === (b.type_identifier.toLowerCase()=="folder") ? 0 : a.type_identifier.toLowerCase()=="folder" ? -1 : 1));
+// }
+
 export function filterAndSortFiles(files, activeFilter) {
-  const isFolderFilter = activeFilter?.group?.label === 'Folders';
+  const isFolderFilter = activeFilter?.group?.label === 'folder';
   const searchQuery = activeFilter?.search?.toLowerCase() || '';
 
   const filteredFiles = files.filter((file) => {
+    const isFolder = file.type_identifier?.toLowerCase() === "folder";
+
     // Filter folder
-    if (isFolderFilter) return file.type_identifier.toLowerCase()=="folder";
+    if (isFolderFilter) return isFolder;
 
     // Filter ekstensi
     if (activeFilter?.group?.extensions?.length > 0) {
-      const ext = file.name.split('.').pop().toLowerCase();
-      if (file.type_identifier.toLowerCase()!="folder" && activeFilter?.group?.extensions?.includes(ext)) {
+      const ext = (file.extension || file.name.split('.').pop())?.toLowerCase();
+      if (!isFolder && activeFilter.group.extensions.includes(ext)) {
         return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
       }
       return false;
@@ -152,8 +179,17 @@ export function filterAndSortFiles(files, activeFilter) {
     return searchQuery ? file.name.toLowerCase().includes(searchQuery) : true;
   });
 
-  // Sort folder ke atas
-  return [...filteredFiles].sort((a, b) => ((a.type_identifier.toLowerCase()=="folder") === (b.type_identifier.toLowerCase()=="folder") ? 0 : a.type_identifier=="Folder" ? -1 : 1));
+  // 🔥 SORT FIXED → Folder first, then alphabetical name
+  return [...filteredFiles].sort((a, b) => {
+    const aIsFolder = a.type_identifier?.toLowerCase() === "folder";
+    const bIsFolder = b.type_identifier?.toLowerCase() === "folder";
+
+    // 1) Folder ke atas
+    if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
+
+    // 2) Urutkan nama secara alphabetical
+    return a.name.localeCompare(b.name, 'id', { sensitivity: 'base' });
+  });
 }
 
 export const isEmpty = (str) => !str || str.trim().length === 0 || str === undefined || str===null;

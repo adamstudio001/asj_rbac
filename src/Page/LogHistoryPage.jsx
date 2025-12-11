@@ -34,8 +34,8 @@ const LogHistoryPage = () => {
   // Base URL sesuai role
   const baseUrl =
     isAdminAccess() || isCompanyAccess()
-      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/log?page=1&order_by[]=full_name&sort_by[]=ASC`
-      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/log?page=1&order_by[]=full_name&sort_by[]=ASC`;
+      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
+      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
 
   const fetchLogs = async () => {
     setTimeout(async ()=>{

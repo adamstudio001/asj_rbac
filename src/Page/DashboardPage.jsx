@@ -16,6 +16,7 @@ import ModalUpload from "@/Components/ModalUpload";
 import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
 import { useToast } from "@/Providers/ToastProvider";
+import { filterAndSortFiles } from "@/Common/Utils";
 
 const DashboardPage = () => {
   return (
@@ -36,17 +37,39 @@ const DashboardContent = () => {
     viewMode, 
     viewModeFolders, 
     viewModeFiles, 
+    activeFilter,
     setActiveFilter,
     getDirectory,
     findParentFolderKey
   } = useFileManager();
 
   const [groupFilters, setGroupFilters] = useState([]);
-  const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  async function loadData() {
+  const [listFileFiltered, setListFileFiltered] = useState([]);
+  const [listFiles, setListFiles] = useState([]);
+  const [loadingFile, setLoadingFile] = useState(true);
+  const [errorFile, setErrorFile] = useState(null);
+
+  const baseUrlFiles =
+    isAdminAccess() || isCompanyAccess()
+      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
+      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
+
+  useEffect(() => {
+    console.log(activeFilter)
+  }, [activeFilter]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      fetchFiles();
+    }, 1000);
+
+    return () => clearTimeout(handler);
+  }, [activeFilter.search]);
+
+  async function loadFilterAction() {
       setLoading(true);
       setError(null);
 
@@ -70,7 +93,6 @@ const DashboardContent = () => {
             }));
 
             setGroupFilters(mappedFilters);
-            setLists(listRes.data.data ?? []);
           } else{
             setError("ada masalah dalam load data");
           }
@@ -86,10 +108,50 @@ const DashboardContent = () => {
         }
       },1500);
   }
-  
+
+  const fetchFiles = async () => {
+    setLoadingFile(true);
+
+    setTimeout(async ()=>{
+      try {
+        if (isExpired()) await refreshSession();
+        setErrorFile("");
+
+        const response = await axios.get(`${baseUrlFiles}/storage/search?name=${activeFilter?.search??""}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const res = response.data;
+        if (res?.success) {
+          setListFiles(res.data || []);
+        } else{
+          addToast("error", res?.error);
+        }
+      } catch (err) {
+        addToast(
+          "error",
+          err?.response?.data?.error ||
+          err?.message ||
+          "Terjadi masalah saat mengambil file."
+        );
+      } finally {
+        setLoadingFile(false);
+      }
+    },1500);
+  };
+
   useEffect(() => {
-    loadData();
+    loadFilterAction();
   }, [token, folderKeys]);
+
+  useEffect(() => {
+    fetchFiles();
+  }, []);
+
+  useEffect(() => {
+    setListFileFiltered(filterAndSortFiles(listFiles, activeFilter));
+  }, [listFiles, activeFilter.group]);
 
   return (
     <>
@@ -161,9 +223,9 @@ const DashboardContent = () => {
                 </div>
                 
                 {viewMode === "grid" ? (
-                  <FileGridView lists={lists} folderKeys={folderKeys}/>
+                  <FileGridView lists={listFileFiltered} isLoading={loadingFile} error={errorFile} folderKeys={folderKeys}/>
                 ) : (
-                  <FileListView lists={lists} folderKeys={folderKeys}/>
+                  <FileListView lists={listFileFiltered} isLoading={loadingFile} error={errorFile} folderKeys={folderKeys}/>
                 )}
               </div> : 
               <>
@@ -176,9 +238,9 @@ const DashboardContent = () => {
                   </div>
                   
                   {viewModeFolders === "grid" ? (
-                    <FileGridView lists={lists} folderKeys={folderKeys} mode="Folders"/>
+                    <FileGridView lists={listFileFiltered} isLoading={loadingFile} error={errorFile} folderKeys={folderKeys} mode="Folders"/>
                   ) : (
-                    <FileListView lists={lists} folderKeys={folderKeys} mode="Folders"/>
+                    <FileListView lists={listFileFiltered} isLoading={loadingFile} error={errorFile} folderKeys={folderKeys} mode="Folders"/>
                   )}
                 </div>
                 <div className="py-6 space-y-4">
@@ -338,7 +400,14 @@ function SectionGroupFilter({ groupFilters, loading, error }) {
           onClick={() =>
             setActiveFilter((prev) => ({
               ...prev,
-              group: prev.group?.identifier === filter.identifier ? null : filter,
+              group:
+                prev.group?.identifier === filter.identifier
+                  ? null
+                  : {
+                      identifier: filter?.identifier ?? "", // WAJIB
+                      label: filter?.label ?? "",          // string label
+                      extensions: filter?.extensions ?? [], // array extension
+                    },
             }))
           }
           className={`${
