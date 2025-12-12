@@ -16,11 +16,12 @@ function FileListView({ lists, folderKeys, mode, isLoading=false }) {
   //   } = useFileManager();
 
   // let files = getFileDirectory(lists, folderKeys);
-  // if(mode=="Folders"){
-  //   files = files.filter((f) => f.isFolder)
-  // } else if(mode=="Files"){
-  //   files = files.filter((f) => !f.isFolder)
-  // } else{
+  if(mode=="Folders"){
+    lists = lists.filter((f) => f.type_identifier.toLowerCase()=="folder")
+  } else if(mode=="Files"){
+    lists = lists.filter((f) => f.type_identifier.toLowerCase()!="folder")
+  } 
+  // else{
   //   files = files.filter((f) => f.name.toLowerCase().includes(activeFilter.search.toLowerCase()))
   // }
 
@@ -35,10 +36,12 @@ function FileListView({ lists, folderKeys, mode, isLoading=false }) {
             <div key={i} className="skeleton h-16 flex items-center px-4 py-3 transition mb-2"></div>
           ))}
         </> : 
-        //`/dashboard/${encodeURIComponent(file.folderKeys)}`
-        (lists.map((file, index) => (
+        ((lists ?? []).map((file, index) => (
           file.type_identifier.toLowerCase()==="folder"? 
-          <NavLink key={index} to={`#`} className="flex items-center px-4 py-3 hover:bg-gray-50 transition">
+          <NavLink
+              key={index}
+              to={file.type_identifier.toLowerCase()=="folder"? `/dashboard/${encodeURIComponent(folderKeys!=file.parent_id? file.parent_id:file.id)}`:`#`} 
+              className="flex items-center px-4 py-3 hover:bg-gray-50 transition">
             <div className="text-2xl w-10">{getFileIcon(file.name, true, 24)}</div>
             <TooltipProvider delayDuration={0}>
               <Tooltip>

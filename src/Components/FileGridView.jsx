@@ -12,11 +12,12 @@ function FileGridView({ lists, folderKeys, mode, isLoading=false }) {
   //   } = useFileManager();
 
   // let files = getFileDirectory(lists, folderKeys);
-  // if(mode=="Folders"){
-  //   files = files.filter((f) => f.isFolder)
-  // } else if(mode=="Files"){
-  //   files = files.filter((f) => !f.isFolder)
-  // } else{
+  if(mode=="Folders"){
+    lists = lists.filter((f) => f.type_identifier.toLowerCase()=="folder")
+  } else if(mode=="Files"){
+    lists = lists.filter((f) => f.type_identifier.toLowerCase()!="folder")
+  } 
+  // else{
   //   files = files.filter((f) => f.name.toLowerCase().includes(activeFilter.search.toLowerCase()))
   // }
 
@@ -38,11 +39,11 @@ function FileGridView({ lists, folderKeys, mode, isLoading=false }) {
             </div>
           ))}
         </> : 
-        lists.map((file, index) =>
+        (lists??[]).map((file, index) =>
           file.type_identifier.toLowerCase()==="folder" ? (
             <NavLink
               key={index}
-              to={`#`} //`/dashboard/${encodeURIComponent(file.folderKeys)}`
+              to={file.type_identifier.toLowerCase()=="folder"? `/dashboard/${encodeURIComponent(folderKeys!=file.parent_id? file.parent_id:file.id)}`:`#`}
               className="flex flex-row gap-2 bg-[#7979790D] p-4 rounded shadow-md hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
             >
               <div className="text-4xl">{getFileIcon(file.name, true)}</div>
@@ -60,7 +61,7 @@ function FileGridView({ lists, folderKeys, mode, isLoading=false }) {
         )
       }
 
-      {lists.length > 0 && lists.length < 4 &&
+      {(lists ?? []).length > 0 && lists.length < 4 &&
         Array.from({ length: 4 - lists.length }).map((_, i) => (
           <div key={uuidv4()}>
             &nbsp;

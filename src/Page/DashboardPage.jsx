@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import FileGridView from "@src/Components/FileGridView";
 import FileListView from "@src/Components/FileListView";
 import { IoGridOutline } from "react-icons/io5";
@@ -16,7 +16,9 @@ import ModalUpload from "@/Components/ModalUpload";
 import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
 import { useToast } from "@/Providers/ToastProvider";
-import { filterAndSortFiles } from "@/Common/Utils";
+import { filterAndSortFiles, isEmpty } from "@/Common/Utils";
+import Pagination from "@/Components/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const DashboardPage = () => {
   return (
@@ -27,6 +29,7 @@ const DashboardPage = () => {
 };
 
 const DashboardContent = () => {
+  const navigate = useNavigate();
   const { addToast } = useToast();
   const { folderKeys } = useParams();
   const { user, token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
@@ -52,22 +55,14 @@ const DashboardContent = () => {
   const [loadingFile, setLoadingFile] = useState(true);
   const [errorFile, setErrorFile] = useState(null);
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const fetchTimeout = useRef(null);
+
   const baseUrlFiles =
     isAdminAccess() || isCompanyAccess()
       ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
       : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
-
-  useEffect(() => {
-    console.log(activeFilter)
-  }, [activeFilter]);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      fetchFiles();
-    }, 1000);
-
-    return () => clearTimeout(handler);
-  }, [activeFilter.search]);
 
   async function loadFilterAction() {
       setLoading(true);
@@ -109,49 +104,91 @@ const DashboardContent = () => {
       },1500);
   }
 
-  const fetchFiles = async () => {
+  const fetchFiles = async (fetchPage = page, fetchFolderKeys = folderKeys) => {
     setLoadingFile(true);
 
-    setTimeout(async ()=>{
+    if (fetchTimeout.current) clearTimeout(fetchTimeout.current);
+
+    fetchTimeout.current = setTimeout(async () => {
+      setErrorFile(null);
+
       try {
         if (isExpired()) await refreshSession();
-        setErrorFile("");
 
-        const response = await axios.get(`${baseUrlFiles}/storage/search?name=${activeFilter?.search??""}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const searchQuery = activeFilter?.search ?? "";
+        const url = isEmpty(fetchFolderKeys)
+          ? `${baseUrlFiles}/storage/search?name=${searchQuery}&page=${fetchPage}`
+          : `${baseUrlFiles}/storage/${fetchFolderKeys}?order_by[]=name&sort_by[]=asc&name=${searchQuery}&page=${fetchPage}`;
+
+        const response = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
         });
+
         const res = response.data;
         if (res?.success) {
           setListFiles(res.data || []);
-        } else{
-          addToast("error", res?.error);
+          setTotalPages(res?.last_page ?? 1);
+        } else {
+          addToast("error", res?.error || "Gagal mengambil file");
         }
       } catch (err) {
         addToast(
           "error",
-          err?.response?.data?.error ||
-          err?.message ||
-          "Terjadi masalah saat mengambil file."
+          err?.response?.data?.error || err?.message || "Terjadi masalah saat mengambil file."
         );
       } finally {
         setLoadingFile(false);
       }
-    },1500);
+    }, 1500); // debounce
   };
 
+  // Load filter & initial data
   useEffect(() => {
-    loadFilterAction();
+    if (token) loadFilterAction();
   }, [token, folderKeys]);
 
+  // Reset page saat folder berubah & fetch page 1
   useEffect(() => {
-    fetchFiles();
-  }, []);
+    setPage(1);
+    setActiveFilter((prev) => ({
+      ...prev,
+      search: "",
+    }));
+    fetchFiles(1, folderKeys);
+  }, [folderKeys]);
 
+  // Fetch saat page berubah (kecuali page=1 sudah di-handle di atas)
+  useEffect(() => {
+    if (page !== 1) fetchFiles(page, folderKeys);
+  }, [page]);
+
+  // Fetch saat search berubah (debounced)
+  useEffect(() => {
+    setPage(1);
+    fetchFiles(1, folderKeys);
+  }, [activeFilter.search]);
+
+  // Filter & sort untuk UI
   useEffect(() => {
     setListFileFiltered(filterAndSortFiles(listFiles, activeFilter));
   }, [listFiles, activeFilter.group]);
+
+  function renderPaging(){
+        if(loadingFile){
+          return  <div className="flex items-center justify-center">
+            <div className="skeleton h-4 w-32 mt-8"></div>
+          </div>;
+        } else if(error){
+          return <></>;
+        }
+    
+        return <Pagination
+            className="mt-8"
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+  }
 
   return (
     <>
@@ -199,10 +236,11 @@ const DashboardContent = () => {
                 </div>
               </> : 
               <>
-                <NavLink to={`/dashboard/${findParentFolderKey(folderKeys)==null? "":findParentFolderKey(folderKeys)}`} className="flex w-[min-content] items-center gap-1 text-black font-bold px-1 py-2 rounded-md hover:bg-gray-300 transition">
+                <button
+                  onClick={() => navigate(-1)} className="flex w-[min-content] items-center gap-1 text-black font-bold px-1 py-2 rounded-md hover:bg-gray-300 transition">
                   <IoArrowBack />
                   Back
-                </NavLink>
+                </button>
                 <h2 className="text-black text-3xl my-4">{getDirectory(folderKeys)}</h2>
               </>
             }
@@ -252,13 +290,15 @@ const DashboardContent = () => {
                   </div>
                   
                   {viewModeFiles === "grid" ? (
-                    <FileGridView folderKeys={folderKeys} mode="Files"/>
+                    <FileGridView lists={listFileFiltered} isLoading={loadingFile} error={errorFile} folderKeys={folderKeys} mode="Files"/>
                   ) : (
-                    <FileListView folderKeys={folderKeys} mode="Files"/>
+                    <FileListView lists={listFileFiltered} isLoading={loadingFile} error={errorFile} folderKeys={folderKeys} mode="Files"/>
                   )}
                 </div>
               </>
             }
+            
+            {renderPaging()}
           </div>
         </main>
 
