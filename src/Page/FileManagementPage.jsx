@@ -246,7 +246,7 @@ const FileManagementContent = () => {
 
         const blobResponse = await axios.get(urlTarget, {
           responseType: "blob",
-          headers: { Authorization: `Bearer ${token}` },
+          // headers: { Authorization: `Bearer ${token}` },
         });
 
         const blob = new Blob([blobResponse.data]);
