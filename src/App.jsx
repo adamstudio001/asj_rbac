@@ -30,7 +30,7 @@ export default function App() {
                     <Route path="/role_permissions" element={<RolePermissionPage />} />
                   </Route>
                   <Route path="/logs/" element={<LogHistoryPage />} />
-                  <Route path="/settings/" element={<SettingPage />} />
+                  {/* <Route path="/settings/" element={<SettingPage />} /> */}
                 </Route>
               </Route>
             </Routes>
