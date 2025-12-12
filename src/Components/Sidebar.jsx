@@ -126,7 +126,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
                 <span className={`${isCollapsed ? "hidden" : "block"}`}>Logs History</span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link
                 to="/settings"
                 className={`flex items-center gap-3 ${["/settings"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
@@ -135,7 +135,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
                 <GoGear size={24} />
                 <span className={`${isCollapsed ? "hidden" : "block"}`}>Settings</span>
               </Link>
-            </li>
+            </li> */}
           </ul>
         </div>
 
