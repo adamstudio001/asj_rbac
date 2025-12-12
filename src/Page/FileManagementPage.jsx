@@ -353,7 +353,7 @@ const FileManagementContent = () => {
                               focus:outline-none focus:ring-2 focus:ring-gray-400
                               transition-all duration-150
                             "
-                            onClick={()=>loadData()}
+                            onClick={()=>window.location.reload()}
                           >
                             Klik muat ulang
                           </button>
