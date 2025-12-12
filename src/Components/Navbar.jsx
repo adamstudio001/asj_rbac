@@ -137,16 +137,17 @@ const Navbar = ({renderActionModal = null}) => {
                     {typeof renderActionModal === "function" && renderActionModal()}
                 </div>
             </>
-        } else if(["/settings"].some((p) => currentPath.startsWith(p))){
-            return <>
-                <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
-                   Settings
-                </button>
-                <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
-                   Settings
-                </button>
-            </>
-        }
+        } 
+        // else if(["/settings"].some((p) => currentPath.startsWith(p))){
+        //     return <>
+        //         <button onClick={toggleSidebar} className="lg:hidden w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
+        //            Settings
+        //         </button>
+        //         <button onClick={toggleCollapse} className="hidden lg:flex w-full sm:w-auto text-left text-left font-inter font-semibold text-[18px] text-[#243874]">
+        //            Settings
+        //         </button>
+        //     </>
+        // }
     }
   return (
     <nav className="bg-white border-b-2 border-gray-100 p-4 flex flex-wrap gap-2 items-center justify-between">
