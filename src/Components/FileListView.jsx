@@ -1,15 +1,16 @@
 import { getFileIcon } from '@src/Common/Utils';
-import { useFileManager } from '../Providers/FileManagerProvider';
-import { NavLink } from 'react-router-dom';
+// import { useFileManager } from '../Providers/FileManagerProvider';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/Components/ui/Tooltip"
-import { filterAndSortFiles } from '@/Common/Utils';
+// import { filterAndSortFiles } from '@/Common/Utils';
 
 function FileListView({ lists, folderKeys, mode, isLoading=false }) {
+  const navigate = useNavigate();
   // const { 
   //     activeFilter, 
   //     getFileDirectory,
@@ -40,8 +41,8 @@ function FileListView({ lists, folderKeys, mode, isLoading=false }) {
           file.type_identifier.toLowerCase()==="folder"? 
           <NavLink
               key={index}
-              to={file.type_identifier.toLowerCase()=="folder"? `/dashboard/${encodeURIComponent(folderKeys!=file.parent_id? file.parent_id:file.id)}`:`#`} 
-              className="flex items-center px-4 py-3 hover:bg-gray-50 transition">
+              to={file.type_identifier.toLowerCase()=="folder"? `/dashboard/${encodeURIComponent(folderKeys!=file.parent_id? file.parent_id:file.id)}`:`#`}
+              className="w-full flex items-center px-4 py-3 hover:bg-gray-50 transition">
             <div className="text-2xl w-10">{getFileIcon(file.name, true, 24)}</div>
             <TooltipProvider delayDuration={0}>
               <Tooltip>
@@ -54,7 +55,16 @@ function FileListView({ lists, folderKeys, mode, isLoading=false }) {
               </Tooltip>
             </TooltipProvider>
           </NavLink> : 
-          <div key={index} className="flex items-center px-4 py-3 hover:bg-gray-50 transition">
+          <button 
+            key={index} 
+            onClick={()=>{
+                window.open(
+                  `https://staging-backend.rbac.asj-shipagency.co.id/download/${file.name}`,
+                  '_blank',
+                  'noopener,noreferrer'
+                );
+            }}
+            className="w-full flex items-center px-4 py-3 hover:bg-gray-50 transition">
             <div className="text-2xl w-10">{getFileIcon(file.name, false, 24)}</div>
             <TooltipProvider delayDuration={0}>
               <Tooltip>
@@ -66,7 +76,7 @@ function FileListView({ lists, folderKeys, mode, isLoading=false }) {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
+          </button>
         )))
       }
     </div>

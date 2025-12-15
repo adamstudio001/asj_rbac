@@ -1,11 +1,12 @@
 import { getFileIcon } from '@src/Common/Utils';
-import { useFileManager } from '../Providers/FileManagerProvider';
-import { NavLink } from 'react-router-dom';
+// import { useFileManager } from '../Providers/FileManagerProvider';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { filterAndSortFiles } from '@/Common/Utils';
+// import { filterAndSortFiles } from '@/Common/Utils';
 import { useEffect } from 'react';
 
 function FileGridView({ lists, folderKeys, mode, isLoading=false }) {
+  const navigate = useNavigate();
   // const { 
   //     activeFilter, 
   //     getFileDirectory,
@@ -50,13 +51,20 @@ function FileGridView({ lists, folderKeys, mode, isLoading=false }) {
               <div className="text-left text-[#1A1A1A] text-[13px] leading-[18px] font-inter font-medium truncate w-full">{file.name}</div>
             </NavLink>
           ) : (
-            <div
+            <button
               key={index}
+              onClick={()=>{
+                window.open(
+                  `https://staging-backend.rbac.asj-shipagency.co.id/download/${file.name}`,
+                  '_blank',
+                  'noopener,noreferrer'
+                );
+              }}
               className="flex flex-row gap-2 bg-[#7979790D] p-4 rounded shadow-md hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
             >
               <div className="text-4xl">{getFileIcon(file.name, false)}</div>
               <div className="text-left text-[#1A1A1A] text-[13px] leading-[18px] font-inter font-medium truncate w-full">{file.name}</div>
-            </div>
+            </button>
           )
         )
       }
