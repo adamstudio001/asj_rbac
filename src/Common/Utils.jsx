@@ -32,7 +32,7 @@ export function getFileIconBig(fileName, isFolder = false) {
   const ext = fileName.split('.').pop().toLowerCase();
 
   if (['ppt', 'pptx'].includes(ext)) return <img src={Pp} alt="presentation" className="w-[10cqi]" />;
-  if (['xlsx', 'xls'].includes(ext)) return <img src={Xls} alt="Folder" className="w-[10cqi]" />;
+  if (['xlsx', 'xls', 'csv'].includes(ext)) return <img src={Xls} alt="Folder" className="w-[10cqi]" />;
   if (['doc', 'docx', 'txt'].includes(ext)) return <img src={Document} alt="document" className="w-[10cqi]" />;
   if (['mp3', 'zip'].includes(ext)) return<img src={Zip} alt="archive" className="w-[10cqi]" />;
   if (['mp4', 'mkv', 'avi'].includes(ext)) return<img src={Video} alt="video" className="w-[10cqi]" />;
