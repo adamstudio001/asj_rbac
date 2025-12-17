@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearch } from "../Providers/SearchProvider";
 import Navbar from "@src/Components/Navbar";
-import {TableActionMenu} from "@src/Components/TableActionMenu";
+// import {TableActionMenu} from "@src/Components/TableActionMenu";
 import { Button } from "@/Components/ui/Button";
 import { Label } from "@/Components/ui/Label";
 import {
@@ -21,6 +21,12 @@ import MultipleSelector from "@/Components/ui/MultipleSelector";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import { v4 as uuidv4 } from 'uuid';
 import CustomInput from "@/Components/CustomInput";
+import { cn } from "@/lib/utils";
+import { TableActionMenuImage } from "@/Components/TableActionMenuV2";
+import change_role from "@/assets/change_role.svg";
+import edit_employee from "@/assets/edit_employee.svg";
+import add_team from "@/assets/add_team.svg";
+import view_profile from "@/assets/view_profile.svg";
 
 const permissions = [
     { value: "read", label: "read" },
@@ -43,21 +49,140 @@ const RolePermissionContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const { addToast } = useToast();
+  const [sortConfig, setSortConfig] = useState({});
+  const [selectedIds, setSelectedIds] = useState([]);
 
-  const roles = [
-    { id: 1, role: "HR/GA", permission: [permissions[0]]},
-    { id: 2, role: "Finance", permission: []},
-    { id: 3, role: "Operation", permission: []},
-    { id: 4, role: "Developer", permission: []},
+  const datas = [
+    { id: 1, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    { id: 2, employId: "#29112025002", user: "Hani Ayu Wulandari", role: "Admin Legal", position: "Tax", permission: []},
+    { id: 3, employId: "#29112025003", user: "Rahul", role: "User", position: "Legal", permission: []},
+    { id: 4, employId: "#29112025004", user: "Dika", role: "User", position: "OPS", permission: []},
+    // { id: 5, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 6, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 7, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 8, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 9, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 10, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 11, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 12, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 13, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 14, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 15, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
+    // { id: 16, employId: "#29112025001", user: "Desy Puji Astuti", role: "Super Admin", position: "HR/GA", permission: []},
   ];
 
   useEffect(()=>{
       setSearch("");
   },[]);
 
-  const filteredRoles = roles.filter(user =>
-    user.role.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      const current = prev[key] ?? null;
+
+      let next;
+      if (current === null) next = "asc";
+      else if (current === "asc") next = "desc";
+      else next = null;
+
+      return {
+        ...prev,
+        [key]: next,
+      };
+    });
+  };
+
+  const filteredDatas = useMemo(() => {
+    let result = datas.filter(user =>
+      user.role.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const activeSorts = Object.entries(sortConfig)
+      .filter(([_, dir]) => dir !== null);
+
+    if (activeSorts.length === 0) {
+      return result;
+    }
+
+    return [...result].sort((a, b) => {
+      for (const [key, direction] of activeSorts) {
+        let aVal = a[key];
+        let bVal = b[key];
+
+        aVal = aVal?.toString().toLowerCase() ?? "";
+        bVal = bVal?.toString().toLowerCase() ?? "";
+
+        if (aVal < bVal) return direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [datas, search, sortConfig]);
+
+  const allChecked =
+    filteredDatas.length > 0 &&
+    filteredDatas.every((row) => selectedIds.includes(row.id));
+
+  const SortableTh = ({
+    column,
+    className,
+    left,
+    children,
+  }) => {
+    return (
+      <th
+        className={cn(
+          "px-4 py-3 font-inter font-medium text-[14px] text-black select-none",
+          className
+        )}
+      >
+        <div className="flex items-center gap-2">
+          {/* SLOT KIRI (checkbox / icon / dll) */}
+          {left && (
+            <div onClick={(e) => e.stopPropagation()}>
+              {left}
+            </div>
+          )}
+
+          {/* AREA SORTING */}
+          <button
+            type="button"
+            onClick={() => handleSort(column)}
+            className="flex items-center gap-2"
+          >
+            {children}
+
+            <div className="flex flex-col leading-none gap-[2px]">
+              <svg
+                width="10"
+                height="6"
+                viewBox="0 0 10 6"
+                className={
+                  sortConfig[column] === "asc"
+                    ? "fill-[#1e3264]"
+                    : "fill-gray-400"
+                }
+              >
+                <path d="M5 0L10 6H0L5 0Z" />
+              </svg>
+
+              <svg
+                width="10"
+                height="6"
+                viewBox="0 0 10 6"
+                className={`rotate-180 ${
+                  sortConfig[column] === "desc"
+                    ? "fill-[#1e3264]"
+                    : "fill-gray-400"
+                }`}
+              >
+                <path d="M5 0L10 6H0L5 0Z" />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </th>
+    );
+  };
 
   return (
     <>
@@ -75,49 +200,108 @@ const RolePermissionContent = () => {
         }
       />
       
-      <main className="flex-1 items-center p-6 overflow-auto">
-        <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
-          <table className="w-full text-left text-sm">
+      <main className="flex-1 items-center p-6 overflow-auto scroll-custom">
+        <div className="w-full rounded-lg"> {/* overflow-x-scroll scroll-custom  */}
+         <table className="w-full text-left text-sm">
             <thead className="bg-[#F3F3F3]">
               <tr className="border border-gray-200">
-                <th className="px-4 py-3 w-10"></th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black min-w-0 w-[250px]">Role</th>
-                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Permission</th>
+                <SortableTh
+                  column="user"
+                  className="w-[250px]"
+                  left={
+                    <input
+                      type="checkbox"
+                      checked={allChecked}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds(filteredDatas.map((r) => r.id));
+                        } else {
+                          setSelectedIds([]);
+                        }
+                      }}
+                    />
+                  }
+                >
+                  List User
+                </SortableTh>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Employe ID</th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Role</th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Position</th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px] text-black">Action</th>
               </tr>
             </thead>
             <tbody>
-              {filteredRoles.map((role) => (
+              {filteredDatas.map((data) => (
                 <tr
-                  key={role.id}
+                  key={data.id}
                   className="hover:bg-gray-50 transition border-b border-gray-200"
                 >
-                  <td className="px-4 py-3">
-                    <TableActionMenu>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px] flex gap-2">
+                      <input 
+                        type="checkbox" 
+                        key={data.id}
+                        checked={selectedIds.includes(data.id)}
+                        onChange={(e) => {
+                          setSelectedIds((prev) =>
+                            e.target.checked
+                              ? [...prev, data.id]
+                              : prev.filter((id) => id !== data.id)
+                          );
+                        }}/> 
+                      <EllipsisTooltip className={"w-[250px]"}>
+                        {data.user}
+                      </EllipsisTooltip>
+                  </td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                      {data.employId}
+                  </td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                      {data.role}
+                  </td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                      {data.position}
+                  </td>
+                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                    <TableActionMenuImage>
                       <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                         onClick={() => {
-                          setSelectedRole(role);
+                          setSelectedRole(null);
                           setIsModalOpen(true);
                         }}
                       >
-                        {/* <FaUserEdit className="mr-2 text-gray-500" /> */}
-                        Edit
+                        <img src={view_profile} alt="view profile" /> 
+                        View Profile
                       </button>
                       <button
+                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        onClick={() => {}}
+                      >
+                        <img src={add_team} alt="view profile" /> 
+                        Add to team
+                      </button>
+                      <button
+                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        onClick={() => {}}
+                      >
+                        <img src={edit_employee} alt="view profile" /> 
+                        Edit Employee
+                      </button>
+                      <button
+                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        onClick={() => {}}
+                      >
+                        <img src={change_role} alt="view profile" /> 
+                        Change role
+                      </button>
+                      {/* <button
                         className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                         onClick={() => setIsModalDeleteOpen(true)}
                       >
-                        {/* <FaTrash className="mr-2 text-red-500" /> */}
                         Delete
-                      </button>
-                    </TableActionMenu>
+                      </button> */}
+                    </TableActionMenuImage>
                   </td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                      <EllipsisTooltip className={"w-[250px]"}>{role.role}</EllipsisTooltip>
-                  </td>
-                  <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">{
-                      role.permission.map(p => <span key={uuidv4()} className="px-2 py-1 bg-green-400 rounded rounded-xl">{p.label}</span>)  
-                  }</td>
                 </tr>
               ))}
             </tbody>

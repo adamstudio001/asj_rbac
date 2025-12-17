@@ -311,7 +311,7 @@ const UserPageContent = () => {
                           <TableActionMenu>
                             {/* Edit User */}
                             <button
-                              className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                              className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                               onClick={() => {
                                 setSelectedUser(user);
                                 setIsModalOpen(true);
@@ -323,7 +323,7 @@ const UserPageContent = () => {
 
                             {/* Reset Password */}
                             <button
-                              className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                              className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                               onClick={() =>
                                 alert(`Reset password for ${user.full_name}`)
                               }
@@ -334,7 +334,7 @@ const UserPageContent = () => {
 
                             {/* Delete User */}
                             <button
-                              className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                              className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                               onClick={() => {
                                 setIsModalDeleteOpen(true);
                                 setSelectedUser(user);
@@ -403,8 +403,8 @@ const UserPageContent = () => {
         }
       />
 
-      <main className="flex-1 items-center p-6 overflow-auto">
-        <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
+      <main className="flex-1 items-center p-6 overflow-auto scroll-custom">
+        <div className="w-full rounded-lg"> {/* overflow-x-scroll scroll-custom  */}
           {renderTable()}
         </div>
 

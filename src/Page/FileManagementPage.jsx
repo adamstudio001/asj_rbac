@@ -466,7 +466,7 @@ const FileManagementContent = () => {
         )}
       />
 
-      <main className="flex-1 items-center py-6 px-[2.5cqi] overflow-auto">
+      <main className="flex-1 items-center py-6 px-[2.5cqi] overflow-auto scroll-custom">
         <div className="w-full mb-8 pb-4 sm:w-auto flex items-center gap-3">
           <div className="relative">
             <input
@@ -487,7 +487,7 @@ const FileManagementContent = () => {
           </div>
         </div>
 
-        <div className="w-full overflow-x-scroll scroll-custom rounded-lg space-y-6">
+        <div className="w-full rounded-lg space-y-6"> {/* overflow-x-scroll scroll-custom  */}
           {renderBreadCrumb()}
 
           {renderTable()}
