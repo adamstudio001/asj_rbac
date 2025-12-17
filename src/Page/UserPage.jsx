@@ -234,9 +234,9 @@ const UserPageContent = () => {
                       <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
                         Position
                       </th>
-                      <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                      {/* <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
                         Last Seen
-                      </th>
+                      </th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -254,9 +254,9 @@ const UserPageContent = () => {
                       <td className="border px-4 py-2">
                         <div className="skeleton h-4 w-full"></div>
                       </td>
-                      <td className="border px-4 py-2">
+                      {/* <td className="border px-4 py-2">
                         <div className="skeleton h-4 w-full"></div>
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -276,9 +276,9 @@ const UserPageContent = () => {
                   <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
                     Position
                   </th>
-                  <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
+                  {/* <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left">
                     Last Seen
-                  </th>
+                  </th> */}
               </tr>
             </thead>
             <tbody> 
@@ -355,9 +355,9 @@ const UserPageContent = () => {
                         <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
                           {user.employment.map(e => getJobPosition(e.job_identifier)?.label ?? "")}
                         </td>
-                        <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
+                        {/* <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
                           {formatLastSeen(user?.lastLogin?.start, user?.lastLogin?.end)}
-                        </td>
+                        </td> */}
                       </tr>
                     ))
               }
