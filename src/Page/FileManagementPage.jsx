@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Navbar from "@src/Components/Navbar";
 import Pagination from "@src/Components/Pagination";
 import { useSearch } from "@src/Providers/SearchProvider";
@@ -34,13 +34,18 @@ import {
 } from "@/Components/ui/DialogModal";
 import CustomInput from "@/Components/CustomInput";
 import { Button } from "@/Components/ui/Button";
-import { IoDownload } from "react-icons/io5";
+// import { IoDownload } from "react-icons/io5";
 import { Download } from "lucide-react";
+import { MenuProvider, useMenu } from "@/Providers/MenuContext";
+import { useLongPress } from "@/Hooks/useLongPress";
+import { createFileObject } from "@/Common/FileFactory";
 
 const FileManagementPage = () => {
   return (
     // <ToastProvider>
+    <MenuProvider>
       <FileManagementContent />
+    </MenuProvider>
     // </ToastProvider>
   );
 };
@@ -49,6 +54,7 @@ const FileManagementContent = () => {
   const { folderKeys } = useParams();
   const isRoot = isEmpty(folderKeys);
   const navigate = useNavigate();
+  const {showMenu, data, setData} = useMenu();
 
   const { search, setSearch } = useSearch();
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
@@ -65,10 +71,34 @@ const FileManagementContent = () => {
   const [lists, setLists] = useState([]);
   const [listsPath, setListsPath] = useState([]);
   const [fileSelected, setFileSelected] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [isLoad, setIsLoad] = useState(false);
   const [error, setError] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
+
+  const [isWrapped, setIsWrapped] = useState(false);
+  const textRef = useRef(null);
+  const [files, setFiles] = useState([]);
+
+  useEffect(() => {
+    if (!textRef.current) return;
+
+    const ro = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        // jika tinggi lebih dari line-height, berarti wrap
+        const lineHeight = parseInt(getComputedStyle(entry.target).lineHeight, 10);
+        if (entry.contentRect.height > lineHeight) {
+          setIsWrapped(true);
+        } else {
+          setIsWrapped(false);
+        }
+      }
+    });
+
+    ro.observe(textRef.current);
+
+    return () => ro.disconnect();
+  }, [textRef]);
 
   async function loadData() {
     if (isExpired()) {
@@ -166,7 +196,7 @@ const FileManagementContent = () => {
       }
     }
 
-    setLoading(true);
+    // setLoading(true);
     setIsModalDeleteOpen(false);
     try {
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
@@ -188,7 +218,7 @@ const FileManagementContent = () => {
       console.error(err);
       // addToast("error", "ada masalah pada aplikasi");
     } finally {
-      setLoading(false);
+      setIsModalDeleteOpen(false);
     }
   }
 
@@ -297,6 +327,7 @@ const FileManagementContent = () => {
             }}
           />;
   }
+
   function renderTable(){
     if(isLoad){
       return  <table className="w-full table-auto border-collapse">
@@ -378,7 +409,7 @@ const FileManagementContent = () => {
                     >
                       <button
                         className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                        onClick={() => alert("Copy")}
+                        onClick={() => setData(file)}
                       >
                         <img src={Copy} alt="copy" /> Copy
                       </button>
@@ -426,18 +457,34 @@ const FileManagementContent = () => {
     return <Pagination className="mt-8" currentPage={page} totalPages={totalPages} onPageChange={setPage} />
   }
 
+  const handleContextMenu = (e) => {
+      e.preventDefault(); 
+      showMenu(e.clientX, e.clientY, async (d) => {
+        const fileObj = await createFileObject({ reference: d, name:d?.name ?? "unknown" });
+        setFiles([fileObj]);
+        setIsModalOpen(true);
+      });
+  };
+
+  const longPress = useLongPress((e) => {
+    showMenu(e.touches[0].clientX, e.touches[0].clientY, (d) => {
+      setIsModalOpen(true);
+
+    });
+  });
+
   return (
     <>
       <Navbar
         renderActionModal={() => (
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center max-sm:gap-4 gap-8">
+            <div className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex flex-wrap items-center gap-4`}>
               {(!isRoot || (isUserAccess() || isCompanyAccess())) && <button
                 onClick={() => {
                   setIsModalFolderOpen(true);
                   setFileSelected(null);
                 }}
-                className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
+                className="flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
               >
                 <BsPlusLg size={18} />
                 Folder
@@ -446,7 +493,7 @@ const FileManagementContent = () => {
                 onClick={() => {
                   setIsModalOpen(true);
                 }}
-                className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
+                className={`${isWrapped ? "w-full" : "max-w-[24rem]"} flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
               >
                 <LuUpload size={18} />
                 Upload file
@@ -458,7 +505,7 @@ const FileManagementContent = () => {
                 C
               </div>
               <div className="flex items-center gap-1">
-                <span className="font-medium text-gray-800">{user?.full_name ?? "Unknown"}</span>
+                <span ref={textRef} className="font-medium text-gray-800">{user?.full_name ?? "Unknown"}</span>
                 <IoIosArrowDown className="w-4 text-[#a5a5a5]" />
               </div>
             </div>
@@ -466,7 +513,11 @@ const FileManagementContent = () => {
         )}
       />
 
-      <main className="flex-1 items-center py-6 px-[2.5cqi] overflow-auto scroll-custom">
+      <main 
+        className="flex-1 items-center py-6 px-[2.5cqi] overflow-auto scroll-custom"
+        onContextMenu={(e) => handleContextMenu(e)}
+        {...longPress}
+        >
         <div className="w-full mb-8 pb-4 sm:w-auto flex items-center gap-3">
           <div className="relative">
             <input
@@ -594,6 +645,7 @@ const FileManagementContent = () => {
         refreshData={()=>loadData()} 
         idFolder={folderKeys} 
         token={token} 
+        initialFiles={files}
         isAdmin={isAdminAccess()} 
         isCompany={isCompanyAccess()} 
         isUser={isUserAccess()}/>

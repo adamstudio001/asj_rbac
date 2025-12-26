@@ -11,53 +11,6 @@ export const FileManagerProvider = ({ children }) => {
 
     const [activeFilter, setActiveFilter] = useState({search: "", group: null});
     
-    // const dummyFiles = [
-    //     { 
-    //         id: 1,
-    //         name: "Laporan Absensi Karyawan", 
-    //         isFolder: true, 
-    //         folderKeys: "SF01", 
-    //         lastModified: "2025-01-01 10:00:00",
-    //         fileSize: 20202000000,
-    //         lists: [
-    //         { id: 2, name: "Surat Cuti.docx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 10240 },
-    //         { id: 3, name: "Presentation.pptx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 20480 },
-    //         { id: 4, name: "Payroll.xlsx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 30480 },
-    //         { id: 5, name: "trunk.png", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 50480 },
-    //         { id: 6, name: "Plan.xlsx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 60480 },
-    //         { id: 7, name: "Samsul.pdf", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 70480 },
-    //         { 
-    //             id: 8,
-    //             name: "Laporan",
-    //             isFolder: true,
-    //             folderKeys: "AK011",
-    //             lastModified: "2025-01-01 10:00:00",
-    //             fileSize: 0,
-    //             lists: [
-    //             { id: 9, name: "Surat Izin Cuti.docx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 10240 },
-    //             ]
-    //         }
-    //         ] 
-    //     },
-    //     { id: 10, name: "Surat Izin Cuti.docx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 10000 },
-    //     { id: 11, name: "Monthly Report Presentation.pptx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 20000 },
-    //     { id: 12, name: "Payroll-2026.xlsx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 30000 },
-    //     { id: 13, name: "tree-trunk.png", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 40000 },
-    //     { id: 14, name: "Home_Renovation_Plan.xlsx", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 50000 },
-    //     { id: 15, name: "Surat Resign Samsul.pdf", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 60000 },
-    //     { id: 16, name: "music.mp3", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 70000 },
-    //     { id: 17, name: "Vacation_Photos_Italy.zip", isFolder: false, lastModified: "2025-01-01 10:00:00", fileSize: 80000 },
-    //     { 
-    //         id: 18,
-    //         name: "Laporan Absensi Karyawan 2025", 
-    //         isFolder: true, 
-    //         folderKeys: "SF02", 
-    //         lastModified: "2025-01-01 10:00:00",
-    //         fileSize: 0,
-    //         lists: []
-    //     },
-    // ];
-
     function findFolderRecursive(items, key) {
         for (const item of items) {
             if (item.type_identifier=="Folder" && encodeURIComponent(item.folderKeys) === encodeURIComponent(key)) {

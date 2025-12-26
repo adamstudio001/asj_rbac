@@ -59,6 +59,28 @@ const DashboardContent = () => {
   const [totalPages, setTotalPages] = useState(1);
   const fetchTimeout = useRef(null);
 
+  const [isWrapped, setIsWrapped] = useState(false);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    if (!textRef.current) return;
+  
+    const ro = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const lineHeight = parseInt(getComputedStyle(entry.target).lineHeight, 10);
+        if (entry.contentRect.height > lineHeight) {
+        setIsWrapped(true);
+        } else {
+        setIsWrapped(false);
+        }
+      }
+    });
+  
+    ro.observe(textRef.current);
+  
+    return () => ro.disconnect();
+  }, [textRef]);
+
   const baseUrlFiles =
     isAdminAccess() || isCompanyAccess()
       ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
@@ -193,20 +215,20 @@ const DashboardContent = () => {
   return (
     <>
       <Navbar renderActionModal={()=> (
-        <div className="flex items-center gap-8">
+        <div className={`flex flex-wrap items-center max-[24rem]:gap-3 ${isWrapped ? "" : "gap-3"} space-x-8`}>
                     <button onClick={()=>{
                       alert("feature in development");
                       // setIsModalOpen(!isModalOpen);
-                    }} className="flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition">
+                    }} className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}>
                     <LuUpload size={18}/> 
                     Upload file
                     </button>
-                    <div className="flex items-center gap-2">
+                    <div className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex items-center gap-2`}>
                       <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
                         C
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="font-medium text-gray-800">{user?.full_name ?? "Unknown"}</span>
+                        <span ref={textRef} className="font-medium text-gray-800">sghadchsagcda asghcdagfscdghasc</span>
                         <IoIosArrowDown className="w-4 text-[#a5a5a5]"/>
                       </div>
                     </div>

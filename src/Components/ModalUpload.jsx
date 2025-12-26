@@ -11,14 +11,16 @@ import {
   DialogModalTitle,
 } from "@/Components/ui/DialogModal";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useToast } from "@src/Providers/ToastProvider";
 import { cn } from "@/lib/utils";
 import axios from "axios";
-import { buildHeaders } from "@/Common/Utils";
+import { buildHeaders, isEmpty } from "@/Common/Utils";
+import { createFileObject } from "@/Common/FileFactory";
 
 export default function ModalUpload({
   refreshData = () => {},
+  initialFiles=[],
   idFolder = null,
   token = null,
   isAdmin = false,
@@ -32,6 +34,12 @@ export default function ModalUpload({
   const inputRef = useRef(null);
 
   const handleBrowse = () => inputRef.current.click();
+
+  useEffect(() => {
+    if (initialFiles?.length) {
+      setFiles(initialFiles);
+    }
+  }, [initialFiles]);
 
   const readAllFiles = async (entry, path = "") => {
     return new Promise((resolve) => {
@@ -70,17 +78,20 @@ export default function ModalUpload({
     });
   };
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const selected = Array.from(e.target.files);
 
-    const newFiles = selected.map((file) => ({
-      id: uuidv4(),
-      file,
-      path: file.webkitRelativePath || file.name,
-      progress: 0,
-      status: "idle", // idle | uploading | upload | uploaded | error
-      error: null,
-    }));
+    // const newFiles = selected.map((file) => ({
+    //   id: uuidv4(),
+    //   file,
+    //   path: file.webkitRelativePath || file.name,
+    //   progress: 0,
+    //   status: "idle", // idle | uploading | upload | uploaded | error
+    //   error: null,
+    // }));
+    const newFiles = await Promise.all(
+      selected.map((f) => createFileObject({ file: f }))
+    );
 
     setFiles((prev) => [...prev, ...newFiles]);
     e.target.value = "";
@@ -99,14 +110,17 @@ export default function ModalUpload({
       }
     }
 
-    const droppedFiles = collectedFiles.map((file) => ({
-      id: uuidv4(),
-      file,
-      path: file.customPath || file.webkitRelativePath || file.name,
-      progress: 0,
-      status: "idle",
-      error: null,
-    }));
+    // const droppedFiles = collectedFiles.map((file) => ({
+    //   id: uuidv4(),
+    //   file,
+    //   path: file.customPath || file.webkitRelativePath || file.name,
+    //   progress: 0,
+    //   status: "idle",
+    //   error: null,
+    // }));
+    const droppedFiles = await Promise.all(
+      collectedFiles.map((f) => createFileObject({ file: f }))
+    );
 
     setFiles((prev) => [...prev, ...droppedFiles]);
   };
@@ -131,6 +145,9 @@ export default function ModalUpload({
     pending.forEach((fileObj) => uploadSingleFile(fileObj));
   };
 
+  useEffect(()=>{
+    console.log(files)
+  },[files]);
   // ==========================
   // 🚀 Upload Single File
   // ==========================
@@ -150,13 +167,52 @@ export default function ModalUpload({
     setTimeout(async () => {
       // 2️⃣ STATE: upload (progress bar)
       setFileState(fileId, { status: "upload" });
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token, false);
+
+      if (f.isReference && !f.file) {
+        try {
+          if(isEmpty(`${f?.reference?.id}`)){
+            throw Error("ada masalah data ketika di copy");
+          }
+          const urlDownload = (isAdmin || isCompany)? 
+          `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${f?.reference?.id}/url-download`: 
+          `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${f?.reference?.id}/url-download`;
+
+          const resDownloadUrl = await fetch(urlDownload, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({}), // karena axios.post sebelumnya kosong
+          });
+          const downloadResponse = await resDownloadUrl.json();
+
+          if (!downloadResponse?.success) {
+            throw new Error(`Failed to get download URL ${f.path}`);
+          }
+
+          const urlTarget = downloadResponse.data.download_url;
+          const blobRes = await fetch(urlTarget, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const blob = await blobRes.blob();
+          
+          const file = new File([blob], "Copy - "+f.path, { type: blob.type });
+          f.file = file;
+        } catch (err) {
+          console.log(err)
+          setFileState(fileId, { status: "error", error: "terjadi masalah pada server ketika copy berkas" });
+          return;
+        }
+      }
 
       const formData = new FormData();
       formData.append("file", f.file);
 
       try {
-        const info = JSON.parse(sessionStorage.getItem("info") || "{}");
-        const headers = buildHeaders(info, token, false);
+        // const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+        // const headers = buildHeaders(info, token, false);
 
         const url = (isAdmin || isCompany)
           ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${idFolder}/file`
@@ -269,49 +325,52 @@ export default function ModalUpload({
             {/* FILE LIST */}
             {files.length > 0 && (
               <div className="w-full overflow-hidden flex flex-col gap-2">
-                {files.map((f) => (
-                  <div
-                    key={f.id}
-                    className={cn(
-                      "relative border rounded text-sm",
-                      f.status === "error"
-                        ? "border-red-400"
-                        : f.status === "uploaded"
-                          ? "border-green-500"
-                          : "border-gray-400"
-                    )}
-                  >
-                    <div className={`flex justify-between p-2`}>
-                      <span className="truncate">{f.path}</span>
-                      <button
-                        disabled={f.status !== "idle" && f.status !== "uploaded" && f.status !== "error"}
-                        onClick={() => handleRemove(f)}
-                        className="w-5 h-5 bg-gray-300 hover:bg-black rounded-full text-white flex justify-center items-center"
-                      >
-                        <X size={16} />
-                      </button>
+                {files.map((f) => {
+                  console.log(f)
+                  return (
+                    <div
+                      key={f.id}
+                      className={cn(
+                        "relative border rounded text-sm",
+                        f.status === "error"
+                          ? "border-red-400"
+                          : f.status === "uploaded"
+                            ? "border-green-500"
+                            : "border-gray-400"
+                      )}
+                    >
+                      <div className={`flex justify-between p-2`}>
+                        <span className="truncate">{f.path}</span>
+                        <button
+                          disabled={f.status !== "idle" && f.status !== "uploaded" && f.status !== "error"}
+                          onClick={() => handleRemove(f)}
+                          className="w-5 h-5 bg-gray-300 hover:bg-black rounded-full text-white flex justify-center items-center"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      {/* SHIMMER */}
+                      {f.status === "uploading" && (
+                        <div className="w-full h-2 rounded mt-1 overflow-hidden bg-gray-200">
+                          <div className="animate-shimmer h-full w-full" />
+                        </div>
+                      )}
+
+                      {/* PROGRESS */}
+                      {f.status === "upload" && (
+                        <div className="w-full h-2 rounded mt-1 overflow-hidden bg-gray-200">
+                          <div
+                            className="h-full bg-blue-500 transition-all duration-200"
+                            style={{ width: `${f.progress}%` }}
+                          />
+                        </div>
+                      )}
+
+                      {f.error && renderError(f.error)}
                     </div>
-
-                    {/* SHIMMER */}
-                    {f.status === "uploading" && (
-                      <div className="w-full h-2 rounded mt-1 overflow-hidden bg-gray-200">
-                        <div className="animate-shimmer h-full w-full" />
-                      </div>
-                    )}
-
-                    {/* PROGRESS */}
-                    {f.status === "upload" && (
-                      <div className="w-full h-2 rounded mt-1 overflow-hidden bg-gray-200">
-                        <div
-                          className="h-full bg-blue-500 transition-all duration-200"
-                          style={{ width: `${f.progress}%` }}
-                        />
-                      </div>
-                    )}
-
-                    {f.error && renderError(f.error)}
-                  </div>
-                ))}
+                  )}
+                )}
               </div>
             )}
           </div>
