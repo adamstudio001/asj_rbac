@@ -191,14 +191,12 @@ export default function ModalUpload({
           }
 
           const urlTarget = downloadResponse.data.download_url;
-          const blobRes = await fetch(urlTarget, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+          const blobResponse = await axios.get(urlTarget, {
+            responseType: "blob",
           });
-          const blob = await blobRes.blob();
+          const blob = blobResponse.data;
           
-          const file = new File([blob], "Copy - "+f.path, { type: blob.type });
+          const file = new File([blob], f.path, { type: blob.type });
           f.file = file;
         } catch (err) {
           console.log(err)
