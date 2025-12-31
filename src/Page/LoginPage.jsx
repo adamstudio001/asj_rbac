@@ -6,11 +6,12 @@ import axios from "axios";
 import { useToast } from "@/Providers/ToastProvider";
 import { cn, getInformation } from "@/lib/utils";
 import { useAuth } from "@/Providers/AuthProvider";
+import slide1 from "@/assets/slide1.jpeg";
+import slide2 from "@/assets/slide2.jpeg";
+import slide3 from "@/assets/slide3.jpeg";
 
 const images = [
-  "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4",
-  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
-  "https://images.unsplash.com/photo-1506765515384-028b60a970df",
+  slide1,slide2,slide3
 ];
 
 const LoginPage = () => {
