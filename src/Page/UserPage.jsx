@@ -48,50 +48,8 @@ const UserPageContent = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalResetOpen, setIsModalResetOpen] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
-
-  // const users = [
-  //   {
-  //     id: 1,
-  //     firstName: "Desy",
-  //     lastName: "Puji Astuti",
-  //     email: "admin@gmail.com",
-  //     whatsapp: "087870590000",
-  //     branch: "Jakarta",
-  //     lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
-  //     jobPosition: "HR/GA",
-  //   },
-  //   {
-  //     id: 2,
-  //     firstName: "Hani",
-  //     lastName: "Ayu Wulansari",
-  //     email: "admin@gmail.com",
-  //     whatsapp: "087870590000",
-  //     branch: "Jakarta",
-  //     lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
-  //     jobPosition: "Finance",
-  //   },
-  //   {
-  //     id: 3,
-  //     firstName: "Rahul",
-  //     lastName: "",
-  //     email: "admin@gmail.com",
-  //     whatsapp: "087870590000",
-  //     branch: "Jakarta",
-  //     lastLogin: {start: "2025-01-01 01:00:00", end: "2025-10-07 10:12:00"},
-  //     jobPosition: "Operation",
-  //   },
-  //   {
-  //     id: 4,
-  //     firstName: "Dika",
-  //     lastName: "",
-  //     email: "admin@gmail.com",
-  //     whatsapp: "087870590000",
-  //     branch: "Jakarta",
-  //     lastLogin: {start: "2025-10-13 15:00:00", end: null},
-  //     jobPosition: "Operation",
-  //   },
-  // ];
 
   const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -324,9 +282,10 @@ const UserPageContent = () => {
                             {/* Reset Password */}
                             <button
                               className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                              onClick={() =>
-                                alert(`Reset password for ${user.full_name}`)
-                              }
+                              onClick={() =>{
+                                setSelectedUser(user);
+                                setIsModalResetOpen(true);
+                              }}
                             >
                               <img src={reset} alt="download" className="w-4 h-4"/>
                               Reset Password
@@ -431,11 +390,172 @@ const UserPageContent = () => {
         branches={branches}
         extraAction={()=>loadData()}
       />
+
+      <ModalResetPassword
+        open={isModalResetOpen}
+        onOpenChange={setIsModalResetOpen}
+        data={selectedUser}
+        extraAction={()=>loadData()}
+      />
     </>
   );
 };
 
 export default UserPage;
+
+export function ModalResetPassword({ open, onOpenChange, data = null, extraAction = function(){} }) {
+  const [loading, setLoading] = useState(false);
+  
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: {
+      firstName: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  const { addToast } = useToast();
+  const { token, isExpired, refreshSession } = useAuth();
+  
+  useEffect(() => {
+    reset({
+      firstName: data?.first_name ?? "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  }, [data, reset]);
+
+  const onSubmit = async (values) => {
+    if (isExpired()) {
+      refreshSession();
+    }
+
+    setLoading(true);
+
+    try {
+      console.log(values, data);
+      const formData = {
+        password: values.newPassword,
+        password_confirmation: values.confirmPassword,
+      };
+
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1//company/1/user/${data.id}/reset-password`
+      const method = "put";
+
+      const res = await axios({
+        method,
+        url,
+        data: formData,
+        headers
+      });
+
+      const body = res.data;
+      console.log(body);
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+        onOpenChange(false);
+        extraAction();
+      }
+
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+    }
+  }, [open, reset]);
+
+  return (
+    <DialogModal open={open} onOpenChange={onOpenChange}>
+      <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-full sm:max-w-lg"> {/*max-h-[min(640px,80vh)]*/}
+        <DialogModalHeader>
+          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+            Reset Password
+          </DialogModalTitle>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto scroll-custom">
+            <DialogModalDescription asChild>
+              <div className="px-6 pb-8 space-y-8">
+                {/* General Information */}
+                <div>
+                  <h5 className="font-inter font-bold text-lg text-[#1B2E48] pb-4">
+                    General Information
+                  </h5>
+
+                  <div className="space-y-6">
+                    {/* --- Row 1 --- */}
+                    <CustomInput
+                        label="First Name"
+                        name="firstName"
+                        register={register}
+                        disabled
+                        errors={errors}
+                        rules={{}}
+                    />
+                    
+                    <CustomInput
+                        label="New Password"
+                        name="newPassword"
+                        type="password"
+                        register={register}
+                        errors={errors}
+                        rules={{
+                            required: "New Password is required",
+                            minLength: { value: 6, message: "Min 6 chars" },
+                        }}
+                    />
+
+                    <CustomInput
+                        label="Confirm Password"
+                        name="confirmPassword"
+                        type="password"
+                        register={register}
+                        errors={errors}
+                        rules={{
+                          required: "Confirm Password is required",
+                          validate: (value) => value === watch("newPassword") || "Confirm Password not match",
+                        }}
+                    />
+                  </div>
+                </div>
+
+              </div>
+            </DialogModalDescription>
+
+            <DialogModalFooter className="px-6 pb-6 items-center">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full max-w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+              >
+                {loading? "Sending...":"Save"}
+              </Button>
+            </DialogModalFooter>
+          </form>
+        </DialogModalHeader>
+      </DialogModalContent>
+    </DialogModal>
+  );
+}
 
 export function ModalUser({ open, onOpenChange, data = null, mode = "create", jobs = [], branches = [], extraAction = function(){} }) {
   const [loading, setLoading] = useState(false);
