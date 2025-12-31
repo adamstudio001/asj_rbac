@@ -14,7 +14,8 @@ function Input({
       disabled={disabled}
       data-slot="input"
       className={cn(
-        "flex h-9 w-full min-w-0 rounded-md border border-[1.2px] border-black bg-transparent px-3 py-6 text-sm text-[#1B2E48] shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground/70 disabled:bg-gray-200 disabled:border-gray-400 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-9 w-full min-w-0 rounded-md border border-[1.2px] border-black bg-transparent px-3 py-6 text-sm text-[#1B2E48] shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground/70", 
+        "disabled:bg-transparent disabled:border-gray-400 disabled:pointer-events-none disabled:cursor-not-allowed disabled:text-black",
         "focus-visible:border-blue-500",
         // "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
         "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",

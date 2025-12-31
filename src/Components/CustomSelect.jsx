@@ -111,7 +111,7 @@ const CustomSelect = React.memo(function CustomSelect({
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={cn(
-          "w-full flex justify-between items-center rounded-md border-[1.2px] px-3 py-4 text-sm text-left border-black bg-white text-[#1B2E48] disabled:cursor-not-allowed disabled:text-gray-500 disabled:bg-gray-100 disabled:border-gray-400"
+          "w-full flex justify-between items-center rounded-md border-[1.2px] px-3 py-4 text-sm text-left border-black bg-white text-[#1B2E48] disabled:cursor-not-allowed disabled:text-black disabled:border-gray-400"
         )}
       >
         <span>{value.label || placeholder}</span>

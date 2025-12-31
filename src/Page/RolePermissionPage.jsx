@@ -27,6 +27,8 @@ import change_role from "@/assets/change_role.svg";
 import edit_employee from "@/assets/edit_employee.svg";
 import add_team from "@/assets/add_team.svg";
 import view_profile from "@/assets/view_profile.svg";
+import { Checkbox } from "@/Components/ui/Checkbox";
+import { Labelx } from "@/Components/ui/Labelx";
 
 const permissions = [
     { value: "read", label: "read" },
@@ -187,17 +189,7 @@ const RolePermissionContent = () => {
   return (
     <>
       <Navbar
-        renderActionModal={()=>
-          <button
-            onClick={() => {
-              setSelectedRole(null);
-              setIsModalOpen(true);
-            }}
-            className="bg-[#1e3264] text-white px-4 py-2 rounded-md font-medium hover:bg-[#15234a] transition"
-          >
-            + New Role
-          </button>
-        }
+        renderActionModal={()=>{}}
       />
       
       <main className="flex-1 items-center p-6 overflow-auto scroll-custom">
@@ -209,11 +201,10 @@ const RolePermissionContent = () => {
                   column="user"
                   className="w-[250px]"
                   left={
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={allChecked}
-                      onChange={(e) => {
-                        if (e.target.checked) {
+                      onCheckedChange={(checked) => {
+                        if (checked) {
                           setSelectedIds(filteredDatas.map((r) => r.id));
                         } else {
                           setSelectedIds([]);
@@ -237,13 +228,12 @@ const RolePermissionContent = () => {
                   className="hover:bg-gray-50 transition border-b border-gray-200"
                 >
                   <td className="px-4 py-3 font-inter text-[14px] leading-[14px] flex gap-2">
-                      <input 
-                        type="checkbox" 
+                      <Checkbox 
                         key={data.id}
                         checked={selectedIds.includes(data.id)}
-                        onChange={(e) => {
+                        onCheckedChange={(checked) => {
                           setSelectedIds((prev) =>
-                            e.target.checked
+                            checked
                               ? [...prev, data.id]
                               : prev.filter((id) => id !== data.id)
                           );
@@ -266,8 +256,7 @@ const RolePermissionContent = () => {
                       <button
                         className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                         onClick={() => {
-                          setSelectedRole(null);
-                          setIsModalOpen(true);
+                         
                         }}
                       >
                         <img src={view_profile} alt="view profile" /> 
@@ -280,16 +269,19 @@ const RolePermissionContent = () => {
                         <img src={add_team} alt="view profile" /> 
                         Add to team
                       </button>
-                      <button
+                      {/* <button
                         className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                         onClick={() => {}}
                       >
                         <img src={edit_employee} alt="view profile" /> 
                         Edit Employee
-                      </button>
+                      </button> */}
                       <button
                         className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                        onClick={() => {}}
+                        onClick={() => {
+                          setSelectedRole(data);
+                          setIsModalOpen(true);
+                        }}
                       >
                         <img src={change_role} alt="view profile" /> 
                         Change role
@@ -332,7 +324,7 @@ const RolePermissionContent = () => {
 
 export default RolePermissionPage;
 
-export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) {
+export function ModalRole({ open, onOpenChange, data = null}) {
   const {
     control,
     register,
@@ -341,17 +333,28 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
     reset,
   } = useForm({
     defaultValues: {
-      role: data?.role ?? "",
-      permission: data?.permission ?? [], // default permission (kosong atau dari data)
+      name: data?.user ?? "",
+      permission: [], // default permission (kosong atau dari data)
     },
   });
 
   const { addToast } = useToast();
+  const accessList = [
+    "Upload file - Filemanagement",
+    "New Folder - Filemanagement",
+    "Edit User",
+    "Remove User",
+    "Reset Password",
+    "New User",
+    "Change Role",
+    "Log History",
+    "Detail - Log History",
+  ];
 
   useEffect(() => {
     reset({
-      role: data?.role ?? "",
-      permission: data?.permission ?? [],
+      name: data?.user ?? "",
+      permission: [],
     });
   }, [data, reset]);
 
@@ -362,7 +365,7 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
       return;
     }
 
-    console.log(mode === "create" ? "Creating:" : "Editing:", values);
+    console.log(values);
     reset();
     onOpenChange(false);
     addToast("success", "Save successfully");
@@ -370,94 +373,108 @@ export function ModalRole({ open, onOpenChange, data = null, mode = "create" }) 
 
   return (
     <DialogModal open={open} onOpenChange={onOpenChange}>
-      <DialogModalContent className="flex flex-col gap-0 p-0 max-h-[min(640px,80vh)] sm:max-w-md overflow-visible">
-        <DialogModalHeader>
-          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
-            {mode === "create" ? "Add New Role" : "Edit Role"}
-          </DialogModalTitle>
+  <DialogModalContent
+    className="
+      flex flex-col
+      p-0
+      max-h-[min(640px,80vh)]
+      sm:max-w-5xl
+      overflow-hidden
+    "
+  >
+    {/* HEADER */}
+    <DialogModalHeader className="shrink-0">
+      <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+          Change Role
+        </DialogModalTitle>
+      </DialogModalHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto scroll-custom">
-            <DialogModalDescription asChild>
-              <div className="px-6 py-4 space-y-8">
-                {/* General Information */}
-                <div>
-                  <div className="space-y-6">
-                    <div className="flex flex-wrap gap-4">
-                      <div className="flex-1 ">
-                        <CustomInput
-                          label="Role"
-                          name="role"
-                          type="role"
-                          register={register}
-                          errors={errors}
-                          rules={{
-                            required: "Role is required",
-                            minLength: { value: 2, message: "Too short" },
+      {/* BODY (SCROLL AREA) */}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex-1 min-h-0 overflow-y-auto scroll-custom"
+      >
+        <DialogModalDescription asChild>
+          <div className="px-6 space-y-8">
+            <CustomInput
+              label="Name"
+              name="name"
+              register={register}
+              disabled
+              errors={errors}
+              rules={{}}
+            />
+
+            <h2 className="font-inter font-bold text-[20px] text-[#1B2E48]">
+              Select Access
+            </h2>
+
+            {/* GRID ACCESS LIST */}
+            <Controller
+              name="permission"
+              control={control}
+              render={({ field }) => (
+                <div
+                  className="
+                    grid
+                    grid-cols-1
+                    sm:grid-cols-2
+                    gap-x-6
+                    gap-y-4
+                  "
+                >
+                  {accessList.map((item) => {
+                    const checked = field.value.includes(item);
+
+                    return (
+                      <label
+                        key={item}
+                        className="
+                          grid
+                          grid-cols-[20px_1fr]
+                          gap-x-3
+                          items-start
+                          cursor-pointer
+                          select-none
+                        "
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(isChecked) => {
+                            if (isChecked) {
+                              field.onChange([...field.value, item]);
+                            } else {
+                              field.onChange(
+                                field.value.filter((v) => v !== item)
+                              );
+                            }
                           }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Permission Field */}
-                  <div className="space-y-6 mt-3">
-                    <div className="flex flex-wrap gap-4">
-                      <div className="flex-1 ">
-                        <Label>Permissions</Label>
-
-                        <Controller
-                          name="permission"
-                          control={control}
-                          rules={{
-                            required: "At least one permission is required",
-                            validate: (value) =>
-                              value.length > 0 || "At least one permission is required",
-                          }}
-                          render={({ field }) => (
-                            <MultipleSelector
-                              {...field}
-                              portal={true}
-                              appendTo={document.body}
-                              className="border-[1.2px] border-black bg-transparent px-3 py-3"
-                              commandProps={{
-                                label: "Select Permission",
-                              }}
-                              defaultOptions={permissions}
-                              placeholder="Select Permission"
-                              hideClearAllButton
-                              hidePlaceholderWhenSelected
-                              emptyIndicator={
-                                <p className="text-center text-sm">
-                                  No results found
-                                </p>
-                              }
-                            />
-                          )}
+                          className="w-5 h-5 shrink-0"
                         />
 
-                        {errors.permission && (
-                          <p className="text-sm text-red-500">
-                            {errors.permission.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                        <span className="text-sm text-[#1B2E48] break-words leading-snug">
+                          {item}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
-              </div>
-            </DialogModalDescription>
+              )}
+            />
+          </div>
+        </DialogModalDescription>
 
-            <DialogModalFooter className="px-6 pb-6 items-center">
-              <Button
-                type="submit"
-                className="w-full max-w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
-              >
-                Save
-              </Button>
-            </DialogModalFooter>
-          </form>
-        </DialogModalHeader>
-      </DialogModalContent>
-    </DialogModal>
+        {/* FOOTER (TETAP DI DALAM FORM TAPI TIDAK SCROLL KELUAR) */}
+        <DialogModalFooter className="px-6 py-6 shrink-0">
+          <Button
+            type="submit"
+            className="w-full bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+          >
+            Save
+          </Button>
+        </DialogModalFooter>
+      </form>
+    </DialogModalContent>
+  </DialogModal>
   );
 }
