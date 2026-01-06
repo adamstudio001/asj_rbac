@@ -828,20 +828,11 @@ export function ModalResetPassword({
                   onClick={async () => {
                     // const text = await navigator.clipboard.readText();
                     setValue(contextMenu.field, clipboardValue);
-                    setContextMenu({ ...contextMenu, open: false });
-                  }}
-                >
-                  Paste
-                </button>
-                <button
-                  type="button"
-                  className="w-full px-3 py-2 text-left hover:bg-gray-100 text-red-500"
-                  onClick={() => {
                     setClipboardValue(null);
                     setContextMenu({ ...contextMenu, open: false });
                   }}
                 >
-                  Cancel
+                  Paste
                 </button>
               </>
             }
