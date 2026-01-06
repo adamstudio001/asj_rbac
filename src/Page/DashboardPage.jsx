@@ -228,7 +228,7 @@ const DashboardContent = () => {
                         C
                       </div>
                       <div className="flex items-center gap-1">
-                        <span ref={textRef} className="font-medium text-gray-800">sghadchsagcda asghcdagfscdghasc</span>
+                        <span ref={textRef} className="font-medium text-gray-800">{user?.full_name ?? "-"}</span>
                         <IoIosArrowDown className="w-4 text-[#a5a5a5]"/>
                       </div>
                     </div>

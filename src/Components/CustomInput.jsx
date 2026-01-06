@@ -10,6 +10,7 @@ export default function CustomInput({
   errors,
   rules = {},
   disabled = false,
+  ...props
 }) {
   return (
     <div className="flex-1 min-w-[250px]">
@@ -18,6 +19,7 @@ export default function CustomInput({
         type={type}
         disabled={disabled}
         {...register(name, rules)}
+        {...props}
       />
       {errors?.[name] && (
         <p className="text-sm text-red-500">{errors[name]?.message}</p>

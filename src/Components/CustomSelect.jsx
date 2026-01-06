@@ -114,7 +114,7 @@ const CustomSelect = React.memo(function CustomSelect({
           "w-full flex justify-between items-center rounded-md border-[1.2px] px-3 py-4 text-sm text-left border-black bg-white text-[#1B2E48] disabled:cursor-not-allowed disabled:text-black disabled:border-gray-400"
         )}
       >
-        <span>{value.label || placeholder}</span>
+        <span>{value?.label || placeholder}</span>
         {loading?  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>:<TiArrowSortedDown className="w-4 h-4 text-black" />}
       </button>
 
@@ -126,7 +126,7 @@ const CustomSelect = React.memo(function CustomSelect({
         >
           <ul className="max-h-56 overflow-auto py-1">
             {sources.map((record) => {
-              const isSelected = value.identifier === record.identifier;
+              const isSelected = value?.identifier === record.identifier;
               return (
                 <li
                   key={record.identifier}

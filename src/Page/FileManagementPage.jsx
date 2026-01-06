@@ -3,7 +3,6 @@ import Navbar from "@src/Components/Navbar";
 import Pagination from "@src/Components/Pagination";
 import { useSearch } from "@src/Providers/SearchProvider";
 import { IoIosArrowDown } from "react-icons/io";
-import { LuUpload } from "react-icons/lu";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
 import { buildHeaders, filterAndSortFiles, formatDate, formatFileSize, formatFileType, getFileIcon, isEmpty } from "../Common/Utils";
 import { useToast } from "@/Providers/ToastProvider";
@@ -14,11 +13,13 @@ import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import Copy from "@assets/copy.svg";
 import Rename from "@assets/edit.svg";
 import Trash from "@assets/trash.svg";
+import FolderCreate from "@assets/folder_create.svg";
+import RestoreFile from "@assets/restore.svg";
+import UploadFile from "@assets/upload_file.svg";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/Components/ui/Dialog";
 import BreadcrumbFolder from "@/Components/BreadcrumbFolder";
 import { useNavigate, useParams } from "react-router-dom";
 import FileInfoPopper from "@/Components/FileInfoPopper";
-import { BsPlusLg } from "react-icons/bs";
 import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
 import { useForm } from "react-hook-form";
@@ -486,16 +487,26 @@ const FileManagementContent = () => {
                 }}
                 className="flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
               >
-                <BsPlusLg size={18} />
-                Folder
+                <img src={FolderCreate} width={18}/>
+                Create Folder
               </button>}
-              {folderKeys && <button
+              {/* {isAdminAccess &&  */}
+              <button
+                onClick={() => {}}
+                className="flex max-sm:flex-1 items-center gap-3 bg-[#F3F3F3] text-[#1E293B] font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#e6e5e5] transition"
+              >
+                <img src={RestoreFile} width={18}/>
+                Restore File
+              </button>
+              {/* } */}
+              {folderKeys && 
+              <button
                 onClick={() => {
                   setIsModalOpen(true);
                 }}
                 className={`${isWrapped ? "w-full" : "max-w-[24rem]"} flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
               >
-                <LuUpload size={18} />
+                <img src={UploadFile} width={18}/>
                 Upload file
               </button>}
             </div>
@@ -619,7 +630,7 @@ const FileManagementContent = () => {
                   <tr>
                     <td className="font-normal text-gray-500 text-right align-top pr-3">Where From:</td>
                     <td className="font-medium leading-snug break-words">
-                     Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                     
                     </td>
                   </tr>
                   <tr>
@@ -801,7 +812,7 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full max-w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+                className="w-full max-w-[20cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
               >
                 {loading? "Sending...":"Save"}
               </Button>
@@ -914,7 +925,7 @@ export function ModalRenameFile({ open, onOpenChange, folderKeys, data, extraAct
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full max-w-[300px] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+                className="w-full max-w-[20cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
               >
                 {loading? "Sending...":"Save"}
               </Button>

@@ -63,7 +63,7 @@ function DialogModalContent({
         {...props}>
         {children}
         {showClose && <DialogPrimitive.Close
-          className="group absolute top-3 right-3 flex size-7 items-center justify-center rounded transition-[color,box-shadow] bg-white border border-2 border-black hover:bg-black hover:text-white focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none">
+          className="group absolute top-3 right-3 flex size-7 items-center justify-center rounded transition-[color,box-shadow] bg-white hover:bg-black hover:text-white focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none">
           <XIcon
             size={16}
             className="transition-opacity group-hover:opacity-100" />
