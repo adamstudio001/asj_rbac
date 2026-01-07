@@ -73,9 +73,9 @@ function LoginContent() {
     // setErrorMessage("");
     try {
       //[note] sudah jalan tapi belum dipakai, jadi disable dulu
-      // const info = await getInformation();
-      // console.log(info);
-      // addToast("success", JSON.stringify(info));
+      const info = await getInformation();
+      console.log(info);
+      addToast("success", JSON.stringify(info));
 
       const res = await axios.post("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/login", data); 
       const body = res.data;
