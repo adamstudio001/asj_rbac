@@ -44,8 +44,9 @@ const RolePermissionContent = () => {
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const [isLoad, setIsLoad] = useState(false);
   const { addToast } = useToast();
-  const [jobs, setJobs] = useState([]);
-  const [branches, setBranches] = useState([]);
+  // const [jobs, setJobs] = useState([]);
+  // const [branches, setBranches] = useState([]);
+  const [listPermission, setListPermissions] = useState([]);
   const [sortConfig, setSortConfig] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
   const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } =
@@ -100,32 +101,43 @@ const RolePermissionContent = () => {
       setIsLoad(true);
       setTimeout(async () => {
         try {
-          const [jobsRes, branchesRes] = await Promise.allSettled([
+          const [permissionRes] = await Promise.allSettled([
+            // axios.get(
+            //   "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job",
+            //   {
+            //     headers: { Authorization: `Bearer ${token}` },
+            //   }
+            // ),
+            // axios.get(
+            //   "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location",
+            //   {
+            //     headers: { Authorization: `Bearer ${token}` },
+            //   }
+            // ),
             axios.get(
-              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job",
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            ),
-            axios.get(
-              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location",
+              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/permission",
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
             ),
           ]);
 
-          const jobs =
-            jobsRes.status === "fulfilled"
-              ? jobsRes.value.data?.data || []
-              : [];
-          const branches =
-            branchesRes.status === "fulfilled"
-              ? branchesRes.value.data?.data || []
+          // const jobs =
+          //   jobsRes.status === "fulfilled"
+          //     ? jobsRes.value.data?.data || []
+          //     : [];
+          // const branches =
+          //   branchesRes.status === "fulfilled"
+          //     ? branchesRes.value.data?.data || []
+          //     : [];
+          const permissions =
+            permissionRes.status === "fulfilled"
+              ? permissionRes.value.data?.data || []
               : [];
 
-          setJobs(jobs);
-          setBranches(branches);
+          // setJobs(jobs);
+          // setBranches(branches);
+          setListPermissions(permissions);
         } catch (err) {
           console.error(err);
           addToast("error", "ada masalah pada aplikasi");
@@ -377,7 +389,7 @@ const RolePermissionContent = () => {
                   <button
                     className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                     onClick={() => {
-                      console.log(data)
+                      console.log(data);
                       setSelectedRole(data);
                       setIsModalPermissionOpen(true);
                     }}
@@ -412,9 +424,7 @@ const RolePermissionContent = () => {
 
   return (
     <>
-      <Navbar
-        renderActionModal={() => {}}
-      />
+      <Navbar renderActionModal={() => {}} />
 
       <main className="flex-1 items-center p-6 overflow-auto scroll-custom">
         <div className="w-full rounded-lg">
@@ -439,6 +449,7 @@ const RolePermissionContent = () => {
         open={isModalPermissionOpen}
         onOpenChange={setIsModalPermissionOpen}
         data={selectedRole}
+        listPermission={listPermission}
       />
 
       <ModalRole
@@ -453,9 +464,14 @@ const RolePermissionContent = () => {
 
 export default RolePermissionPage;
 
-export function ModalPermission({ open, onOpenChange, data }) {
-  const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } =
-    useAuth();
+export function ModalPermission({
+  open,
+  onOpenChange,
+  data,
+  listPermission = [],
+}) {
+  const { isAdminAccess } = useAuth();
+  const { addToast } = useToast();
 
   const {
     control,
@@ -466,112 +482,44 @@ export function ModalPermission({ open, onOpenChange, data }) {
   } = useForm({
     defaultValues: {
       name: data?.user ?? "",
-      permission: [], // default permission (kosong atau dari data)
+      permission: [],
     },
   });
 
-  const { addToast } = useToast();
-  const accessGroups = [
-    {
-      title: "General",
-      items: ["View user", "View log history", "View IP address"],
-    },
-    {
-      title: "Role Access",
-      items: [
-        "Add new role",
-        "Change role",
-        "Delete role",
-        "Change permission",
-        "Add to team",
-        "View history",
-      ],
-    },
-    {
-      title: "User",
-      items: [
-        "Add new user",
-        "View user",
-        "Edit user",
-        "Delete user",
-        "Reset password user",
-      ],
-    },
-    {
-      title: "File Management",
-      columns: [
-        [
-          "Upload file",
-          "Download file",
-          "Remove file/folder",
-          "Create folder",
-          "Delete folder",
-          "Get Info file/folder",
-          "View HR/GA folder",
-          "View legal folder",
-          "View FDA folder",
-          "View commercial folder",
-          "View tax folder",
-          "View finance folder",
-          "View operation folder",
-          "Download secret file",
-          "Manage division folder",
-          "Unlock/lock folder/file",
-        ],
-      ],
-    },
-  ];
+  const accessGroups = listPermission;
 
-  const getAllPermissions = (accessGroups) => {
-    return accessGroups.flatMap(group => {
-      if (group.items) return group.items;
-      if (group.columns) return group.columns.flat();
-      return [];
-    });
-  };
+  const getAllPermissions = (groups) => groups.flatMap((g) => g.permissions);
 
   useEffect(() => {
     reset({
       name: data?.user ?? "",
       permission: [],
     });
-  }, [data, reset]);
+  }, [data, listPermission, reset]);
 
   const onSubmit = (values) => {
-    if (values.permission.length === 0) {
-      // fallback tambahan (safeguard)
+    if (!values.permission.length) {
       addToast("error", "Permission cannot be empty");
       return;
     }
 
-    console.log(values);
-    reset();
-    onOpenChange(false);
+    console.log("SUBMIT:", values.permission);
     addToast("success", "Save successfully");
+    // onOpenChange(false);
   };
 
   return (
     <DialogModal open={open} onOpenChange={onOpenChange}>
-      <DialogModalContent
-        className="
-          flex flex-col
-          p-0
-          max-h-[min(640px,80vh)]
-          sm:max-w-5xl
-          overflow-hidden
-        "
-      >
-        {/* HEADER */}
-        <DialogModalHeader className="shrink-0">
-          <DialogModalTitle className="px-6 pt-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+      <DialogModalContent className="flex flex-col p-0 max-h-[80vh] sm:max-w-5xl overflow-hidden">
+        <DialogModalHeader>
+          <DialogModalTitle className="px-6 pt-4 text-[22px] font-bold">
             Change Permission
           </DialogModalTitle>
         </DialogModalHeader>
 
-        {/* BODY */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-full min-h-0 overflow-y-auto overflow-x-hidden scroll-custom"
+          className="flex-1 overflow-y-auto scroll-custom"
         >
           <DialogModalDescription asChild>
             <div className="px-6 space-y-8">
@@ -581,15 +529,12 @@ export function ModalPermission({ open, onOpenChange, data }) {
                 register={register}
                 disabled
                 errors={errors}
-                rules={{}}
               />
 
               <div>
                 <h2 className="font-inter font-bold text-[20px] text-[#1B2E48]">
                   Select Access
                 </h2>
-
-                {/* ACCESS LIST – FLEX */}
                 <Controller
                   name="permission"
                   control={control}
@@ -597,45 +542,40 @@ export function ModalPermission({ open, onOpenChange, data }) {
                     const allPermissions = getAllPermissions(accessGroups);
 
                     const isAllChecked =
-                      allPermissions.length > 0 &&
-                      allPermissions.every(p => field.value.includes(p));
+                      allPermissions.length &&
+                      allPermissions.every((p) =>
+                        field.value.some((v) => v.identifier === p.identifier)
+                      );
 
                     return (
                       <>
-                        {isAdminAccess() && <>
-                          <label className="grid grid-cols-[20px_1fr] gap-x-3 items-start cursor-pointer select-none mb-6 mt-3">
+                        {isAdminAccess() && (
+                          <label className="grid grid-cols-[20px_1fr] gap-x-3 mb-6 mt-3 cursor-pointer">
                             <Checkbox
                               checked={isAllChecked}
-                              onCheckedChange={(checked) => {
-                                field.onChange(checked ? allPermissions : []);
-                              }}
-                              className="w-5 h-5"
+                              onCheckedChange={(checked) =>
+                                field.onChange(checked ? allPermissions : [])
+                              }
                             />
-                            <span className="text-sm font-medium text-[#1B2E48]">
-                              Select all access
-                            </span>
+                            <span>Select all access</span>
                           </label>
-                        </>}
+                        )}
 
                         <PermissionGroup
                           accessGroups={accessGroups}
-                          field={field} 
+                          field={field}
                           className={!isAdminAccess()? "mt-3":""}
                         />
                       </>
-                    )
+                    );
                   }}
                 />
               </div>
             </div>
           </DialogModalDescription>
 
-          {/* FOOTER */}
-          <DialogModalFooter className="px-6 py-6 shrink-0 items-center">
-            <Button
-              type="submit"
-              className="w-full max-w-[20cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
-            >
+          <DialogModalFooter className="px-6 py-6">
+            <Button type="submit" className="bg-[#1a2f48] text-white">
               Save
             </Button>
           </DialogModalFooter>
@@ -646,24 +586,17 @@ export function ModalPermission({ open, onOpenChange, data }) {
 }
 
 function PermissionGroup({ accessGroups, field, className }) {
-  const general = accessGroups.find(g => g.title === "General");
-  const role = accessGroups.find(g => g.title === "Role Access");
-  const user = accessGroups.find(g => g.title === "User");
-  const file = accessGroups.find(g => g.title === "File Management");
+  const find = (name) => accessGroups.find((g) => g.group_name === name);
 
   return (
-    <div className={cn(`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`, className)}>
-      {/* KOLOM 1 */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
       <div className="flex flex-col gap-10">
-        <PermissionSection group={general} field={field} />
-        <PermissionSection group={user} field={field} />
+        <PermissionSection group={find("General")} field={field} />
+        <PermissionSection group={find("User")} field={field} />
       </div>
 
-      {/* KOLOM 2 */}
-      <PermissionSection group={role} field={field} />
-
-      {/* KOLOM 3 */}
-      <PermissionSection group={file} field={field} />
+      <PermissionSection group={find("Role Access")} field={field} />
+      <PermissionSection group={find("File Management")} field={field} />
     </div>
   );
 }
@@ -671,78 +604,70 @@ function PermissionGroup({ accessGroups, field, className }) {
 function PermissionSection({ group, field }) {
   if (!group) return null;
 
-  const isFileManagement =
-    group.title.toLowerCase() === "file management";
+  const isFile = group.group_name.toLowerCase() === "file management";
+  const items = group.permissions ?? [];
+  const useTwoColumns = isFile && items.length > 11;
 
-  // Normalisasi data
-  const items = group.items ?? group.columns?.flat() ?? [];
-
-  const useTwoColumns = isFileManagement && items.length > 11;
-
-  // Split item untuk File Management
   const columns = useMemo(() => {
     if (!useTwoColumns) return [items];
-
     const mid = Math.ceil(items.length / 2);
     return [items.slice(0, mid), items.slice(mid)];
   }, [items, useTwoColumns]);
 
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="font-semibold text-[16px] text-[#5B84D6]">
-        {group.title}
-      </h3>
+      <h3 className="font-semibold text-[#5B84D6]">{group.group_name}</h3>
 
-      {/* ISI */}
       <div
-        className={`grid gap-x-8 gap-y-3 ${
+        className={`grid gap-3 ${
           useTwoColumns ? "grid-cols-2" : "grid-cols-1"
         }`}
       >
         {columns.map((col, idx) => (
           <div key={idx} className="flex flex-col gap-3">
-            {col.map(item => (
-              <PermissionItem
-                key={item}
-                label={item}
-                field={field}
-              />
+            {col.map((p) => (
+              <PermissionItem key={p.identifier} permission={p} field={field} />
             ))}
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-const PermissionItem = ({ label, field }) => {
-  const checked = field.value.includes(label);
+function PermissionItem({ permission, field }) {
+  const checked = field.value.some(
+    (p) => p.identifier === permission.identifier
+  );
 
   return (
-    <label className="grid grid-cols-[20px_1fr] gap-x-3 items-start cursor-pointer select-none">
+    <label className="grid grid-cols-[20px_1fr] gap-x-3 cursor-pointer">
       <Checkbox
         checked={checked}
-        onCheckedChange={(isChecked) => {
-          if (isChecked) {
-            field.onChange([...field.value, label]);
+        onCheckedChange={(v) => {
+          if (v) {
+            field.onChange([
+              ...field.value,
+              {
+                identifier: permission.identifier,
+                label: permission.label,
+              },
+            ]);
           } else {
-            field.onChange(field.value.filter((v) => v !== label));
+            field.onChange(
+              field.value.filter(
+                (p) => p.identifier !== permission.identifier
+              )
+            );
           }
         }}
-        className="w-5 h-5"
       />
-      <span className="text-sm text-[#1B2E48] leading-snug break-words">
-        {label}
-      </span>
+      <span className="text-sm">{permission.label}</span>
     </label>
-  )
+  );
 }
 
-export function ModalRole({
-  data,
-  open,
-  onOpenChange,
-}) {
+export function ModalRole({ data, open, onOpenChange }) {
   const {
     control,
     register,
@@ -823,20 +748,20 @@ export function ModalRole({
               />
 
               <Controller
-                  name="role"
-                  control={control}
-                  rules={{ required: "Role is required" }}
-                  render={({ field }) => (
-                    <CustomSelect
-                      label="Select Role"
-                      records={listRole}
-                      // sourceUrl="https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job"
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={errors.role?.message}
-                    />
-                  )}
-                />
+                name="role"
+                control={control}
+                rules={{ required: "Role is required" }}
+                render={({ field }) => (
+                  <CustomSelect
+                    label="Select Role"
+                    records={listRole}
+                    // sourceUrl="https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job"
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.role?.message}
+                  />
+                )}
+              />
 
               <div className="mt-40"></div>
             </div>
