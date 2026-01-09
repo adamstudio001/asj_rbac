@@ -28,6 +28,7 @@ import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
 import { Textarea } from "@/Components/ui/Textarea";
 import CustomTextArea from "@/Components/CustomTextArea";
+import { IoMdAdd } from "react-icons/io";
 
 const RolePermissionPage = () => {
   return (
@@ -434,7 +435,7 @@ const RolePermissionContent = () => {
             }}
             className={`max-w-[24rem] flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
           >
-            New Role
+            <IoMdAdd/> Add Role
           </button>
         )}
       />
