@@ -40,6 +40,7 @@ import { Download } from "lucide-react";
 import { MenuProvider, useMenu } from "@/Providers/MenuContext";
 import { useLongPress } from "@/Hooks/useLongPress";
 import { createFileObject } from "@/Common/FileFactory";
+import UserProfileMenu from "@/Components/UserProfileMenu";
 
 const FileManagementPage = () => {
   return (
@@ -478,7 +479,7 @@ const FileManagementContent = () => {
     <>
       <Navbar
         renderActionModal={() => (
-          <div className="flex flex-wrap items-center max-sm:gap-4 gap-8">
+          <div className="flex flex-wrap items-center max-[400px]:flex-wrap gap-4 gap-8">
             <div className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex flex-wrap items-center gap-4`}>
               {(!isRoot || (isUserAccess() || isCompanyAccess())) && <button
                 onClick={() => {
@@ -511,7 +512,7 @@ const FileManagementContent = () => {
               </button>}
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
                 C
               </div>
@@ -519,7 +520,8 @@ const FileManagementContent = () => {
                 <span ref={textRef} className="font-medium text-gray-800">{user?.full_name ?? "Unknown"}</span>
                 <IoIosArrowDown className="w-4 text-[#a5a5a5]" />
               </div>
-            </div>
+            </div> */}
+            <UserProfileMenu reftext={textRef} user={user} onLogout={() => console.log("logout")}/>
           </div>
         )}
       />

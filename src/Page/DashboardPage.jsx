@@ -19,6 +19,7 @@ import { useToast } from "@/Providers/ToastProvider";
 import { filterAndSortFiles, isEmpty } from "@/Common/Utils";
 import Pagination from "@/Components/Pagination";
 import { useNavigate } from "react-router-dom";
+import UserProfileMenu from "@/Components/UserProfileMenu";
 
 const DashboardPage = () => {
   return (
@@ -215,7 +216,7 @@ const DashboardContent = () => {
   return (
     <>
       <Navbar renderActionModal={()=> (
-        <div className={`flex flex-wrap items-center max-[24rem]:gap-3 ${isWrapped ? "" : "gap-3"} space-x-8`}>
+        <div className={`flex max-[400px]:flex-wrap items-center max-[24rem] gap-3 ${isWrapped ? "" : "gap-3"} space-x-8`}>
                     <button onClick={()=>{
                       alert("feature in development");
                       // setIsModalOpen(!isModalOpen);
@@ -223,7 +224,7 @@ const DashboardContent = () => {
                     <LuUpload size={18}/> 
                     Upload file
                     </button>
-                    <div className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex items-center gap-2`}>
+                    {/* <div className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex items-center gap-2`}>
                       <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
                         C
                       </div>
@@ -231,7 +232,8 @@ const DashboardContent = () => {
                         <span ref={textRef} className="font-medium text-gray-800">{user?.full_name ?? "-"}</span>
                         <IoIosArrowDown className="w-4 text-[#a5a5a5]"/>
                       </div>
-                    </div>
+                    </div> */}
+                    <UserProfileMenu reftext={textRef} user={user} onLogout={() => console.log("logout")}/>
                 </div>
       )}/>
       <main className="flex-1 overflow-auto items-center p-6">
