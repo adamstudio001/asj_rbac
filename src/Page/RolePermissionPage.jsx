@@ -27,6 +27,7 @@ import { Checkbox } from "@/Components/ui/Checkbox";
 import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
 import { Textarea } from "@/Components/ui/Textarea";
+import CustomTextArea from "@/Components/CustomTextArea";
 
 const RolePermissionPage = () => {
   return (
@@ -41,6 +42,7 @@ const RolePermissionContent = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [isModalPermissionOpen, setIsModalPermissionOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalNewOpen, setIsModalNewOpen] = useState(false);
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const [isLoad, setIsLoad] = useState(false);
   const { addToast } = useToast();
@@ -424,7 +426,18 @@ const RolePermissionContent = () => {
 
   return (
     <>
-      <Navbar renderActionModal={() => {}} />
+      <Navbar
+        renderActionModal={() => (
+          <button
+            onClick={() => {
+              setIsModalNewOpen(true);
+            }}
+            className={`max-w-[24rem] flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
+          >
+            New Role
+          </button>
+        )}
+      />
 
       <main className="flex-1 items-center p-6 overflow-auto scroll-custom">
         <div className="w-full rounded-lg">
@@ -457,6 +470,11 @@ const RolePermissionContent = () => {
         onOpenChange={setIsModalOpen}
         data={selectedRole}
         mode={selectedRole ? "edit" : "add"}
+      />
+
+      <ModalCreateRole
+        open={isModalNewOpen}
+        onOpenChange={setIsModalNewOpen}
       />
     </>
   );
@@ -564,7 +582,7 @@ export function ModalPermission({
                         <PermissionGroup
                           accessGroups={accessGroups}
                           field={field}
-                          className={!isAdminAccess()? "mt-3":""}
+                          className={!isAdminAccess() ? "mt-3" : ""}
                         />
                       </>
                     );
@@ -655,9 +673,7 @@ function PermissionItem({ permission, field }) {
             ]);
           } else {
             field.onChange(
-              field.value.filter(
-                (p) => p.identifier !== permission.identifier
-              )
+              field.value.filter((p) => p.identifier !== permission.identifier)
             );
           }
         }}
@@ -765,6 +781,112 @@ export function ModalRole({ data, open, onOpenChange }) {
 
               <div className="mt-40"></div>
             </div>
+          </DialogModalDescription>
+
+          {/* FOOTER (TETAP DI DALAM FORM TAPI TIDAK SCROLL KELUAR) */}
+          <DialogModalFooter className="px-6 py-6 shrink-0 items-center">
+            <Button
+              type="submit"
+              className="w-full max-w-[20cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+            >
+              Save
+            </Button>
+          </DialogModalFooter>
+        </form>
+      </DialogModalContent>
+    </DialogModal>
+  );
+}
+
+export function ModalCreateRole({ open, onOpenChange }) {
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: {
+      name: "",
+      role: "",
+      role_description: "",
+    },
+  });
+
+  useEffect(() => {
+    reset({
+      name: "",
+      role: "",
+      role_description: "",
+    });
+  }, [reset]);
+
+  const { addToast } = useToast();
+
+  const onSubmit = (values) => {
+    console.log(values);
+    reset();
+    onOpenChange(false);
+    addToast("success", "Save successfully");
+  };
+
+  return (
+    <DialogModal open={open} onOpenChange={onOpenChange}>
+      <DialogModalContent
+        className="
+          flex flex-col
+          p-0
+          max-h-[min(640px,80vh)]
+          sm:max-w-lg
+          overflow-hidden
+        "
+      >
+        {/* HEADER */}
+        <DialogModalHeader className="shrink-0">
+          <DialogModalTitle className="px-6 pt-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+            Add New Role
+          </DialogModalTitle>
+        </DialogModalHeader>
+
+        {/* BODY (SCROLL AREA) */}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex-1 min-h-0 overflow-y-auto scroll-custom"
+        >
+          <DialogModalDescription asChild>
+            <div className="px-6 space-y-6">
+              <CustomInput
+                label="Name"
+                name="name"
+                register={register}
+                errors={errors}
+                rules={{
+                  required: "Name is required",
+                }}
+                disabled
+              />
+
+              <CustomInput
+                label="Role"
+                name="role"
+                register={register}
+                errors={errors}
+                rules={{
+                  required: "Role is required",
+                }}
+              />
+
+              <CustomTextArea
+                label="Role Description"
+                name="role_description"
+                register={register}
+                errors={errors}
+                rules={{}}
+              />
+
+              <div className="mt-8"></div>
+            </div>
+
           </DialogModalDescription>
 
           {/* FOOTER (TETAP DI DALAM FORM TAPI TIDAK SCROLL KELUAR) */}
