@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { IoIosArrowDown } from "react-icons/io";
+import view_user from "@/assets/view_profile.svg";
+import logout from "@/assets/logout.svg";
 
 export default function UserProfileMenu({
   user,
@@ -53,8 +55,7 @@ export default function UserProfileMenu({
       <div
         ref={triggerRef}
         onClick={() => setOpen(v => !v)}
-        className={`${isWrapped ? "w-full" : "max-w-[24rem] w-full"}
-          flex items-center gap-2 cursor-pointer select-none`}
+        className={`max-w-[24rem]:w-full flex items-center gap-2`}
       >
         <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
           {user?.full_name?.[0]?.toUpperCase() ?? "?"}
@@ -62,7 +63,6 @@ export default function UserProfileMenu({
 
         <div className="flex items-center gap-1">
           <span ref={reftext} className="
-            font-medium text-gray-800
             max-w-[200px]
             overflow-hidden
             text-ellipsis
@@ -70,8 +70,7 @@ export default function UserProfileMenu({
             [-webkit-line-clamp:2]
             [-webkit-box-orient:vertical]
             leading-tight">
-            {/* {user?.full_name ?? "-"} */}
-            asdvashdgvahsvd gsavdgahsvdghvashgvd asgvdahgsvdhavsd gahsvdhgasvdvas
+            {user?.full_name ?? "-"}
           </span>
           <IoIosArrowDown className="w-4 text-[#a5a5a5]" />
         </div>
@@ -94,26 +93,28 @@ export default function UserProfileMenu({
               border border-gray-100
               z-[9999]
               overflow-hidden
-              animate-in fade-in zoom-in-95
+              animate-in fade-in zoom-in-95 p-2
             "
           >
             <button
-              className="flex items-center gap-2 w-full px-4 py-3 text-sm hover:bg-gray-50"
+              className="flex items-center gap-2 w-full px-4 py-3 font-medium text-[#424242] text-sm hover:bg-[#F4F4F4] rounded"
               onClick={() => {
                 setOpen(false);
               }}
             >
-              👤 View Profile
+              <img src={view_user} alt="view profile" />
+              View Profile
             </button>
 
             <button
-              className="flex items-center gap-2 w-full px-4 py-3 text-sm text-red-600 hover:bg-gray-50"
+              className="flex items-center gap-2 w-full px-4 py-3 font-medium text-[#424242] text-sm hover:bg-[#F4F4F4] rounded"
               onClick={() => {
                 setOpen(false);
                 onLogout();
               }}
             >
-              🚪 Logout
+              <img src={logout} alt="logout" />
+              Logout
             </button>
           </div>,
           document.body

@@ -216,7 +216,7 @@ const DashboardContent = () => {
   return (
     <>
       <Navbar renderActionModal={()=> (
-        <div className={`flex max-[400px]:flex-wrap items-center max-[24rem] gap-3 ${isWrapped ? "" : "gap-3"} space-x-8`}>
+        <div className={`flex flex-wrap items-center max-[24rem]:gap-3 ${isWrapped ? "" : "gap-3"} space-x-8`}>
                     <button onClick={()=>{
                       alert("feature in development");
                       // setIsModalOpen(!isModalOpen);

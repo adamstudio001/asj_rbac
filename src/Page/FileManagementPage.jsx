@@ -479,8 +479,8 @@ const FileManagementContent = () => {
     <>
       <Navbar
         renderActionModal={() => (
-          <div className="flex flex-wrap items-center max-[400px]:flex-wrap gap-4 gap-8">
-            <div className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex flex-wrap items-center gap-4`}>
+          <div className="flex flex-wrap items-center max-[400px]:flex-wrap gap-4">
+            <div className={`max-w-[24rem]:w-full flex flex-wrap items-center gap-4`}>
               {(!isRoot || (isUserAccess() || isCompanyAccess())) && <button
                 onClick={() => {
                   setIsModalFolderOpen(true);
