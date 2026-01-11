@@ -29,6 +29,7 @@ import axios from "axios";
 import { Textarea } from "@/Components/ui/Textarea";
 import CustomTextArea from "@/Components/CustomTextArea";
 import { IoMdAdd } from "react-icons/io";
+import { buildHeaders } from "@/Common/Utils";
 
 const RolePermissionPage = () => {
   return (
@@ -40,55 +41,57 @@ const RolePermissionPage = () => {
 
 const RolePermissionContent = () => {
   const { search, setSearch } = useSearch();
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedData, setSelectedData] = useState(null);
   const [isModalPermissionOpen, setIsModalPermissionOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalNewOpen, setIsModalNewOpen] = useState(false);
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const [isLoad, setIsLoad] = useState(false);
   const { addToast } = useToast();
-  // const [jobs, setJobs] = useState([]);
-  // const [branches, setBranches] = useState([]);
+
+  const [datas, setDatas] = useState([]);
+  const [listRole, setListRole] = useState([]);
   const [listPermission, setListPermissions] = useState([]);
+  
   const [sortConfig, setSortConfig] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
   const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } =
     useAuth();
 
-  const datas = [
-    {
-      id: 1,
-      employId: "#29112025001",
-      user: "Desy Puji Astuti",
-      role: "Super Admin",
-      position: "HR/GA",
-      permission: [],
-    },
-    {
-      id: 2,
-      employId: "#29112025002",
-      user: "Hani Ayu Wulandari",
-      role: "Admin Legal",
-      position: "Tax",
-      permission: [],
-    },
-    {
-      id: 3,
-      employId: "#29112025003",
-      user: "Rahul",
-      role: "User",
-      position: "Legal",
-      permission: [],
-    },
-    {
-      id: 4,
-      employId: "#29112025004",
-      user: "Dika",
-      role: "User",
-      position: "OPS",
-      permission: [],
-    },
-  ];
+  // const datas = [
+  //   {
+  //     id: 1,
+  //     employId: "#29112025001",
+  //     user: "Desy Puji Astuti",
+  //     role: "Super Admin",
+  //     position: "HR/GA",
+  //     permission: [],
+  //   },
+  //   {
+  //     id: 2,
+  //     employId: "#29112025002",
+  //     user: "Hani Ayu Wulandari",
+  //     role: "Admin Legal",
+  //     position: "Tax",
+  //     permission: [],
+  //   },
+  //   {
+  //     id: 3,
+  //     employId: "#29112025003",
+  //     user: "Rahul",
+  //     role: "User",
+  //     position: "Legal",
+  //     permission: [],
+  //   },
+  //   {
+  //     id: 4,
+  //     employId: "#29112025004",
+  //     user: "Dika",
+  //     role: "User",
+  //     position: "OPS",
+  //     permission: [],
+  //   },
+  // ];
 
   useEffect(() => {
     setSearch("");
@@ -104,13 +107,13 @@ const RolePermissionContent = () => {
       setIsLoad(true);
       setTimeout(async () => {
         try {
-          const [permissionRes] = await Promise.allSettled([
-            // axios.get(
-            //   "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job",
-            //   {
-            //     headers: { Authorization: `Bearer ${token}` },
-            //   }
-            // ),
+          const [roleRes, permissionRes] = await Promise.allSettled([
+            axios.get(
+              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role",
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            ),
             // axios.get(
             //   "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location",
             //   {
@@ -125,10 +128,11 @@ const RolePermissionContent = () => {
             ),
           ]);
 
-          // const jobs =
-          //   jobsRes.status === "fulfilled"
-          //     ? jobsRes.value.data?.data || []
-          //     : [];
+          const datas =
+            roleRes.status === "fulfilled"
+              ? roleRes.value.data?.data || []
+              : [];
+
           // const branches =
           //   branchesRes.status === "fulfilled"
           //     ? branchesRes.value.data?.data || []
@@ -138,8 +142,8 @@ const RolePermissionContent = () => {
               ? permissionRes.value.data?.data || []
               : [];
 
-          // setJobs(jobs);
-          // setBranches(branches);
+          setDatas(userRoleAdapter(datas));
+          setListRole(roleAdapter(datas));
           setListPermissions(permissions);
         } catch (err) {
           console.error(err);
@@ -149,6 +153,51 @@ const RolePermissionContent = () => {
         }
       }, 1500);
     }
+  }
+
+  function userRoleAdapter(apiResponse = []) {
+    if (!Array.isArray(apiResponse)) return [];
+
+    return apiResponse.flatMap((role) => {
+      const roleName = role.name;
+      const roleDesc = role.description;
+      const roleId = role.id;
+
+      if(role.employment.length > 0){
+        return (role.employment || []).map((emp) => ({
+          id: emp.user?.id ?? null,
+          full_name: emp.user?.full_name ?? "",
+          email: emp.user?.email ?? "",
+          job_identifier: emp.job_identifier ?? null,
+          employee_id: emp?.employee_id ?? "",
+          id_role: roleId,
+          role: roleName,
+          role_description: roleDesc,
+        }));
+      }
+      
+      return {
+        id: null,
+        full_name: "",
+        email: "",
+        job_identifier: null,
+        employee_id: "",
+        id_role: roleId,
+        role: roleName,
+        role_description: roleDesc,
+      };
+    });
+  }
+
+  function roleAdapter(apiResponse = []) {
+    if (!Array.isArray(apiResponse)) return [];
+
+    return apiResponse.flatMap((role) => {
+      const roleName = role.name;
+      const roleId = role.id;
+
+      return {identifier: roleId, label: roleName};
+    });
   }
 
   const handleSort = (key) => {
@@ -168,8 +217,8 @@ const RolePermissionContent = () => {
   };
 
   const filteredDatas = useMemo(() => {
-    let result = datas.filter((user) =>
-      user.role.toLowerCase().includes(search.toLowerCase())
+    let result = datas.filter((data) =>
+      data.role.toLowerCase().includes(search.toLowerCase())
     );
 
     const activeSorts = Object.entries(sortConfig).filter(
@@ -361,17 +410,17 @@ const RolePermissionContent = () => {
                   }}
                 />
                 <EllipsisTooltip className={"w-[250px]"}>
-                  {data.user}
+                  {data.full_name}
                 </EllipsisTooltip>
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {data.employId}
+                {data.employee_id}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
                 {data.role}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {data.position}
+                {data.job_identifier}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
                 <TableActionMenuImage>
@@ -382,18 +431,27 @@ const RolePermissionContent = () => {
                     <img src={view_profile} alt="view profile" />
                     View Profile
                   </button> */}
-                  <button
+                  {/* <button
                     className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                     onClick={() => {}}
                   >
                     <img src={add_team} alt="view profile" />
                     Add to team
+                  </button> */}
+                  <button
+                    className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                    onClick={() => {
+                      setSelectedData(data);
+                      setIsModalNewOpen(true);
+                    }}
+                  >
+                    {/* <img src={add_team} alt="view profile" /> */}
+                    Edit
                   </button>
                   <button
                     className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                     onClick={() => {
-                      console.log(data);
-                      setSelectedRole(data);
+                      setSelectedData(data);
                       setIsModalPermissionOpen(true);
                     }}
                   >
@@ -403,7 +461,7 @@ const RolePermissionContent = () => {
                   <button
                     className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                     onClick={() => {
-                      setSelectedRole(data);
+                      setSelectedData(data);
                       setIsModalOpen(true);
                     }}
                   >
@@ -462,20 +520,24 @@ const RolePermissionContent = () => {
       <ModalPermission
         open={isModalPermissionOpen}
         onOpenChange={setIsModalPermissionOpen}
-        data={selectedRole}
+        data={selectedData}
         listPermission={listPermission}
       />
 
       <ModalRole
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        data={selectedRole}
-        mode={selectedRole ? "edit" : "add"}
+        data={selectedData}
+        listRole={listRole}
+        extraAction={() => loadData()}
       />
 
-      <ModalCreateRole
+      <ModalForm
         open={isModalNewOpen}
+        data={selectedData}
+        mode={selectedData? "update":"create"}
         onOpenChange={setIsModalNewOpen}
+        extraAction={() => loadData()}
       />
     </>
   );
@@ -684,7 +746,10 @@ function PermissionItem({ permission, field }) {
   );
 }
 
-export function ModalRole({ data, open, onOpenChange }) {
+export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction = () => {}, }) {
+  const [loading, setLoading] = useState(false);
+  const { token, isExpired, refreshSession } = useAuth();
+
   const {
     control,
     register,
@@ -693,39 +758,71 @@ export function ModalRole({ data, open, onOpenChange }) {
     reset,
   } = useForm({
     defaultValues: {
-      name: data?.user ?? "",
+      name: data?.full_name ?? "",
       role: "",
     },
   });
 
   useEffect(() => {
     reset({
-      name: data?.user ?? "",
+      name: data?.full_name ?? "",
       role: "",
     });
   }, [data, reset]);
 
   const { addToast } = useToast();
-  const listRole = [
-    {
-      identifier: "super_admin",
-      label: "Super Admin",
-    },
-    {
-      identifier: "admin",
-      label: "Admin",
-    },
-    {
-      identifier: "user",
-      label: "User",
-    },
-  ];
 
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
     console.log(values);
-    reset();
-    onOpenChange(false);
-    addToast("success", "Save successfully");
+    if (isExpired()) {
+      refreshSession();
+    }
+
+    setLoading(true);
+
+    if(!data?.id){
+      addToast("error","anda belum pilih usernya");
+      return;
+    }
+
+    try {
+      console.log(values);
+      const formData = {
+        user_id: values?.role?.identifier && data?.id? [data.id]:[],
+      };
+
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/${values?.role?.identifier}/user`;
+      const method = "put";
+
+      const res = await axios({
+        method,
+        url,
+        data: formData,
+        headers,
+      });
+
+      const body = res.data;
+      console.log(body);
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+        onOpenChange(false);
+        extraAction();
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+
+    // reset();
+    // onOpenChange(false);
   };
 
   return (
@@ -758,9 +855,7 @@ export function ModalRole({ data, open, onOpenChange }) {
                 name="name"
                 register={register}
                 errors={errors}
-                rules={{
-                  required: "Name is required",
-                }}
+                rules={{}}
                 disabled
               />
 
@@ -788,9 +883,11 @@ export function ModalRole({ data, open, onOpenChange }) {
           <DialogModalFooter className="px-6 py-6 shrink-0 items-center">
             <Button
               type="submit"
+              disabled={loading}
+              on
               className="w-full max-w-[20cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
             >
-              Save
+              {loading ? "Sending..." : "Save"}
             </Button>
           </DialogModalFooter>
         </form>
@@ -799,7 +896,10 @@ export function ModalRole({ data, open, onOpenChange }) {
   );
 }
 
-export function ModalCreateRole({ open, onOpenChange }) {
+export function ModalForm({ data, open, onOpenChange, mode="create", extraAction = function () {}, }) {
+  const { token, isExpired, refreshSession } = useAuth();
+  const [loading, setLoading] = useState(false);
+
   const {
     control,
     register,
@@ -808,27 +908,75 @@ export function ModalCreateRole({ open, onOpenChange }) {
     reset,
   } = useForm({
     defaultValues: {
-      name: "",
-      role: "",
-      role_description: "",
+      name: data?.full_name ?? "",
+      role: data?.role ?? "",
+      role_description: data?.role_description ?? "",
     },
   });
 
   useEffect(() => {
     reset({
-      name: "",
-      role: "",
-      role_description: "",
+      name: data?.full_name ?? "",
+      role: data?.role ?? "",
+      role_description: data?.role_description ?? "",
     });
   }, [reset]);
 
   const { addToast } = useToast();
 
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
     console.log(values);
-    reset();
-    onOpenChange(false);
-    addToast("success", "Save successfully");
+
+    if (isExpired()) {
+      refreshSession();
+    }
+
+    setLoading(true);
+
+    try {
+      console.log(values);
+      const formData = {
+        name: values.role,
+        description: values.role_description,
+      };
+
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const baseUrl =
+        "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role";
+
+      const url = mode === "create" ? baseUrl : `${baseUrl}/${data?.id_role ?? 0}`;
+
+      const method = mode === "create" ? "post" : "put";
+
+      const res = await axios({
+        method,
+        url,
+        data: formData,
+        headers,
+      });
+
+      const body = res.data;
+      console.log(body);
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+        onOpenChange(false);
+        extraAction();
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+
+    // reset();
+    // onOpenChange(false);
+    // addToast("success", "Save successfully");
   };
 
   return (
@@ -845,7 +993,7 @@ export function ModalCreateRole({ open, onOpenChange }) {
         {/* HEADER */}
         <DialogModalHeader className="shrink-0">
           <DialogModalTitle className="px-6 pt-4 font-inter font-bold text-[22px] text-[#1B2E48]">
-            Add New Role
+            {mode=="create"? "Add New":"Edit"} Role
           </DialogModalTitle>
         </DialogModalHeader>
 
@@ -861,9 +1009,7 @@ export function ModalCreateRole({ open, onOpenChange }) {
                 name="name"
                 register={register}
                 errors={errors}
-                rules={{
-                  required: "Name is required",
-                }}
+                rules={{}}
                 disabled
               />
 
@@ -882,7 +1028,9 @@ export function ModalCreateRole({ open, onOpenChange }) {
                 name="role_description"
                 register={register}
                 errors={errors}
-                rules={{}}
+                rules={{
+                  required: "Role description is required",
+                }}
               />
 
               <div className="mt-8"></div>
@@ -894,9 +1042,10 @@ export function ModalCreateRole({ open, onOpenChange }) {
           <DialogModalFooter className="px-6 py-6 shrink-0 items-center">
             <Button
               type="submit"
+              disabled={loading}
               className="w-full max-w-[20cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
             >
-              Save
+              {loading ? "Sending..." : "Save"}
             </Button>
           </DialogModalFooter>
         </form>
