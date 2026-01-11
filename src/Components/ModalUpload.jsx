@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import axios from "axios";
 import { buildHeaders, isEmpty } from "@/Common/Utils";
 import { createFileObject } from "@/Common/FileFactory";
+import RadioGroup from "./RadioGroup";
 
 export default function ModalUpload({
   refreshData = () => {},
@@ -32,6 +33,7 @@ export default function ModalUpload({
 
   const [files, setFiles] = useState([]);
   const inputRef = useRef(null);
+  const [category, setCategory] = useState(null);
 
   const handleBrowse = () => inputRef.current.click();
 
@@ -371,6 +373,17 @@ export default function ModalUpload({
                 )}
               </div>
             )}
+
+            <RadioGroup
+              className="justify-end"
+              value={category}
+              onChange={setCategory}
+              orientation="horizontal"
+              options={[
+                { label: "Secret", value: "SECRET" },
+                { label: "Super Secret", value: "SUPER_SECRET" },
+              ]}
+            />
           </div>
         </DialogModalDescription>
 
