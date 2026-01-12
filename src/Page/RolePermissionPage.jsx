@@ -22,11 +22,10 @@ import CustomInput from "@/Components/CustomInput";
 import { cn } from "@/lib/utils";
 import { TableActionMenuImage } from "@/Components/TableActionMenuV2";
 import change_role from "@/assets/change_role.svg";
-import add_team from "@/assets/add_team.svg";
+import change_permission from "@/assets/permissions.svg";
 import { Checkbox } from "@/Components/ui/Checkbox";
 import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
-import { Textarea } from "@/Components/ui/Textarea";
 import CustomTextArea from "@/Components/CustomTextArea";
 import { IoMdAdd } from "react-icons/io";
 import { buildHeaders } from "@/Common/Utils";
@@ -107,19 +106,25 @@ const RolePermissionContent = () => {
       setIsLoad(true);
       setTimeout(async () => {
         try {
-          const [roleRes, permissionRes] = await Promise.allSettled([
+          const [roleOriRes, roleRes, userRes, permissionRes] = await Promise.allSettled([
             axios.get(
               "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role",
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
             ),
-            // axios.get(
-            //   "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location",
-            //   {
-            //     headers: { Authorization: `Bearer ${token}` },
-            //   }
-            // ),
+            axios.get(
+              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/role-with-user",
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            ),
+            axios.get(
+              `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user`, //?page=${page}
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            ),
             axios.get(
               "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/permission",
               {
@@ -128,22 +133,28 @@ const RolePermissionContent = () => {
             ),
           ]);
 
-          const datas =
+          const roleOris =
+            roleOriRes.status === "fulfilled"
+              ? roleOriRes.value.data?.data || []
+              : [];
+
+          const roles =
             roleRes.status === "fulfilled"
               ? roleRes.value.data?.data || []
               : [];
 
-          // const branches =
-          //   branchesRes.status === "fulfilled"
-          //     ? branchesRes.value.data?.data || []
-          //     : [];
+          const users =
+            userRes.status === "fulfilled"
+              ? userRes.value.data?.data || []
+              : [];
+
           const permissions =
             permissionRes.status === "fulfilled"
               ? permissionRes.value.data?.data || []
               : [];
 
-          setDatas(userRoleAdapter(datas));
-          setListRole(roleAdapter(datas));
+          setDatas(userRoleAdapter(users, roles));
+          setListRole(roleAdapter(roleOris));
           setListPermissions(permissions);
         } catch (err) {
           console.error(err);
@@ -155,36 +166,50 @@ const RolePermissionContent = () => {
     }
   }
 
-  function userRoleAdapter(apiResponse = []) {
-    if (!Array.isArray(apiResponse)) return [];
+  function buildUserRoleMap(apiRolesResponse = []) {
+    const map = new Map();
 
-    return apiResponse.flatMap((role) => {
-      const roleName = role.name;
-      const roleDesc = role.description;
-      const roleId = role.id;
+    apiRolesResponse.forEach((role) => {
+      role.employment?.forEach((emp) => {
+        if (!emp.user_id) return;
 
-      if(role.employment.length > 0){
-        return (role.employment || []).map((emp) => ({
-          id: emp.user?.id ?? null,
-          full_name: emp.user?.full_name ?? "",
-          email: emp.user?.email ?? "",
-          job_identifier: emp.job_identifier ?? null,
-          employee_id: emp?.employee_id ?? "",
-          id_role: roleId,
-          role: roleName,
-          role_description: roleDesc,
-        }));
-      }
-      
+        const existing = map.get(emp.user_id) ?? [];
+
+        map.set(emp.user_id, [
+          ...existing,
+          {
+            id: role.id,
+            name: role.name,
+            permission_list: role.permission_list ?? [],
+          },
+        ]);
+      });
+    });
+
+    return map;
+  }
+
+  function userRoleAdapter(apiUsersResponse = [], apiRolesResponse = []) {
+    if (!Array.isArray(apiUsersResponse)) return [];
+
+    const roleMap = buildUserRoleMap(apiRolesResponse);
+
+    return apiUsersResponse.map((user) => {
+      const employment = user.employment?.[0] ?? null;
+      const roles = roleMap.get(user.id) ?? [];
+
       return {
-        id: null,
-        full_name: "",
-        email: "",
-        job_identifier: null,
-        employee_id: "",
-        id_role: roleId,
-        role: roleName,
-        role_description: roleDesc,
+        id: user.id,
+        full_name: user.full_name,
+        employee_id: employment?.employee_id ?? "",
+        role: roles.map((r) => ({
+          identifier: r.id,
+          label: r.name,
+        })),
+        permissions: [
+          ...new Set(roles.flatMap((r) => r.permission_list)),
+        ],
+        position: employment?.job_identifier ?? "",
       };
     });
   }
@@ -218,7 +243,7 @@ const RolePermissionContent = () => {
 
   const filteredDatas = useMemo(() => {
     let result = datas.filter((data) =>
-      data.role.toLowerCase().includes(search.toLowerCase())
+      data.full_name.toLowerCase().includes(search.toLowerCase())
     );
 
     const activeSorts = Object.entries(sortConfig).filter(
@@ -417,37 +442,25 @@ const RolePermissionContent = () => {
                 {data.employee_id}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {data.role}
+                {Array.isArray(data.role) && data.role.length > 0
+                  ? data.role.map(r => r.label).join(", ")
+                  : "-"}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {data.job_identifier}
+                {data.position}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
                 <TableActionMenuImage>
                   {/* <button
-                    className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                    onClick={() => {}}
-                  >
-                    <img src={view_profile} alt="view profile" />
-                    View Profile
-                  </button> */}
-                  {/* <button
-                    className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                    onClick={() => {}}
-                  >
-                    <img src={add_team} alt="view profile" />
-                    Add to team
-                  </button> */}
-                  <button
                     className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                     onClick={() => {
                       setSelectedData(data);
                       setIsModalNewOpen(true);
                     }}
                   >
-                    {/* <img src={add_team} alt="view profile" /> */}
+                    <img src={add_team} alt="view profile" />
                     Edit
-                  </button>
+                  </button> */}
                   <button
                     className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                     onClick={() => {
@@ -455,17 +468,22 @@ const RolePermissionContent = () => {
                       setIsModalPermissionOpen(true);
                     }}
                   >
-                    <img src={change_role} alt="view profile" />
+                    <img src={change_permission} alt="permission" />
                     Change Permission
                   </button>
                   <button
                     className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                     onClick={() => {
+                      if(Array.isArray(data.role) && data.role.length > 1){
+                        addToast("error","tidak dapat ubah role karena sudah terdaftar role lebih dari 1");
+                        return;
+                      }
+
                       setSelectedData(data);
                       setIsModalOpen(true);
                     }}
                   >
-                    <img src={change_role} alt="view profile" />
+                    <img src={change_role} alt="role" />
                     Change role
                   </button>
                   {/* <button
@@ -490,6 +508,7 @@ const RolePermissionContent = () => {
           <button
             onClick={() => {
               setIsModalNewOpen(true);
+              setSelectedData(null);
             }}
             className={`max-w-[24rem] flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
           >
@@ -522,6 +541,7 @@ const RolePermissionContent = () => {
         onOpenChange={setIsModalPermissionOpen}
         data={selectedData}
         listPermission={listPermission}
+        extraAction={() => loadData()}
       />
 
       <ModalRole
@@ -550,9 +570,18 @@ export function ModalPermission({
   onOpenChange,
   data,
   listPermission = [],
+  extraAction = () => {},
 }) {
-  const { isAdminAccess } = useAuth();
+  const { token, isExpired, refreshSession, isAdminAccess } = useAuth();
   const { addToast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const accessGroups = listPermission;
+  const getAllPermissions = (groups) => groups.flatMap((g) => g.permissions);
+  const mapPermissionByIdentifier = (allPermissions, selectedIdentifiers = []) =>
+    allPermissions.filter((p) =>
+      selectedIdentifiers.includes(p.identifier)
+    );
 
   const {
     control,
@@ -562,31 +591,83 @@ export function ModalPermission({
     reset,
   } = useForm({
     defaultValues: {
-      name: data?.user ?? "",
-      permission: [],
+      name: data?.full_name ?? "",
+      permission: [], 
     },
   });
 
-  const accessGroups = listPermission;
-
-  const getAllPermissions = (groups) => groups.flatMap((g) => g.permissions);
-
   useEffect(() => {
+    if (!data || !listPermission.length) return;
+
+    const allPermissions = getAllPermissions(listPermission);
+
+    const selectedPermissions = mapPermissionByIdentifier(
+      allPermissions,
+      data.permissions ?? []
+    );
+
     reset({
-      name: data?.user ?? "",
-      permission: [],
+      name: data?.full_name ?? "",
+      permission: selectedPermissions,
     });
   }, [data, listPermission, reset]);
 
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
+    console.log("submit", values)
+    if(data?.role===undefined || data?.role===null || (Array.isArray(data.role) && data.role.length ==0)){
+      addToast("error","anda belum memberikan role pada user ini");
+      return;
+    }
     if (!values.permission.length) {
       addToast("error", "Permission cannot be empty");
       return;
     }
+    if(Array.isArray(data.role) && data.role.length > 1){
+      addToast("error","tidak dapat ubah role karena sudah terdaftar role lebih dari 1");
+      return;
+    }
 
-    console.log("SUBMIT:", values.permission);
-    addToast("success", "Save successfully");
-    // onOpenChange(false);
+    if (isExpired()) {
+      refreshSession();
+    }
+
+    setLoading(true);
+
+    try {
+      console.log(values);
+      const formData = {
+        permission_identifier: values.permission.flatMap(p => p.identifier) ?? [],
+      };
+
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/${data?.role[0]?.identifier}/permission`;
+      const method = "put";
+
+      const res = await axios({
+        method,
+        url,
+        data: formData,
+        headers,
+      });
+
+      const body = res.data;
+      console.log(body);
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+        onOpenChange(false);
+        extraAction();
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -658,9 +739,10 @@ export function ModalPermission({
           <DialogModalFooter className="px-6 py-6 shrink-0 items-center">
             <Button
               type="submit"
+              disabled={loading}
               className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
             >
-              Save
+              {loading? "Loading...":"Save"}
             </Button>
           </DialogModalFooter>
         </form>
@@ -752,6 +834,7 @@ function PermissionItem({ permission, field }) {
 export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction = () => {}, }) {
   const [loading, setLoading] = useState(false);
   const { token, isExpired, refreshSession } = useAuth();
+  console.log(data, listRole)
 
   const {
     control,
@@ -762,14 +845,14 @@ export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction =
   } = useForm({
     defaultValues: {
       name: data?.full_name ?? "",
-      role: "",
+      role: data?.role[0] ?? null,
     },
   });
 
   useEffect(() => {
     reset({
       name: data?.full_name ?? "",
-      role: "",
+      role: data?.role[0] ?? null,
     });
   }, [data, reset]);
 
