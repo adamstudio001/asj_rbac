@@ -41,6 +41,7 @@ import { MenuProvider, useMenu } from "@/Providers/MenuContext";
 import { useLongPress } from "@/Hooks/useLongPress";
 import { createFileObject } from "@/Common/FileFactory";
 import UserProfileMenu from "@/Components/UserProfileMenu";
+import { Checkbox } from "@/Components/ui/Checkbox";
 
 const FileManagementPage = () => {
   return (
@@ -81,6 +82,9 @@ const FileManagementContent = () => {
   const [isWrapped, setIsWrapped] = useState(false);
   const textRef = useRef(null);
   const [files, setFiles] = useState([]);
+
+  const [isLoadVisible, setIsLoadVisible] = useState(false);
+  const [listVisible, setListVisible] = useState([]);
 
   useEffect(() => {
     if (!textRef.current) return;
@@ -159,8 +163,34 @@ const FileManagementContent = () => {
     }, 1500);
   }
 
+  async function loadVisibility() {
+    if (isExpired()) {
+      refreshSession();
+    }
+
+    const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-visibility`;
+
+    setIsLoadVisible(true);
+
+    setTimeout(async () => {
+      try {
+        // --- Buat array promise dinamis ---
+        const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } })
+        const body = res.data;
+        
+        setListVisible(body?.data ?? []);
+      } catch (err) {
+        console.error(err);
+        setError("Terjadi kesalahan saat memuat data.");
+      } finally {
+        setIsLoadVisible(false);
+      }
+    }, 1500);
+  }
+
   useEffect(() => {
     setSearch("");
+    loadVisibility();
   }, []);
 
   useEffect(() => {
@@ -483,6 +513,35 @@ const FileManagementContent = () => {
       <Navbar
         renderActionModal={() => (
           <div className="flex flex-wrap items-center max-[400px]:flex-wrap gap-4">
+            {isLoadVisible ? (
+              <>
+                <div className="skeleton h-4 w-8"></div>
+                <div className="skeleton h-4 w-8"></div>
+              </>
+            ) : (
+              listVisible.map((visible, index) => (
+                <label
+                  key={visible.id ?? index}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Checkbox
+                    key={visible?.identifier}
+                    checked={!!visible?.is_default}
+                    onCheckedChange={(checked) => {
+                      setListVisible(prev =>
+                        prev.map(v =>
+                          v.identifier === visible.identifier
+                            ? { ...v, is_default: checked }
+                            : v
+                        )
+                      );
+                    }}
+                  />
+                  <span>{visible.label}</span>
+                </label>
+              ))
+            )}
+
             <div className={`max-w-[24rem]:w-full flex flex-wrap items-center gap-4`}>
               {((isRoot && hasPermission("CREATE_FOLDER")) || (!isRoot && hasPermission("CREATE_FOLDER"))) && <button //!isRoot || (isUserAccess() || isCompanyAccess())
                 onClick={() => {
