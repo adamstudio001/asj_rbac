@@ -374,16 +374,18 @@ export default function ModalUpload({
               </div>
             )}
 
-            <RadioGroup
-              className="justify-end"
-              value={category}
-              onChange={setCategory}
-              orientation="horizontal"
-              options={[
-                { label: "Secret", value: "SECRET" },
-                { label: "Super Secret", value: "SUPER_SECRET" },
-              ]}
-            />
+            {files.length > 0 && (
+              <RadioGroup
+                className="justify-end"
+                value={category}
+                onChange={setCategory}
+                orientation="horizontal"
+                options={[
+                  { label: "Secret", value: "SECRET" },
+                  { label: "Super Secret", value: "SUPER_SECRET" },
+                ]}
+              />
+            )}
           </div>
         </DialogModalDescription>
 
