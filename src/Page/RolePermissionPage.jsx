@@ -462,7 +462,7 @@ const RolePermissionContent = () => {
                       <img src={add_team} alt="view profile" />
                       Edit
                     </button> */}
-                    {hasPermission("CHANGE_PERMISSIONS") && <button
+                    {(hasPermission("CHANGE_PERMISSIONS") && isCompanyAccess()) && <button
                       className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                       onClick={() => {
                         setSelectedData(data);
@@ -574,7 +574,7 @@ export function ModalPermission({
   listPermission = [],
   extraAction = () => {},
 }) {
-  const { token, hasPermission, isExpired, refreshSession, isAdminAccess } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession, isAdminAccess, isCompanyAccess } = useAuth();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -713,7 +713,7 @@ export function ModalPermission({
 
                     return (
                       <>
-                        {isAdminAccess() && (
+                        {isCompanyAccess() && (
                           <label className="grid grid-cols-[20px_1fr] gap-x-3 mb-6 mt-3 cursor-pointer">
                             <Checkbox
                               checked={isAllChecked}
@@ -728,7 +728,7 @@ export function ModalPermission({
                         <PermissionGroup
                           accessGroups={accessGroups}
                           field={field}
-                          className={!isAdminAccess() ? "mt-3" : ""}
+                          className={!isCompanyAccess() ? "mt-3" : ""}
                         />
                       </>
                     );
