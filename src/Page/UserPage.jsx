@@ -1205,7 +1205,7 @@ export function ModalUser({
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full max-w-[20cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+                className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
               >
                 {loading ? "Sending..." : "Save"}
               </Button>

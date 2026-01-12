@@ -655,8 +655,11 @@ export function ModalPermission({
             </div>
           </DialogModalDescription>
 
-          <DialogModalFooter className="px-6 py-6">
-            <Button type="submit" className="bg-[#1a2f48] text-white">
+          <DialogModalFooter className="px-6 py-6 shrink-0 items-center">
+            <Button
+              type="submit"
+              className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+            >
               Save
             </Button>
           </DialogModalFooter>
@@ -670,7 +673,7 @@ function PermissionGroup({ accessGroups, field, className }) {
   const find = (name) => accessGroups.find((g) => g.group_name === name);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 ${className}`}>
       <div className="flex flex-col gap-10">
         <PermissionSection group={find("General")} field={field} />
         <PermissionSection group={find("User")} field={field} />
@@ -885,7 +888,7 @@ export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction =
               type="submit"
               disabled={loading}
               on
-              className="w-full max-w-[20cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+              className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
             >
               {loading ? "Sending..." : "Save"}
             </Button>
@@ -1043,7 +1046,7 @@ export function ModalForm({ data, open, onOpenChange, mode="create", extraAction
             <Button
               type="submit"
               disabled={loading}
-              className="w-full max-w-[20cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+              className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
             >
               {loading ? "Sending..." : "Save"}
             </Button>
