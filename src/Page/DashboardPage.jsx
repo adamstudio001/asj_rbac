@@ -33,7 +33,7 @@ const DashboardContent = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { folderKeys } = useParams();
-  const { user, token, hasPermission, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
+  const { user, token, logout, hasPermission, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
 
   const { 
     isModalOpen, 
@@ -227,7 +227,7 @@ const DashboardContent = () => {
             Upload file
             </button>
           }
-          <UserProfileMenu reftext={textRef} user={user} onLogout={() => console.log("logout")}/>
+          <UserProfileMenu reftext={textRef} user={user} onLogout={() => logout()}/>
         </div>
       )}/>
       <main className="flex-1 overflow-auto items-center p-6">

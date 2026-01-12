@@ -66,7 +66,7 @@ const FileManagementContent = () => {
   const { addToast } = useToast();
   const { setIsModalOpen } = useFileManager(); //#getFileDirectory
 
-  const { user, token, hasPermission, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
+  const { user, token, logout, hasPermission, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
   const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
   const [isModalRenameFileOpen, setIsModalRenameFileOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
@@ -524,7 +524,7 @@ const FileManagementContent = () => {
                 <IoIosArrowDown className="w-4 text-[#a5a5a5]" />
               </div>
             </div> */}
-            <UserProfileMenu reftext={textRef} user={user} onLogout={() => console.log("logout")}/>
+            <UserProfileMenu reftext={textRef} user={user} onLogout={() => logout()}/>
           </div>
         )}
       />

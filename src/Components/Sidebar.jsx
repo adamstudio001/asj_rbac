@@ -23,18 +23,18 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const [loading, setLoading] = useState(false);
 
   const onLogout = async () => {
-    setLoading(true);
+    // setLoading(true);
     // setErrorMessage("");
     // await sleep(2000);
 
     try {
-      const res = await axios.post("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/logout", {}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-      }); 
-      const body = res.data;
-      console.log(body)
+      // const res = await axios.post("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/logout", {}, {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      // }); 
+      // const body = res.data;
+      // console.log(body)
 
       logout();
       // if (body.error) {
@@ -51,7 +51,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
       //   err.response?.data?.message || "Gagal login, periksa email dan password.";
       // setErrorMessage("ada masalah pada aplikasi");
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
