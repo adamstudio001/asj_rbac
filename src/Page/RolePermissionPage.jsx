@@ -332,7 +332,7 @@ const RolePermissionContent = () => {
         <table className="w-full table-auto border-collapse">
           <thead className="bg-[#F3F3F3]">
             <tr className="border border-gray-200">
-              <th className="px-4 py-3 w-10"></th>
+              {/* <th className="px-4 py-3 w-10"></th> */}
               <th className="px-4 py-3 font-inter font-medium text-[14px] text-black text-left min-w-0 w-[200px]">
                 List User
               </th>
@@ -355,9 +355,9 @@ const RolePermissionContent = () => {
               .fill(null)
               .map((_, i) => (
                 <tr key={i}>
-                  <td className="border px-4 py-2">
+                  {/* <td className="border px-4 py-2">
                     <div className="skeleton h-4 w-full"></div>
-                  </td>
+                  </td> */}
                   <td className="border px-4 py-2">
                     <div className="skeleton h-4 w-full"></div>
                   </td>
@@ -387,18 +387,17 @@ const RolePermissionContent = () => {
             <SortableTh
               column="user"
               className="w-[250px]"
-              left={
-                <Checkbox
-                  checked={allChecked}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setSelectedIds(filteredDatas.map((r) => r.id));
-                    } else {
-                      setSelectedIds([]);
-                    }
-                  }}
-                />
-              }
+              left={<></>}
+                // <Checkbox
+                //   checked={allChecked}
+                //   onCheckedChange={(checked) => {
+                //     if (checked) {
+                //       setSelectedIds(filteredDatas.map((r) => r.id));
+                //     } else {
+                //       setSelectedIds([]);
+                //     }
+                //   }}
+                // />
             >
               List User
             </SortableTh>
@@ -423,7 +422,7 @@ const RolePermissionContent = () => {
               className="hover:bg-gray-50 transition border-b border-gray-200"
             >
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px] flex gap-2">
-                <Checkbox
+                {/* <Checkbox
                   key={data.id}
                   checked={selectedIds.includes(data.id)}
                   onCheckedChange={(checked) => {
@@ -433,7 +432,7 @@ const RolePermissionContent = () => {
                         : prev.filter((id) => id !== data.id)
                     );
                   }}
-                />
+                /> */}
                 <EllipsisTooltip className={"w-[250px]"}>
                   {data.full_name}
                 </EllipsisTooltip>
