@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const noactive = "bg-[#F8F8F8] text-[#515151]";
   const currentPath = location.pathname;
 
-  const { logout, token, isAdminAccess, isCompanyAccess } = useAuth();
+  const { logout, token, hasPermission, isAdminAccess, isCompanyAccess } = useAuth();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -116,7 +116,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
               </li>
             </> : <></>
             }
-            <li>
+            {hasPermission("VIEW_LOG_HISTORY") && <li>
               <Link
                 to="/logs"
                 className={`flex items-center gap-3 ${["/logs"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
@@ -125,7 +125,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
                 <IoNotificationsOutline size={24} />
                 <span className={`${isCollapsed ? "hidden" : "block"}`}>Logs History</span>
               </Link>
-            </li>
+            </li>}
             {/* <li>
               <Link
                 to="/settings"

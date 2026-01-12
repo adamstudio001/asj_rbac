@@ -61,7 +61,7 @@ const UserPageContent = () => {
   
   const [totalPages, setTotalPages] = useState(1);
 
-  const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } =
+  const { token, hasPermission, isAdminAccess, isCompanyAccess, isExpired, refreshSession } =
     useAuth();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
@@ -297,58 +297,66 @@ const UserPageContent = () => {
                 className="hover:bg-gray-50 transition border-b border-gray-200"
               >
                 <td className="px-4 py-3">
-                  <TableActionMenu>
-                    <button
-                      className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setIsModalViewOpen(true);
-                      }}
-                    >
-                      <img src={view_user} alt="view user" />
-                      View User
-                    </button>
+                  {
+                    (
+                      hasPermission("VIEW_USER") ||
+                      hasPermission("EDIT_USER") ||
+                      hasPermission("RESET_PASSWORD_USER") ||
+                      hasPermission("DELETE_USER")
+                    ) &&
+                    <TableActionMenu>
+                      {hasPermission("VIEW_USER") && <button
+                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsModalViewOpen(true);
+                        }}
+                      >
+                        <img src={view_user} alt="view user" />
+                        View User
+                      </button>}
 
-                    {/* Edit User */}
-                    <button
-                      className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      <img
-                        src={user_edit}
-                        alt="download"
-                        className="w-4 h-4 hover:text-white"
-                      />
-                      Edit User
-                    </button>
+                      {/* Edit User */}
+                      {hasPermission("EDIT_USER") && <button
+                        className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        <img
+                          src={user_edit}
+                          alt="edit user"
+                          className="w-4 h-4 hover:text-white"
+                        />
+                        Edit User
+                      </button>}
 
-                    {/* Reset Password */}
-                    <button
-                      className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setIsModalResetOpen(true);
-                      }}
-                    >
-                      <img src={reset} alt="download" className="w-4 h-4" />
-                      Reset Password
-                    </button>
+                      {/* Reset Password */}
+                      {hasPermission("RESET_PASSWORD_USER") && <button
+                        className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsModalResetOpen(true);
+                        }}
+                      >
+                        <img src={reset} alt="reset password" className="w-4 h-4" />
+                        Reset Password
+                      </button>}
 
-                    {/* Delete User */}
-                    <button
-                      className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                      onClick={() => {
-                        setIsModalDeleteOpen(true);
-                        setSelectedUser(user);
-                      }}
-                    >
-                      <img src={trash} alt="download" className="w-4 h-4" />
-                      Delete User
-                    </button>
-                  </TableActionMenu>
+                      {/* Delete User */}
+                      {hasPermission("DELETE_USER") && <button
+                        className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        onClick={() => {
+                          setIsModalDeleteOpen(true);
+                          setSelectedUser(user);
+                        }}
+                      >
+                        <img src={trash} alt="delete user" className="w-4 h-4" />
+                        Delete User
+                      </button>}
+                    </TableActionMenu>
+                  }
                 </td>
 
                 <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
@@ -400,7 +408,7 @@ const UserPageContent = () => {
     <>
       <Navbar
         renderActionModal={() =>
-          isAdminAccess() || isCompanyAccess() ? (
+          hasPermission("ADD_NEW_USER") ? ( //(isAdminAccess() || isCompanyAccess())
             <button
               disabled={isLoad}
               onClick={() => {
@@ -593,7 +601,7 @@ export function ModalResetPassword({
   const [clipboardValue, setClipboardValue] = useState("");
 
   const { addToast } = useToast();
-  const { token, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession } = useAuth();
 
   const {
     register,
@@ -876,7 +884,7 @@ export function ModalUser({
   });
 
   const { addToast } = useToast();
-  const { token, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession } = useAuth();
 
   useEffect(() => {
     reset({
@@ -1048,7 +1056,7 @@ export function ModalUser({
                         }
                       /> */}
                       <div className="flex-1 min-w-[250px]">
-                        <label data-slot="label" class="text-sm leading-4 font-medium text-foreground select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Password</label>
+                        <label data-slot="label" className="text-sm leading-4 font-medium text-foreground select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Password</label>
 
                         <div className="flex flex-col">
                           <div className="relative">

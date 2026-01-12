@@ -18,7 +18,7 @@ import axios from "axios";
 const LogHistoryPage = () => {
   const { addToast } = useToast();
   const { search, setSearch } = useSearch();
-  const { token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
 
   const [_, setTick] = useState(0);
   const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
@@ -198,9 +198,10 @@ const LogHistoryPage = () => {
                 <td className="px-4 py-3">{log.job_identifier || "-"}</td>
 
                 <td className="px-4 py-3 text-[#007BFF]">
+                  {hasPermission("VIEW_IP_ADDRESS")? 
                   <button onClick={() => openModal(log)}>
                     {log.ip_address || "-"}
-                  </button>
+                  </button> : "***.***.***.***"}
                 </td>
 
                 <td className="px-4 py-3">{log.city || "-"}</td>

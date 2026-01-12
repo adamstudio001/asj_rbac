@@ -40,6 +40,21 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const hasPermission = (targetPermission) => {
+    try {
+      const storedUser = sessionStorage.getItem("user");
+      if (!storedUser) return false;
+
+      const info = JSON.parse(storedUser);
+      if (!Array.isArray(info?.permissions)) return false;
+
+      return info.permissions.includes(targetPermission);
+    } catch (err) {
+      console.error("hasPermission error:", err);
+      return false;
+    }
+  };
+
   const isAdminAccess = () => {
     try {
       const storedUser = sessionStorage.getItem("user");
@@ -168,7 +183,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, expired, setUser, setToken, refreshSession, logout, isExpired, isAdminAccess, isCompanyAccess, isUserAccess }}>
+    <AuthContext.Provider value={{ user, token, expired, setUser, setToken, refreshSession, logout, isExpired, hasPermission, isAdminAccess, isCompanyAccess, isUserAccess }}>
       {children}
     </AuthContext.Provider>
   );

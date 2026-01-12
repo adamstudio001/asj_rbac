@@ -54,7 +54,7 @@ const RolePermissionContent = () => {
   
   const [sortConfig, setSortConfig] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
-  const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } =
+  const { token, hasPermission, isAdminAccess, isCompanyAccess, isExpired, refreshSession } =
     useAuth();
 
   // const datas = [
@@ -449,49 +449,52 @@ const RolePermissionContent = () => {
                 {data.position}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                <TableActionMenuImage>
-                  {/* <button
-                    className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                    onClick={() => {
-                      setSelectedData(data);
-                      setIsModalNewOpen(true);
-                    }}
-                  >
-                    <img src={add_team} alt="view profile" />
-                    Edit
-                  </button> */}
-                  <button
-                    className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                    onClick={() => {
-                      setSelectedData(data);
-                      setIsModalPermissionOpen(true);
-                    }}
-                  >
-                    <img src={change_permission} alt="permission" />
-                    Change Permission
-                  </button>
-                  <button
-                    className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                    onClick={() => {
-                      if(Array.isArray(data.role) && data.role.length > 1){
-                        addToast("error","tidak dapat ubah role karena sudah terdaftar role lebih dari 1");
-                        return;
-                      }
+                {
+                  (hasPermission("CHANGE_PERMISSIONS") || hasPermission("CHANGE_ROLE")) && 
+                  <TableActionMenuImage>
+                    {/* <button
+                      className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                      onClick={() => {
+                        setSelectedData(data);
+                        setIsModalNewOpen(true);
+                      }}
+                    >
+                      <img src={add_team} alt="view profile" />
+                      Edit
+                    </button> */}
+                    {hasPermission("CHANGE_PERMISSIONS") && <button
+                      className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                      onClick={() => {
+                        setSelectedData(data);
+                        setIsModalPermissionOpen(true);
+                      }}
+                    >
+                      <img src={change_permission} alt="permission" />
+                      Change Permission
+                    </button>}
+                    {hasPermission("CHANGE_ROLE") && <button
+                      className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                      onClick={() => {
+                        if(Array.isArray(data.role) && data.role.length > 1){
+                          addToast("error","tidak dapat ubah role karena sudah terdaftar role lebih dari 1");
+                          return;
+                        }
 
-                      setSelectedData(data);
-                      setIsModalOpen(true);
-                    }}
-                  >
-                    <img src={change_role} alt="role" />
-                    Change role
-                  </button>
-                  {/* <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                        onClick={() => setIsModalDeleteOpen(true)}
-                      >
-                        Delete
-                      </button> */}
-                </TableActionMenuImage>
+                        setSelectedData(data);
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      <img src={change_role} alt="role" />
+                      Change role
+                    </button>}
+                    {/* <button
+                          className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                          onClick={() => setIsModalDeleteOpen(true)}
+                        >
+                          Delete
+                        </button> */}
+                  </TableActionMenuImage>
+                }
               </td>
             </tr>
           ))}
@@ -503,7 +506,7 @@ const RolePermissionContent = () => {
   return (
     <>
       <Navbar
-        renderActionModal={() => (
+        renderActionModal={() => hasPermission("ADD_NEW_ROLE")? (
           <button
             onClick={() => {
               setIsModalNewOpen(true);
@@ -513,7 +516,7 @@ const RolePermissionContent = () => {
           >
             <IoMdAdd/> Add Role
           </button>
-        )}
+        ) : <></>}
       />
 
       <main className="flex-1 items-center p-6 overflow-auto scroll-custom">
@@ -571,7 +574,7 @@ export function ModalPermission({
   listPermission = [],
   extraAction = () => {},
 }) {
-  const { token, isExpired, refreshSession, isAdminAccess } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession, isAdminAccess } = useAuth();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -832,7 +835,7 @@ function PermissionItem({ permission, field }) {
 
 export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction = () => {}, }) {
   const [loading, setLoading] = useState(false);
-  const { token, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession } = useAuth();
   console.log(data, listRole)
 
   const {
@@ -982,7 +985,7 @@ export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction =
 }
 
 export function ModalForm({ data, open, onOpenChange, mode="create", extraAction = function () {}, }) {
-  const { token, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const {

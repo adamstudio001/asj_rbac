@@ -33,7 +33,7 @@ const DashboardContent = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { folderKeys } = useParams();
-  const { user, token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
+  const { user, token, hasPermission, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
 
   const { 
     isModalOpen, 
@@ -217,24 +217,18 @@ const DashboardContent = () => {
     <>
       <Navbar renderActionModal={()=> (
         <div className={`flex flex-wrap items-center max-[24rem]:gap-3 ${isWrapped ? "" : "gap-3"} space-x-8`}>
-                    <button onClick={()=>{
-                      alert("feature in development");
-                      // setIsModalOpen(!isModalOpen);
-                    }} className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}>
-                    <LuUpload size={18}/> 
-                    Upload file
-                    </button>
-                    {/* <div className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex items-center gap-2`}>
-                      <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-semibold">
-                        C
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span ref={textRef} className="font-medium text-gray-800">{user?.full_name ?? "-"}</span>
-                        <IoIosArrowDown className="w-4 text-[#a5a5a5]"/>
-                      </div>
-                    </div> */}
-                    <UserProfileMenu reftext={textRef} user={user} onLogout={() => console.log("logout")}/>
-                </div>
+          {
+            hasPermission("UPLOAD_FILE") && 
+            <button onClick={()=>{
+              alert("feature in development");
+              // setIsModalOpen(!isModalOpen);
+            }} className={`${isWrapped ? "w-full" : "max-w-[24rem]:w-full"} flex items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}>
+            <LuUpload size={18}/> 
+            Upload file
+            </button>
+          }
+          <UserProfileMenu reftext={textRef} user={user} onLogout={() => console.log("logout")}/>
+        </div>
       )}/>
       <main className="flex-1 overflow-auto items-center p-6">
           <div className="px-[2cqi] sm:px-[10cqi] w-full">
@@ -341,7 +335,7 @@ function RecentOpened() {
   const [reloadKey, setReloadKey] = useState(0);
 
   const { addToast } = useToast();
-  const { token, isExpired, refreshSession, isAdminAccess, isCompanyAccess } = useAuth();
+  const { token, isExpired, hasPermission, refreshSession, isAdminAccess, isCompanyAccess } = useAuth();
 
   const baseUrlFiles =
     isAdminAccess() || isCompanyAccess()

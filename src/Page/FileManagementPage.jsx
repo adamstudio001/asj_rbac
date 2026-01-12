@@ -66,7 +66,7 @@ const FileManagementContent = () => {
   const { addToast } = useToast();
   const { setIsModalOpen } = useFileManager(); //#getFileDirectory
 
-  const { user, token, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
+  const { user, token, hasPermission, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
   const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
   const [isModalRenameFileOpen, setIsModalRenameFileOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
@@ -409,29 +409,31 @@ const FileManagementContent = () => {
                         </>
                       }
                     >
+                      <>
                       <button
                         className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                         onClick={() => setData(file)}
                       >
                         <img src={Copy} alt="copy" /> Copy
                       </button>
-                      <button
+                      {hasPermission("DOWNLOAD_FILE") && <button
                         className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                         onClick={() => downloadHandler(file)}
                       >
                         <Download size={18}/> Download
-                      </button>
+                      </button>}
                       <button
                         className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                         onClick={() => editHandler(file)}
                       >
                         <img src={Rename} alt="Rename" /> Rename
                       </button>
-                      <FileInfoPopper 
+                      {hasPermission("GET_INFO_FILE_FOLDER") && <FileInfoPopper 
                         file={file} 
                         changeFile={setSelectedFile} 
                         eventInfoModal={setIsInfoModalOpen} 
-                      />
+                      />}
+                      {hasPermission("REMOVE_FILE_FOLDER") &&
                       <button
                         className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                         onClick={() => {
@@ -440,7 +442,8 @@ const FileManagementContent = () => {
                         }}
                       >
                         <img src={Trash} alt="Trash" /> Remove
-                      </button>
+                      </button>}
+                      </>
                     </TableRowActionMenu>
               )}
             </tbody>
@@ -481,7 +484,7 @@ const FileManagementContent = () => {
         renderActionModal={() => (
           <div className="flex flex-wrap items-center max-[400px]:flex-wrap gap-4">
             <div className={`max-w-[24rem]:w-full flex flex-wrap items-center gap-4`}>
-              {(!isRoot || (isUserAccess() || isCompanyAccess())) && <button
+              {((isRoot && hasPermission("CREATE_FOLDER")) || (!isRoot && hasPermission("CREATE_FOLDER"))) && <button //!isRoot || (isUserAccess() || isCompanyAccess())
                 onClick={() => {
                   setIsModalFolderOpen(true);
                   setFileSelected(null);
@@ -500,7 +503,7 @@ const FileManagementContent = () => {
                 Restore File
               </button>
               {/* } */}
-              {folderKeys && 
+              {(folderKeys && hasPermission("UPLOAD_FILE")) && 
               <button
                 onClick={() => {
                   setIsModalOpen(true);
@@ -658,6 +661,7 @@ const FileManagementContent = () => {
         refreshData={()=>loadData()} 
         idFolder={folderKeys} 
         token={token} 
+        hasPermission={hasPermission("UPLOAD_FILE")}
         initialFiles={files}
         isAdmin={isAdminAccess()} 
         isCompany={isCompanyAccess()} 
@@ -705,7 +709,7 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
   });
 
   const { addToast } = useToast();
-  const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isAdminAccess, isCompanyAccess, isExpired, refreshSession } = useAuth();
   const isEdit = mode=="edit";
   const isRoot = !folderKeys || folderKeys === null || folderKeys === undefined || folderKeys === Object;
   
@@ -727,6 +731,11 @@ export function ModalFolder({ open, onOpenChange, folderKeys, data, mode, extraA
       const formData = {
         "folder_name": values.folder_name,
       };
+      if(!isEdit && !hasPermission("CREATE_FOLDER")){
+        addToast("error","anda tidak memiliki permission CREATE_FOLDER");
+        setLoading(false);
+        return;
+      }
       
       let url = null;
       if((isAdminAccess() || isCompanyAccess())){
@@ -842,7 +851,7 @@ export function ModalRenameFile({ open, onOpenChange, folderKeys, data, extraAct
   });
 
   const { addToast } = useToast();
-  const { token, isAdminAccess, isCompanyAccess, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isAdminAccess, isCompanyAccess, isExpired, refreshSession } = useAuth();
   
   useEffect(() => {
     reset({

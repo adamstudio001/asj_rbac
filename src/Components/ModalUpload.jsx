@@ -24,10 +24,11 @@ export default function ModalUpload({
   initialFiles=[],
   idFolder = null,
   token = null,
+  hasPermission = false,
   isAdmin = false,
   isCompany = false,
   isUser = false
-}) {
+}) { 
   const { isModalOpen, setIsModalOpen } = useFileManager();
   const { addToast } = useToast();
 
@@ -154,6 +155,10 @@ export default function ModalUpload({
   // 🚀 Upload Single File
   // ==========================
   const uploadSingleFile = async (f) => {
+    if(!hasPermission){
+      addToast("error", "anda tidak memiliki permission UPLOAD_FILE");
+      return;
+    }
     const fileId = f.id;
 
     // if (f.file.size > 1 * 1024 * 1024) {
