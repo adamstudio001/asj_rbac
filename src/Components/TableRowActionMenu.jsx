@@ -3,6 +3,15 @@ import { createPopper } from "@popperjs/core";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
+const flattenChildren = (children) => {
+  return React.Children.toArray(children).flatMap((child) => {
+    if (child?.type === React.Fragment) {
+      return React.Children.toArray(child.props.children);
+    }
+    return child;
+  });
+};
+
 export function TableRowActionMenu({ isFolder = true, refId, children, rowCells }) {
   const [showMenu, setShowMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -83,21 +92,19 @@ export function TableRowActionMenu({ isFolder = true, refId, children, rowCells 
             className="z-[9999] bg-white border border-gray-200 rounded-lg shadow-md px-1 py-2 w-40"
             style={{ position: "absolute" }}
           >
-            {React.Children.map(children, (child) => {
+            {flattenChildren(children).map((child, idx) => {
+              if (!React.isValidElement(child)) return null;
+
               const isCustomComponent = typeof child.type === "function";
 
-              const extraProps = {
+              return React.cloneElement(child, {
+                key: idx,
                 onClick: (e) => {
-                  if (child.props.onClick) child.props.onClick(e);
-                  setShowMenu(false);
+                  child.props.onClick?.(e);
+                  closeMenu(); 
                 },
-              };
-
-              if (isCustomComponent) {
-                extraProps.closeMenu = closeMenu;
-              }
-
-              return React.cloneElement(child, extraProps);
+                ...(isCustomComponent && { closeMenu }),
+              });
             })}
           </div>,
           document.body
