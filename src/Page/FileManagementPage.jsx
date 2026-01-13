@@ -185,7 +185,9 @@ const FileManagementContent = () => {
         }
 
         // === Jalankan paralel ===
-        const [resItemType, resList, resBreadcrumb] = await Promise.all(promises);
+        const [resItemType, resList, resBreadcrumb] = await Promise.all(
+          promises
+        );
 
         const dataList = resList.data;
         const dataBreadcrumb = resBreadcrumb.data;
@@ -632,37 +634,40 @@ const FileManagementContent = () => {
                 <div className="skeleton h-4 w-8"></div>
               </>
             ) : (
-              listVisible.map((visible, index) => (
-                <label
-                  key={visible.id ?? index}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  {
-                    (
-                      visible?.identifier=="GENERAL" || 
-                      (visible?.identifier=="SECRET" && hasPermission("VIEW_SECRET_FOLDER_FILE")) || 
-                      (visible?.identifier=="SUPER_SECRET" && hasPermission("VIEW_SUPER_SECRET_FOLDER_FILE"))
-                    ) && 
-                    <Checkbox
-                      key={visible?.identifier}
-                      checked={!!visible?.is_default}
-                      onCheckedChange={(checked) => {
-                        setListVisible((prev) =>
-                          prev.map((v) => {
-                            if (v.identifier === visible.identifier) {
-                              // toggle current item
-                              return { ...v, is_default: !v.is_default };
-                            }
-                            // unselect all others
-                            return { ...v, is_default: false };
-                          })
-                        );
-                      }}
-                    />
-                  }
-                  <span>{visible.label}</span>
-                </label>
-              ))
+              listVisible.map((visible, index) =>
+                visible?.identifier == "GENERAL" ||
+                (visible?.identifier == "SECRET" &&
+                  hasPermission("VIEW_SECRET_FOLDER_FILE")) ||
+                (visible?.identifier == "SUPER_SECRET" &&
+                  hasPermission("VIEW_SUPER_SECRET_FOLDER_FILE")) ? (
+                  <>
+                    <label
+                      key={visible.id ?? index}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <Checkbox
+                        key={visible?.identifier}
+                        checked={!!visible?.is_default}
+                        onCheckedChange={(checked) => {
+                          setListVisible((prev) =>
+                            prev.map((v) => {
+                              if (v.identifier === visible.identifier) {
+                                // toggle current item
+                                return { ...v, is_default: !v.is_default };
+                              }
+                              // unselect all others
+                              return { ...v, is_default: false };
+                            })
+                          );
+                        }}
+                      />
+                      <span>{visible.label}</span>
+                    </label>
+                  </>
+                ) : (
+                  <></>
+                )
+              )
             )}
 
             <div
@@ -820,7 +825,10 @@ const FileManagementContent = () => {
                         Kind:
                       </td>
                       <td className="font-medium">
-                        {getLabelByIdentifier(selectedFile?.type_identifier, itemType)}
+                        {getLabelByIdentifier(
+                          selectedFile?.type_identifier,
+                          itemType
+                        )}
                       </td>
                     </tr>
                     <tr>
@@ -878,7 +886,10 @@ const FileManagementContent = () => {
                         Kind:
                       </td>
                       <td className="font-medium">
-                        {getLabelByIdentifier(selectedFile?.type_identifier, itemType)}
+                        {getLabelByIdentifier(
+                          selectedFile?.type_identifier,
+                          itemType
+                        )}
                       </td>
                     </tr>
                     <tr>
@@ -900,7 +911,10 @@ const FileManagementContent = () => {
                       </td>
                       <td className="font-medium">
                         {selectedFile?.createdByUser
-                          ? `${selectedFile.createdByUser.full_name} (${selectedFile.createdByUser.employment?.[0]?.role?.name ?? "-"})`
+                          ? `${selectedFile.createdByUser.full_name} (${
+                              selectedFile.createdByUser.employment?.[0]?.role
+                                ?.name ?? "-"
+                            })`
                           : ""}
                       </td>
                     </tr>
@@ -910,7 +924,10 @@ const FileManagementContent = () => {
                       </td>
                       <td className="font-medium">
                         {selectedFile?.updatedByUser
-                          ? `${selectedFile.updatedByUser.full_name} (${selectedFile.updatedByUser.employment?.[0]?.role?.name ?? "-"})`
+                          ? `${selectedFile.updatedByUser.full_name} (${
+                              selectedFile.updatedByUser.employment?.[0]?.role
+                                ?.name ?? "-"
+                            })`
                           : ""}
                       </td>
                     </tr>
