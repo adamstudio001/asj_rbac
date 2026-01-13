@@ -20,22 +20,22 @@ export default function RadioGroup({
       )}
     >
       {options.map((record) => {
-        const isSelected = value === record.value;
+        const isSelected = value === record.identifier;
 
         return (
           <label
-            key={record.value}
+            key={record.identifier}
             className="inline-flex items-center gap-2 cursor-pointer select-none"
             onClick={(e) => {
               e.preventDefault(); // ⛔ cegah radio native mengunci
-              onChange(isSelected ? null : record.value);
+              onChange(isSelected ? null : record.identifier);
             }}
           >
             {/* Native input (for accessibility & form) */}
             <input
               type="radio"
               name={name}
-              value={record.value}
+              value={record.identifier}
               checked={isSelected}
               readOnly
               className="sr-only"

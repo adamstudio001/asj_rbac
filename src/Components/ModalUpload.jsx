@@ -27,7 +27,8 @@ export default function ModalUpload({
   hasPermission = false,
   isAdmin = false,
   isCompany = false,
-  isUser = false
+  isUser = false,
+  listVisible=[]
 }) { 
   const { isModalOpen, setIsModalOpen } = useFileManager();
   const { addToast } = useToast();
@@ -214,6 +215,7 @@ export default function ModalUpload({
 
       const formData = new FormData();
       formData.append("file", f.file);
+      formData.append("visibility_identifier", category ?? "GENERAL");
 
       try {
         // const info = JSON.parse(sessionStorage.getItem("info") || "{}");
@@ -385,10 +387,7 @@ export default function ModalUpload({
                 value={category}
                 onChange={setCategory}
                 orientation="horizontal"
-                options={[
-                  { label: "Secret", value: "SECRET" },
-                  { label: "Super Secret", value: "SUPER_SECRET" },
-                ]}
+                options={listVisible}
               />
             )}
           </div>
