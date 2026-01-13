@@ -327,6 +327,10 @@ const FileManagementContent = () => {
       addToast("error", "belum pilih file/folder yang di download");
       return;
     }
+    // if(file?.visibility_identifier!="GENERAL" && !hasPermission("DOWNLOAD_SECRET_FILE")){
+    //   addToast("error", "anda tidak memiliki akses DOWNLOAD_SECRET_FILE");
+    //   return;
+    // }
 
     if (isExpired()) {
       await refreshSession();
@@ -633,22 +637,29 @@ const FileManagementContent = () => {
                   key={visible.id ?? index}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <Checkbox
-                    key={visible?.identifier}
-                    checked={!!visible?.is_default}
-                    onCheckedChange={(checked) => {
-                      setListVisible((prev) =>
-                        prev.map((v) => {
-                          if (v.identifier === visible.identifier) {
-                            // toggle current item
-                            return { ...v, is_default: !v.is_default };
-                          }
-                          // unselect all others
-                          return { ...v, is_default: false };
-                        })
-                      );
-                    }}
-                  />
+                  {
+                    (
+                      visible?.identifier=="GENERAL" || 
+                      (visible?.identifier=="SECRET" && hasPermission("VIEW_SECRET_FOLDER_FILE")) || 
+                      (visible?.identifier=="SUPER_SECRET" && hasPermission("VIEW_SUPER_SECRET_FOLDER_FILE"))
+                    ) && 
+                    <Checkbox
+                      key={visible?.identifier}
+                      checked={!!visible?.is_default}
+                      onCheckedChange={(checked) => {
+                        setListVisible((prev) =>
+                          prev.map((v) => {
+                            if (v.identifier === visible.identifier) {
+                              // toggle current item
+                              return { ...v, is_default: !v.is_default };
+                            }
+                            // unselect all others
+                            return { ...v, is_default: false };
+                          })
+                        );
+                      }}
+                    />
+                  }
                   <span>{visible.label}</span>
                 </label>
               ))
