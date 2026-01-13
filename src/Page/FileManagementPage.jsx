@@ -138,6 +138,9 @@ const FileManagementContent = () => {
       refreshSession();
     }
 
+    const selectedItem = listVisible.find((v) => v.is_default);
+    const selectedIdentifier = selectedItem?.identifier ?? "";
+
     const baseUrl =
       isAdminAccess() || isCompanyAccess()
         ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
@@ -145,7 +148,7 @@ const FileManagementContent = () => {
 
     const url = `${baseUrl}/${
       !isRoot ? `storage/${folderKeys}` : `storage`
-    }?order_by[]=name&sort_by[]=asc`;
+    }?order_by[]=name&sort_by[]=asc&visibility_identifier=${selectedIdentifier}`;
 
     // --- Breadcrumb URL hanya jika folderKeys punya nilai ---
     const hasFolder =
@@ -236,7 +239,7 @@ const FileManagementContent = () => {
 
   useEffect(() => {
     loadData();
-  }, [folderKeys]);
+  }, [folderKeys, listVisible]);
 
   // const files = getFileDirectory(lists, folderKeys);
   const sortedFiles = filterAndSortFiles(lists, {
@@ -624,11 +627,14 @@ const FileManagementContent = () => {
                     checked={!!visible?.is_default}
                     onCheckedChange={(checked) => {
                       setListVisible((prev) =>
-                        prev.map((v) =>
-                          v.identifier === visible.identifier
-                            ? { ...v, is_default: checked }
-                            : v
-                        )
+                        prev.map((v) => {
+                          if (v.identifier === visible.identifier) {
+                            // toggle current item
+                            return { ...v, is_default: !v.is_default };
+                          }
+                          // unselect all others
+                          return { ...v, is_default: false };
+                        })
                       );
                     }}
                   />
@@ -909,7 +915,7 @@ export function ModalFolder({
   data,
   mode,
   extraAction = function () {},
-  listVisible = []
+  listVisible = [],
 }) {
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState(null);
@@ -1054,12 +1060,12 @@ export function ModalFolder({
                 />
 
                 <RadioGroup
-                                className="justify-end"
-                                value={category}
-                                onChange={setCategory}
-                                orientation="horizontal"
-                                options={listVisible}
-                              />
+                  className="justify-end"
+                  value={category}
+                  onChange={setCategory}
+                  orientation="horizontal"
+                  options={listVisible}
+                />
               </div>
             </DialogModalDescription>
 
