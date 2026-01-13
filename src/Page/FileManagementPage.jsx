@@ -8,9 +8,11 @@ import {
   buildHeaders,
   filterAndSortFiles,
   formatDate,
+  formatDatetime,
   formatFileSize,
   formatFileType,
   getFileIcon,
+  getLabelByIdentifier,
   isEmpty,
 } from "../Common/Utils";
 import { useToast } from "@/Providers/ToastProvider";
@@ -95,6 +97,7 @@ const FileManagementContent = () => {
   const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
   const [isModalRenameFileOpen, setIsModalRenameFileOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
+  const [itemType, setItemType] = useState([]);
   const [lists, setLists] = useState([]);
   const [listsPath, setListsPath] = useState([]);
   const [fileSelected, setFileSelected] = useState(null);
@@ -163,6 +166,10 @@ const FileManagementContent = () => {
       try {
         // --- Buat array promise dinamis ---
         const promises = [
+          axios.get(
+            "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-type",
+            { headers: { Authorization: `Bearer ${token}` } }
+          ),
           axios.get(url, { headers: { Authorization: `Bearer ${token}` } }),
         ];
 
@@ -178,10 +185,11 @@ const FileManagementContent = () => {
         }
 
         // === Jalankan paralel ===
-        const [resList, resBreadcrumb] = await Promise.all(promises);
+        const [resItemType, resList, resBreadcrumb] = await Promise.all(promises);
 
         const dataList = resList.data;
         const dataBreadcrumb = resBreadcrumb.data;
+        const dataItemType = resItemType.data;
 
         console.log(dataList?.success, dataBreadcrumb?.success); //undefined undefined
         if (
@@ -193,6 +201,7 @@ const FileManagementContent = () => {
           );
         }
 
+        setItemType(dataItemType?.data ?? []);
         setLists(dataList?.data ?? []);
         setTotalPages(dataList?.last_page ?? 1);
         setListsPath(dataBreadcrumb?.data ?? []);
@@ -545,6 +554,8 @@ const FileManagementContent = () => {
                       file={file}
                       changeFile={setSelectedFile}
                       eventInfoModal={setIsInfoModalOpen}
+                      paths={listsPath}
+                      types={itemType}
                     />
                   )}
                   {hasPermission("REMOVE_FILE_FOLDER") && (
@@ -763,21 +774,25 @@ const FileManagementContent = () => {
             <DialogTitle className="text-xl">
               {selectedFile?.name || "File Info"}
             </DialogTitle>
-            <DialogClose asChild className="text:black hover:text-gray-400">
-              {/* <Button variant="ghost" size="icon" className="h-10 w-10 p-0"> */}
-              <svg
-                width="38"
-                height="38"
-                viewBox="0 0 38 38"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M18.0503 20.2493L21.3753 16.9243L24.7003 20.2493L25.7897 19.1583L22.4647 15.8333L25.7897 12.5083L24.7003 11.4174L21.3753 14.7424L18.0503 11.4174L16.961 12.5083L20.286 15.8333L16.961 19.1583L18.0503 20.2493ZM12.8507 26.9167C12.1213 26.9167 11.5127 26.6728 11.0251 26.1852C10.5374 25.6975 10.2931 25.089 10.292 24.3596V7.30709C10.292 6.57875 10.5364 5.97023 11.0251 5.4815C11.5138 4.99278 12.1223 4.74895 12.8507 4.75H29.9016C30.6299 4.75 31.2384 4.99384 31.7272 5.4815C32.2159 5.96917 32.4597 6.5777 32.4587 7.30709V24.3596C32.4587 25.0879 32.2148 25.6959 31.7272 26.1836C31.2395 26.6713 30.6304 26.9156 29.9 26.9167H12.8507ZM12.8507 25.3333H29.9016C30.1444 25.3333 30.3676 25.232 30.5713 25.0293C30.7751 24.8267 30.8764 24.6034 30.8753 24.3596V7.30709C30.8753 7.06431 30.774 6.84106 30.5713 6.63734C30.3687 6.43361 30.1449 6.33228 29.9 6.33334H12.8507C12.6068 6.33334 12.3831 6.43467 12.1793 6.63734C11.9756 6.84 11.8743 7.06325 11.8753 7.30709V24.3596C11.8753 24.6024 11.9767 24.8256 12.1793 25.0293C12.382 25.2331 12.6052 25.3344 12.8491 25.3333M8.09908 31.6667C7.37075 31.6667 6.76222 31.4228 6.2735 30.9352C5.78477 30.4475 5.54094 29.839 5.542 29.1096V10.4738H7.12533V29.1096C7.12533 29.3524 7.22666 29.5756 7.42933 29.7793C7.632 29.9831 7.85525 30.0844 8.09908 30.0833H26.7349V31.6667H8.09908Z"
-                  fill="currentColor"
-                />
-              </svg>
-              {/* </Button> */}
+            <DialogClose asChild>
+              <div className="p-1 rounded text-black hover:text-white hover:bg-black inline-flex items-center justify-center cursor-pointer group">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="group-hover:stroke-white" // <-- stroke berubah saat hover
+                  aria-hidden="true"
+                >
+                  <path d="M18 6 6 18"></path>
+                  <path d="m6 6 12 12"></path>
+                </svg>
+              </div>
             </DialogClose>
           </div>
           <div className="px-6 text-sm overflow-y-auto scroll-custom space-y-8">
@@ -793,14 +808,16 @@ const FileManagementContent = () => {
                       <td className="font-normal text-gray-500 text-right align-top pr-3 w-24">
                         Kind:
                       </td>
-                      <td className="font-medium">docx / Microsoft Word</td>
+                      <td className="font-medium">
+                        {getLabelByIdentifier(selectedFile?.type_identifier, itemType)}
+                      </td>
                     </tr>
                     <tr>
                       <td className="font-normal text-gray-500 text-right pr-3">
                         Size:
                       </td>
                       <td className="font-medium">
-                        3.056.611 bytes (3,1 MB on cloud)
+                        {selectedFile?.size || ""}
                       </td>
                     </tr>
                     <tr>
@@ -808,20 +825,29 @@ const FileManagementContent = () => {
                         Where:
                       </td>
                       <td className="font-medium leading-snug break-words">
-                        File Management &gt; Laporan Absensi Karyawan
+                        {[
+                          ...(listsPath?.map((item) => item.name) || []),
+                          selectedFile?.name || "",
+                        ]
+                          .filter(Boolean)
+                          .join(" > ")}
                       </td>
                     </tr>
                     <tr>
                       <td className="font-normal text-gray-500 text-right pr-3">
                         Created:
                       </td>
-                      <td className="font-medium">18 October 2015 at 09.06</td>
+                      <td className="font-medium">
+                        {formatDatetime(selectedFile?.created_datetime || "")}
+                      </td>
                     </tr>
                     <tr>
                       <td className="font-normal text-gray-500 text-right pr-3">
                         Modified:
                       </td>
-                      <td className="font-medium">28 November 2025 at 11.02</td>
+                      <td className="font-medium">
+                        {formatDatetime(selectedFile?.updated_datetime || "")}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -840,25 +866,42 @@ const FileManagementContent = () => {
                       <td className="font-normal text-gray-500 text-right align-top pr-3 w-24">
                         Kind:
                       </td>
-                      <td className="font-medium">docx / Microsoft Word</td>
+                      <td className="font-medium">
+                        {getLabelByIdentifier(selectedFile?.type_identifier, itemType)}
+                      </td>
                     </tr>
                     <tr>
                       <td className="font-normal text-gray-500 text-right align-top pr-3">
                         Where From:
                       </td>
-                      <td className="font-medium leading-snug break-words"></td>
+                      <td className="font-medium leading-snug break-words">
+                        {[
+                          ...(listsPath?.map((item) => item.name) || []),
+                          selectedFile?.name || "",
+                        ]
+                          .filter(Boolean)
+                          .join(" > ")}
+                      </td>
                     </tr>
                     <tr>
                       <td className="font-normal text-gray-500 text-right pr-3">
                         Created By:
                       </td>
-                      <td className="font-medium"></td>
+                      <td className="font-medium">
+                        {selectedFile?.createdByUser
+                          ? `${selectedFile.createdByUser.full_name} (${selectedFile.createdByUser.employment?.[0]?.role?.name ?? "-"})`
+                          : ""}
+                      </td>
                     </tr>
                     <tr>
                       <td className="font-normal text-gray-500 text-right pr-3">
                         Lastest Modified:
                       </td>
-                      <td className="font-medium"></td>
+                      <td className="font-medium">
+                        {selectedFile?.updatedByUser
+                          ? `${selectedFile.updatedByUser.full_name} (${selectedFile.updatedByUser.employment?.[0]?.role?.name ?? "-"})`
+                          : ""}
+                      </td>
                     </tr>
                   </tbody>
                 </table>

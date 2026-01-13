@@ -484,7 +484,7 @@ export function ModalViewUser({
     if(type=="division"){
       const employe = data?.employment ?? [];
       if(employe.length == 1){
-        return employe[0]?.job_identifier ?? "";
+        return employe?.[0]?.job_identifier ?? "";
       } else if(employe.length > 1){
         return employe?.job_identifier.join(", ")
       }
@@ -492,7 +492,7 @@ export function ModalViewUser({
     } else if(type=="branch"){
       const employe = data?.employment ?? [];
       if(employe.length == 1){
-        return employe[0]?.branch_location_identifier ?? "";
+        return employe?.[0]?.branch_location_identifier ?? "";
       } else if(employe.length > 1){
         return employe?.branch_location_identifier.join(", ")
       }

@@ -644,7 +644,7 @@ export function ModalPermission({
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
 
-      const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/${data?.role[0]?.identifier}/permission`;
+      const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/${data?.role?.[0]?.identifier}/permission`;
       const method = "put";
 
       const res = await axios({
@@ -847,14 +847,14 @@ export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction =
   } = useForm({
     defaultValues: {
       name: data?.full_name ?? "",
-      role: data?.role[0] ?? null,
+      role: data?.role?.[0] ?? null,
     },
   });
 
   useEffect(() => {
     reset({
       name: data?.full_name ?? "",
-      role: data?.role[0] ?? null,
+      role: data?.role?.[0] ?? null,
     });
   }, [data, reset]);
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "@radix-ui/react-popover";
 import Info from "@assets/info.svg";
+import { formatDatetime, getLabelByIdentifier } from "@/Common/Utils";
 
-const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu }) => {
+const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [], types = [] }) => {
   const [open, setOpen] = useState(false);
   const [hasMouse, setHasMouse] = useState(false);
   const closeTimer = useRef(null);
@@ -72,7 +73,7 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu }) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b bg-white px-2 py-2 mb-2">
-          <h3 className="text-lg font-semibold">{file?.name || "File Info"}</h3>
+          <h3 className="text-lg font-semibold">{file?.name || ""}</h3>
         </div>
 
         <div className="text-sm overflow-y-auto scroll-custom max-h-80 space-y-4">
@@ -83,25 +84,28 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu }) => {
               <tbody>
                 <tr>
                   <td className="text-gray-500 text-right pr-3 w-24">Kind:</td>
-                  <td className="font-medium">{file?.type || "docx / Microsoft Word"}</td>
+                  <td className="font-medium">{getLabelByIdentifier(file?.type_identifier, types)}</td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Size:</td>
-                  <td className="font-medium">{file?.size || "3,1 MB"}</td>
+                  <td className="font-medium">{file?.size || ""}</td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Where:</td>
                   <td className="font-medium leading-snug break-words">
-                    {file?.path || "File Management > Laporan Absensi Karyawan"}
+                    {[
+                      ...(paths?.map((item) => item.name) || []),
+                      file?.name || "",
+                    ].filter(Boolean).join(" > ")}
                   </td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Created:</td>
-                  <td className="font-medium">{file?.createdAt || "18 October 2015 at 09.06"}</td>
+                  <td className="font-medium">{formatDatetime(file?.created_datetime || "")}</td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Modified:</td>
-                  <td className="font-medium">{file?.modifiedAt || "28 November 2025 at 11.02"}</td>
+                  <td className="font-medium">{formatDatetime(file?.updated_datetime || "")}</td>
                 </tr>
               </tbody>
             </table>
@@ -114,21 +118,43 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu }) => {
               <tbody>
                 <tr>
                   <td className="text-gray-500 text-right pr-3 w-24">Kind:</td>
-                  <td className="font-medium">{file?.type || "docx / Microsoft Word"}</td>
+                  <td className="font-medium">{getLabelByIdentifier(file?.type_identifier, types)}</td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Where From:</td>
                   <td className="font-medium leading-snug break-words">
-                    {file?.from || ""}
+                    {[
+                      ...(paths?.map((item) => item.name) || []),
+                      file?.name || "",
+                    ].filter(Boolean).join(" > ")}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="text-gray-500 text-right pr-3">Classification:</td>
+                  <td className="font-medium leading-snug break-words">
+                    {file?.visibility_identifier
+                      ? file.visibility_identifier
+                          .toLowerCase()
+                          .replace(/_/g, " ")
+                          .replace(/\b\w/g, (c) => c.toUpperCase())
+                      : ""}
                   </td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Created By:</td>
-                  <td className="font-medium"> </td>
+                  <td className="font-medium">
+                    {file?.createdByUser
+                      ? `${file.createdByUser.full_name} (${file.createdByUser.employment?.[0]?.role?.name ?? "-"})`
+                      : ""}
+                  </td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Last Modified:</td>
-                  <td className="font-medium"> </td>
+                  <td className="font-medium">
+                    {file?.updatedByUser
+                      ? `${file.updatedByUser.full_name} (${file.updatedByUser.employment?.[0]?.role?.name ?? "-"})`
+                      : ""}
+                  </td>
                 </tr>
               </tbody>
             </table>
