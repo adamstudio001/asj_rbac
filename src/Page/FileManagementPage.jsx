@@ -329,10 +329,10 @@ const FileManagementContent = () => {
       addToast("error", "belum pilih file/folder yang di download");
       return;
     }
-    // if(file?.visibility_identifier!="GENERAL" && !hasPermission("DOWNLOAD_SECRET_FILE")){
-    //   addToast("error", "anda tidak memiliki akses DOWNLOAD_SECRET_FILE");
-    //   return;
-    // }
+    if(file?.visibility_identifier!="GENERAL" && !hasPermission("DOWNLOAD_SECRET_FILE")){
+      addToast("error", "anda tidak memiliki akses DOWNLOAD_SECRET_FILE");
+      return;
+    }
 
     if (isExpired()) {
       await refreshSession();
