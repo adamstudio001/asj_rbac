@@ -783,7 +783,7 @@ const FileManagementContent = () => {
         onOpenChange={() => setIsInfoModalOpen(false)}
       >
         <DialogContent className="flex flex-col p-0 max-h-[min(640px,80vh)] sm:max-w-2xl">
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-4">
+          <div className="sticky top-0 z-10 flex items-center justify-between bg-white px-6 py-4">
             {/* <h2 className="text-base font-semibold">
               {selectedFile?.name || "File Info"}
             </h2> */}
@@ -872,6 +872,8 @@ const FileManagementContent = () => {
                 </table>
               </div>
             </div>
+            
+            <hr class="h-px my-8 bg-[#DDDDDD] border-0"></hr>
 
             {/* More Info Section */}
             <div>

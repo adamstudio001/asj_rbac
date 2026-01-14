@@ -1,9 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Popover, PopoverTrigger, PopoverContent } from "@radix-ui/react-popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@radix-ui/react-popover";
 import Info from "@assets/info.svg";
-import { formatDatetime, formatFileSize, getLabelByIdentifier } from "@/Common/Utils";
+import {
+  formatDatetime,
+  formatFileSize,
+  getLabelByIdentifier,
+} from "@/Common/Utils";
 
-const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [], types = [] }) => {
+const FileInfoPopper = ({
+  file,
+  changeFile,
+  eventInfoModal,
+  closeMenu,
+  paths = [],
+  types = [],
+}) => {
   const [open, setOpen] = useState(false);
   const [hasMouse, setHasMouse] = useState(false);
   const closeTimer = useRef(null);
@@ -72,8 +87,27 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [
         "
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b bg-white px-2 py-2 mb-2">
+        <div className="flex items-center justify-between bg-white py-2 mb-2">
           <h3 className="text-lg font-semibold">{file?.name || ""}</h3>
+
+          <button onClick={handleMouseLeave} className="p-1 rounded text-black hover:text-white hover:bg-black inline-flex items-center justify-center cursor-pointer group">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="group-hover:stroke-white"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
         </div>
 
         <div className="text-sm overflow-y-auto scroll-custom max-h-80 space-y-4">
@@ -84,7 +118,9 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [
               <tbody>
                 <tr>
                   <td className="text-gray-500 text-right pr-3 w-24">Kind:</td>
-                  <td className="font-medium">{getLabelByIdentifier(file?.type_identifier, types)}</td>
+                  <td className="font-medium">
+                    {getLabelByIdentifier(file?.type_identifier, types)}
+                  </td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Size:</td>
@@ -96,20 +132,28 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [
                     {[
                       ...(paths?.map((item) => item.name) || []),
                       file?.name || "",
-                    ].filter(Boolean).join(" > ")}
+                    ]
+                      .filter(Boolean)
+                      .join(" > ")}
                   </td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Created:</td>
-                  <td className="font-medium">{formatDatetime(file?.created_datetime || "")}</td>
+                  <td className="font-medium">
+                    {formatDatetime(file?.created_datetime || "")}
+                  </td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Modified:</td>
-                  <td className="font-medium">{formatDatetime(file?.updated_datetime || "")}</td>
+                  <td className="font-medium">
+                    {formatDatetime(file?.updated_datetime || "")}
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
+
+          <hr class="h-px my-8 bg-[#DDDDDD] border-0"></hr>
 
           {/* More Info Section */}
           <div>
@@ -118,7 +162,9 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [
               <tbody>
                 <tr>
                   <td className="text-gray-500 text-right pr-3 w-24">Kind:</td>
-                  <td className="font-medium">{getLabelByIdentifier(file?.type_identifier, types)}</td>
+                  <td className="font-medium">
+                    {getLabelByIdentifier(file?.type_identifier, types)}
+                  </td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Where From:</td>
@@ -126,11 +172,15 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [
                     {[
                       ...(paths?.map((item) => item.name) || []),
                       file?.name || "",
-                    ].filter(Boolean).join(" > ")}
+                    ]
+                      .filter(Boolean)
+                      .join(" > ")}
                   </td>
                 </tr>
                 <tr>
-                  <td className="text-gray-500 text-right pr-3">Classification:</td>
+                  <td className="text-gray-500 text-right pr-3">
+                    Classification:
+                  </td>
                   <td className="font-medium leading-snug break-words">
                     {file?.visibility_identifier
                       ? file.visibility_identifier
@@ -144,15 +194,21 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [
                   <td className="text-gray-500 text-right pr-3">Created By:</td>
                   <td className="font-medium">
                     {file?.createdByUser
-                      ? `${file.createdByUser.full_name} (${file.createdByUser.employment?.[0]?.role?.name ?? "-"})`
+                      ? `${file.createdByUser.full_name} (${
+                          file.createdByUser.employment?.[0]?.role?.name ?? "-"
+                        })`
                       : ""}
                   </td>
                 </tr>
                 <tr>
-                  <td className="text-gray-500 text-right pr-3">Last Modified:</td>
+                  <td className="text-gray-500 text-right pr-3">
+                    Last Modified:
+                  </td>
                   <td className="font-medium">
                     {file?.updatedByUser
-                      ? `${file.updatedByUser.full_name} (${file.updatedByUser.employment?.[0]?.role?.name ?? "-"})`
+                      ? `${file.updatedByUser.full_name} (${
+                          file.updatedByUser.employment?.[0]?.role?.name ?? "-"
+                        })`
                       : ""}
                   </td>
                 </tr>
