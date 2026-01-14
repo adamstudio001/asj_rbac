@@ -564,7 +564,7 @@ export function ModalViewUser({
                     <div className="flex flex-col gap-6">
                       <div className="inline-flex">
                         <b className="min-w-[15cqi] font-bold text-black">Empploye ID:</b>
-                        <p className="text-black text-sm font-normal">{data?.employe_id ?? ""}</p>
+                        <p className="text-black text-sm font-normal">{data?.employment?.[0]?.employee_id ?? ""}</p>
                       </div>
                       <div className="inline-flex">
                         <b className="min-w-[15cqi] font-bold text-black">Division:</b>
@@ -880,6 +880,7 @@ export function ModalUser({
       jobPosition: "",
       branch: "",
       // role: "",
+      employee_id: "",
     },
   });
 
@@ -897,7 +898,7 @@ export function ModalUser({
       jobPosition: getJobPosition(data?.employment?.[0]?.job_identifier),
       branch: getBranch(data?.employment?.[0]?.branch_location_identifier),
       // role: data?.role ?? "",
-      employe_id: "",
+      employee_id: data?.employment?.[0]?.employee_id ?? "",
     });
   }, [data, reset]);
 
@@ -935,6 +936,7 @@ export function ModalUser({
         address: values.address,
         job_identifier: values.jobPosition?.identifier ?? "",
         branch_location_identifier: values.branch?.identifier ?? "",
+        employee_id: values.employee_id
       };
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
@@ -1025,13 +1027,13 @@ export function ModalUser({
                       />
 
                       <CustomInput
-                        label="Employe ID"
-                        name="employe_id"
+                        label="Employee ID"
+                        name="employee_id"
                         register={register}
                         errors={errors}
-                        // rules={{
-                        //   required: "Employe ID is required",
-                        // }}
+                        rules={{
+                          required: "Employee ID is required",
+                        }}
                       />
                     </div>
 
