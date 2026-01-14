@@ -108,7 +108,7 @@ const LogHistoryPage = () => {
               <th className="px-4 py-3 font-inter font-medium text-[14px]">OS</th>
               <th className="px-4 py-3 font-inter font-medium text-[14px]">Last Activity</th>
               <th className="px-4 py-3 font-inter font-medium text-[14px]">Division</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">IP</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">IP Address</th>
               <th className="px-4 py-3 font-inter font-medium text-[14px]">City</th>
             </tr>
           </thead>
