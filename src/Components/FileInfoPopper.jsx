@@ -153,7 +153,7 @@ const FileInfoPopper = ({
             </table>
           </div>
 
-          <hr class="h-px my-8 bg-[#DDDDDD] border-0"></hr>
+          <hr className="h-px my-8 bg-[#DDDDDD] border-0"></hr>
 
           {/* More Info Section */}
           <div>
