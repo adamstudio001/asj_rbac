@@ -70,7 +70,7 @@ const UserPageContent = () => {
 
   async function loadData() {
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     if (isAdminAccess() || isCompanyAccess()) {

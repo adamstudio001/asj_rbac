@@ -138,7 +138,7 @@ const FileManagementContent = () => {
 
   async function loadData() {
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     const selectedItem = listVisible.find((v) => v.is_default);
@@ -218,7 +218,7 @@ const FileManagementContent = () => {
 
   async function loadVisibility() {
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-visibility`;
@@ -265,7 +265,7 @@ const FileManagementContent = () => {
     }
 
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     let urlDelete = null; //[check] masih belum bedain antara delete folder dengan file
@@ -1027,7 +1027,7 @@ export function ModalFolder({
 
   const onSubmit = async (values) => {
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     setLoading(true);
@@ -1197,7 +1197,7 @@ export function ModalRenameFile({
 
   const onSubmit = async (values) => {
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     setLoading(true);

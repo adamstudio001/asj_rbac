@@ -99,7 +99,7 @@ const RolePermissionContent = () => {
 
   async function loadData() {
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     if (isAdminAccess() || isCompanyAccess()) {
@@ -630,7 +630,7 @@ export function ModalPermission({
     }
 
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     setLoading(true);
@@ -863,7 +863,7 @@ export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction =
   const onSubmit = async (values) => {
     console.log(values);
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     setLoading(true);
@@ -1016,7 +1016,7 @@ export function ModalForm({ data, open, onOpenChange, mode="create", extraAction
     console.log(values);
 
     if (isExpired()) {
-      refreshSession();
+      await refreshSession();
     }
 
     setLoading(true);

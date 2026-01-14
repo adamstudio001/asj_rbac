@@ -60,7 +60,7 @@ export function getFileIconBig(fileName, isFolder = false) {
   return <CgFileDocument size={"100%"} className="text-gray-400 text-xl" />; // default
 }
 export function formatFileSize(bytes) {
-  if (bytes === 0) return "0 Bytes";
+  if (bytes === 0 || bytes === "0" || bytes === undefined || bytes === null) return "0 Bytes";
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   const size = bytes / Math.pow(1024, i);

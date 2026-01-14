@@ -253,12 +253,33 @@ export default LogHistoryPage;
 export function ModalInfoIp({ open, onOpenChange, data }) {
   if (!open) return null;
 
+  function timeFormat() {
+  if (!data?.latest_log_datetime) return "";
+
+  // buat Date dari UTC
+  const date = new Date(data.latest_log_datetime);
+
+  // konversi ke Jakarta (UTC+7)
+  const jakartaOffset = 7 * 60; // menit
+  const jakartaDate = new Date(date.getTime() + jakartaOffset * 60 * 1000);
+
+  // format manual YYYY-MM-DD HH:mm WIB
+  const year = jakartaDate.getFullYear();
+  const month = String(jakartaDate.getMonth() + 1).padStart(2, "0");
+  const day = String(jakartaDate.getDate()).padStart(2, "0");
+  const hours = String(jakartaDate.getHours()).padStart(2, "0");
+  const minutes = String(jakartaDate.getMinutes()).padStart(2, "0");
+
+  return `Asia/Jakarta (UTC+7) ${year}-${month}-${day} ${hours}:${minutes} WIB`;
+}
+
+
   return (
     <DialogModal open={open} onOpenChange={onOpenChange}>
       <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-2xl">
         <DialogModalHeader>
-          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[26px] text-[#1B2E48]">
-            API Base URL Detail
+          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+            IP Address Detail
           </DialogModalTitle>
 
           <div className="overflow-y-auto">
@@ -286,12 +307,19 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
 
                     <tr>
                       <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
+                        Latitude / Longitude (Estimation):
+                      </td>
+                      <td className="py-2 px-4 text-[16px] text-black">
+                        {data?.latitude ?? "-"} , {data?.longitude ?? "-"}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
                         Time Zone & Local Time:
                       </td>
                       <td className="py-2 px-4 text-[16px] text-black">
-                        {data?.latest_log_datetime
-                        ? formatLastSeen(data?.latest_log_datetime, null)
-                        : "-"}
+                        {timeFormat()}
                       </td>
                     </tr>
 
@@ -306,7 +334,7 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
 
                     <tr>
                       <td className="py-2 px-4 font-semibold text-[#1B2E48] text-[16px] whitespace-nowrap align-top">
-                        ISP:
+                        ISP / Organization:
                       </td>
                       <td className="py-2 px-4 text-[16px] text-black leading-relaxed">
                         {data?.isp || "-"}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "@radix-ui/react-popover";
 import Info from "@assets/info.svg";
-import { formatDatetime, getLabelByIdentifier } from "@/Common/Utils";
+import { formatDatetime, formatFileSize, getLabelByIdentifier } from "@/Common/Utils";
 
 const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [], types = [] }) => {
   const [open, setOpen] = useState(false);
@@ -88,7 +88,7 @@ const FileInfoPopper = ({ file, changeFile, eventInfoModal, closeMenu, paths = [
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Size:</td>
-                  <td className="font-medium">{file?.size || ""}</td>
+                  <td className="font-medium">{formatFileSize(file?.size)}</td>
                 </tr>
                 <tr>
                   <td className="text-gray-500 text-right pr-3">Where:</td>

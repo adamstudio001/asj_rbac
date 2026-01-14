@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/Components/ui/Dialog";
+import { formatFileSize } from "@/Common/Utils";
 
 function GetInfoButton({ file, onOpenDialog_ }) {
   const [open, setOpen] = useState(false);
@@ -52,7 +53,7 @@ function GetInfoButton({ file, onOpenDialog_ }) {
                       </p>
                       <p>
                         <span className="font-medium text-gray-500">Size:</span>{" "}
-                        {file.fileSize ? `${file.fileSize} bytes` : "-"}
+                        {file.fileSize ? formatFileSize(file.fileSize) : "-"}
                       </p>
                       <p>
                         <span className="font-medium text-gray-500">Modified:</span>{" "}
