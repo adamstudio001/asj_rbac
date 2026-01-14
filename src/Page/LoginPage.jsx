@@ -93,7 +93,7 @@ function LoginContent() {
           full_name: body.data.full_name,
           email: body.data.email,
           company: body.data.company,
-          expires_at: import.meta.env.VITE_SOURCE=="fake"? new Date(Date.now() + 2 * 60 * 1000):body.data.auth.expires_at,
+          expires_at: body.data.auth.expires_at, //import.meta.env.VITE_SOURCE=="fake"? new Date(Date.now() + 2 * 60 * 1000):body.data.auth.expires_at
           admin_access: body.data.has_admin_access_status? 1:0, 
           company_access: body.data.has_company_access_status? 1:0,
           user_access: body.data.has_user_access_status? 1:0,
