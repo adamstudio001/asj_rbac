@@ -563,7 +563,7 @@ export function ModalViewUser({
                   <div className="space-y-6">
                     <div className="flex flex-col gap-6">
                       <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Empploye ID:</b>
+                        <b className="min-w-[15cqi] font-bold text-black">Employee ID:</b>
                         <p className="text-black text-sm font-normal">{data?.employment?.[0]?.employee_id ?? ""}</p>
                       </div>
                       <div className="inline-flex">
@@ -571,7 +571,7 @@ export function ModalViewUser({
                         <p className="text-black text-sm font-normal">{renderValue(data, "division")}</p>
                       </div>
                       <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Work Location / Branch::</b>
+                        <b className="min-w-[15cqi] font-bold text-black">Work Location / Branch:</b>
                         <p className="text-black text-sm font-normal">{renderValue(data, "branch")}</p>
                       </div>
                       <div className="inline-flex">
