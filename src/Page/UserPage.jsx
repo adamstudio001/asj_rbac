@@ -1077,7 +1077,7 @@ export function ModalUser({
                               disabled={mode !== "create"}
                               type={showPasswordUser ? "text" : "password"}
                               className={cn(
-                                "flex h-12 w-full rounded-md border border-black bg-transparent px-3 pr-10 text-sm text-[#1B2E48] outline-none transition focus:border-blue-500",
+                                "flex h-12 w-full rounded-md border border-[#E2E2E2] bg-transparent px-3 pr-10 text-sm text-[#1B2E48] outline-none transition focus-visible:border-black",
                                 errors.password &&
                                   "border-red-500 focus:border-red-500"
                               )}

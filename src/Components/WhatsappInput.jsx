@@ -13,7 +13,7 @@ function WhatsappInput({ register, errors }) {
         <span
           className={cn(
             "inline-flex items-center rounded-l-md border-t-[1.2px] border-l-[1.2px] border-b-[1.2px] bg-background px-3 text-sm text-muted-foreground transition-colors",
-            focused ? "border-blue-500 text-black" : "border-black text-black"
+            focused ? "border-black text-black" : "border-[#E2E2E2] text-black"
           )}
         >
           +62
