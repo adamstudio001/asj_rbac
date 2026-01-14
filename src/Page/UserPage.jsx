@@ -927,10 +927,19 @@ export function ModalUser({
 
     try {
       console.log(values);
-      const formData = {
+      const formData = mode=="create"? {
         first_name: values.firstName,
         last_name: values.lastName,
         password: values.password,
+        whatsapp_number: values.whatsapp,
+        email: values.email,
+        address: values.address,
+        job_identifier: values.jobPosition?.identifier ?? "",
+        branch_location_identifier: values.branch?.identifier ?? "",
+        employee_id: values.employee_id
+      } : {
+        first_name: values.firstName,
+        last_name: values.lastName,
         whatsapp_number: values.whatsapp,
         email: values.email,
         address: values.address,
@@ -1072,10 +1081,10 @@ export function ModalUser({
                                 errors.password &&
                                   "border-red-500 focus:border-red-500"
                               )}
-                              {...register("password", {
+                              {...register("password", mode=="create"? {
                                 required: "Password is required",
                                 minLength: { value: 6, message: "Min 6 chars" },
-                              })}
+                              }: {})}
                             />
 
                             {/* ICON */}
