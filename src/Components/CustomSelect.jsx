@@ -141,7 +141,7 @@ const CustomSelect = React.memo(function CustomSelect({
                     {isSelected ? (
                       <div className="relative w-5 h-5">
                         <div className="absolute inset-0 rounded-full border-2 border-black bg-white"></div>
-                        <div className="absolute inset-[4px] rounded-full bg-black"></div>
+                        <div className="absolute inset-[4px] rounded-full border-2 border-black bg-[#424242]"></div>
                       </div>
                     ) : (
                       <div className="w-5 h-5 border-2 border-black rounded-full"></div>
