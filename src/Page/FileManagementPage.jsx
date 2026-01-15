@@ -137,12 +137,16 @@ const FileManagementContent = () => {
   }, [textRef]);
 
   async function loadData() {
+    const selectedItem = listVisible.find((v) => v.is_default);
+    const selectedIdentifier = selectedItem?.identifier ?? "";
+
+    if(isEmpty(selectedIdentifier)){
+      return;
+    }
+
     if (isExpired()) {
       await refreshSession();
     }
-
-    const selectedItem = listVisible.find((v) => v.is_default);
-    const selectedIdentifier = selectedItem?.identifier ?? "";
 
     const baseUrl =
       isAdminAccess() || isCompanyAccess()
@@ -1054,11 +1058,13 @@ export function ModalFolder({
         }
       } else {
         if (isRoot) {
-          if (isEdit) {
-            alert("fitur edit root folder belum ada");
-          } else {
+          // if (isEdit) {
+          //   setLoading(true);
+          //   alert("fitur edit root folder belum ada");
+          //   return;
+          // } else {
             url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/root/folder`;
-          }
+          // }
         } else {
           if (isEdit) {
             url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}`;
