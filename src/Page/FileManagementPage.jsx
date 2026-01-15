@@ -143,7 +143,7 @@ const FileManagementContent = () => {
     if(isEmpty(selectedIdentifier)){
       return;
     }
-
+    
     if (isExpired()) {
       await refreshSession();
     }
@@ -1058,7 +1058,7 @@ export function ModalFolder({
         }
       } else {
         if (isRoot) {
-          // if (isEdit) {
+          // if (isEdit) { 
           //   setLoading(true);
           //   alert("fitur edit root folder belum ada");
           //   return;
