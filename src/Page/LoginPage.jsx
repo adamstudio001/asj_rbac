@@ -86,8 +86,8 @@ function LoginContent() {
       } else if (body.data && body.data.auth) {
         const auth = body.data.auth;
 
-        const resRoles = await axios.get("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/role-with-user",{headers: { Authorization: `Bearer ${auth.token}` },});
-        const dataRoles = resRoles.data?.data ?? [];
+        // const resRoles = await axios.get("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/role-with-user",{headers: { Authorization: `Bearer ${auth.token}` },});
+        // const dataRoles = resRoles.data?.data ?? [];
 
         const user = {
           full_name: body.data.full_name,
@@ -97,10 +97,10 @@ function LoginContent() {
           admin_access: body.data.has_admin_access_status? 1:0, 
           company_access: body.data.has_company_access_status? 1:0,
           user_access: body.data.has_user_access_status? 1:0,
-          permissions: getPermissionsByUserId(dataRoles, body.data.id),
+          permissions: getPermissions(body.data),
         };
 
-        //console.log(getPermissionsByUserId(dataRoles, body.data.id))
+        console.log(getPermissions(body.data))
 
         sessionStorage.setItem("info", JSON.stringify(info));
         sessionStorage.setItem("token", auth.token);
@@ -130,16 +130,12 @@ function LoginContent() {
     );
   }
 
-  function getPermissionsByUserId(roles = [], userId) {
+  function getPermissions(user) {
     return [
       ...new Set(
-        roles
-          // ambil role yang employment-nya mengandung userId
-          .filter((role) =>
-            role.employment?.some((e) => e.user_id === userId)
-          )
-          // gabungkan semua permission_list
-          .flatMap((role) => role.permission_list ?? [])
+        user.employment
+          .filter((e) => e.is_active_status)
+          .flatMap((e) => e.role?.permission_list ?? [])
       ),
     ];
   }
