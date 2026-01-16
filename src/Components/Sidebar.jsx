@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
     try {
       // const res = await axios.post("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/logout", {}, {
       //     headers: {
-      //       Authorization: `Bearer ${token}`,
+      //       Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       //     },
       // });
       // const body = res.data;

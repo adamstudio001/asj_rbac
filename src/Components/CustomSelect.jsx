@@ -34,7 +34,7 @@ const CustomSelect = React.memo(function CustomSelect({
     try {
       const res = await axios.get(sourceUrl, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
           },
       });
       const body = res.data;

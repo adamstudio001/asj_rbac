@@ -120,25 +120,25 @@ const RolePermissionContent = () => {
               axios.get(
                 "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role",
                 {
-                  headers: { Authorization: `Bearer ${token}` },
+                  headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
               ),
               axios.get(
                 "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/role-with-user",
                 {
-                  headers: { Authorization: `Bearer ${token}` },
+                  headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
               ),
               axios.get(
                 `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user`, //?page=${page}
                 {
-                  headers: { Authorization: `Bearer ${token}` },
+                  headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
               ),
               axios.get(
                 "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/permission",
                 {
-                  headers: { Authorization: `Bearer ${token}` },
+                  headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
               ),
             ]);

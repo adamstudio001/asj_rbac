@@ -108,7 +108,7 @@ const DashboardContent = () => {
         const [filtersRes, listRes] = await Promise.all([
           axios.get(
             "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-type",
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
           ),
           Promise.resolve({ data: { data: [] } }),
         ]);
@@ -155,7 +155,7 @@ const DashboardContent = () => {
           : `${baseUrlFiles}/storage/${fetchFolderKeys}?order_by[]=name&sort_by[]=asc&name=${searchQuery}&page=${fetchPage}`;
 
         const response = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
         });
 
         const res = response.data;
@@ -399,7 +399,7 @@ const DashboardContent = () => {
       <ModalUpload
         refreshData={() => {}}
         idFolder={folderKeys}
-        token={token}
+        token={sessionStorage.getItem("token")}
         isAdmin={isAdminAccess()}
         isCompany={isCompanyAccess()}
         isUser={isUserAccess()}
@@ -445,7 +445,7 @@ function RecentOpened() {
 
           const res = await axios.get(
             `${baseUrlFiles}/storage/recent-activity`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
           );
 
           const mapped = res.data.data.map((item) => ({

@@ -258,7 +258,7 @@ export function buildHeaders(old, token, isjson = true) {
   }
 
   const base = {
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
     ip_address: old.ip || null,
     country: old.country || null,
     state: old.region || null,

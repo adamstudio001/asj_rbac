@@ -49,7 +49,7 @@ const UserPageContent = () => {
   const { addToast } = useToast();
 
   const [isLoad, setIsLoad] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [page, setPage] = useState(1);
@@ -81,6 +81,7 @@ const UserPageContent = () => {
     }
 
     if (isAdmin) {
+      setError(null);
       setIsLoad(true);
       setTimeout(async () => {
         try {
@@ -88,19 +89,25 @@ const UserPageContent = () => {
             axios.get(
               `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user?page=${page}`,
               {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {
+                  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                },
               }
             ),
             axios.get(
               "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job",
               {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {
+                  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                },
               }
             ),
             axios.get(
               "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location",
               {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {
+                  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                },
               }
             ),
           ]);
@@ -119,19 +126,33 @@ const UserPageContent = () => {
               ? branchesRes.value.data?.data || []
               : [];
 
+          if (
+            isEmpty(usersRes?.value?.data?.success) || 
+            isEmpty(jobsRes?.value?.data?.success) ||
+            isEmpty(branchesRes?.value?.data?.success)
+          ) {
+            throw new Error(
+              "One of the API responses returned unsuccessful status."
+            );
+          }
+
           setUsers(users?.data ?? []);
           setTotalPages(users?.last_page ?? 1);
           setJobs(jobs);
           setBranches(branches);
         } catch (err) {
           console.error(err);
-          addToast("error", "ada masalah pada aplikasi");
+          setError("Terjadi kesalahan saat memuat data.");
         } finally {
           setIsLoad(false);
         }
       }, 1500);
     }
   }
+
+  useEffect(()=>{
+    console.log(error)
+  },[error]);
 
   function getJobPosition(value) {
     if (isEmpty(value)) {
@@ -220,7 +241,8 @@ const UserPageContent = () => {
 
   const hasGrantedButtonEditUser = hasPermission("EDIT_USER") || isAdmin;
 
-  const hasGrantedButtonResetUser = hasPermission("RESET_PASSWORD_USER") || isAdmin;
+  const hasGrantedButtonResetUser =
+    hasPermission("RESET_PASSWORD_USER") || isAdmin;
 
   const hasGrantedButtonDeleteUser = hasPermission("DELETE_USER") || isAdmin;
 
@@ -308,7 +330,7 @@ const UserPageContent = () => {
                               focus:outline-none focus:ring-2 focus:ring-gray-400
                               transition-all duration-150
                             "
-                  onClick={() => loadData()}
+                  onClick={() => window.location.reload()}
                 >
                   Klik muat ulang
                 </button>
@@ -726,7 +748,7 @@ export function ModalResetPassword({
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
           },
         }
       );

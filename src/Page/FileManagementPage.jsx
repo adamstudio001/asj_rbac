@@ -166,6 +166,7 @@ const FileManagementContent = () => {
       : null;
 
     setIsLoad(true);
+    setError(null);
 
     setTimeout(async () => {
       try {
@@ -173,15 +174,15 @@ const FileManagementContent = () => {
         const promises = [
           axios.get(
             "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-type",
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
           ),
-          axios.get(url, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(url, { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }),
         ];
 
         if (hasFolder) {
           promises.push(
             axios.get(urlBreadcrumb, {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
             })
           );
         } else {
@@ -234,7 +235,7 @@ const FileManagementContent = () => {
       try {
         // --- Buat array promise dinamis ---
         const res = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
         });
         const body = res.data;
 
@@ -428,7 +429,7 @@ const FileManagementContent = () => {
       );
       console.log(response, {
         responseType: "blob",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
       });
 
       if (response?.success) {
@@ -436,7 +437,7 @@ const FileManagementContent = () => {
 
         const blobResponse = await axios.get(urlTarget, {
           responseType: "blob",
-          // headers: { Authorization: `Bearer ${token}` },
+          // headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
         });
 
         const blob = new Blob([blobResponse.data]);
@@ -993,7 +994,7 @@ const FileManagementContent = () => {
       <ModalUpload
         refreshData={() => loadData()}
         idFolder={folderKeys}
-        token={token}
+        token={sessionStorage.getItem("token")}
         hasPermission={
           hasPermission("UPLOAD_FILE") || isAdmin
         }

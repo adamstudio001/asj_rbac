@@ -58,7 +58,7 @@ const LogHistoryPage = () => {
           `${baseUrl}/log?page=${page}&order_by[]=full_name&sort_by[]=ASC`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
             },
           }
         );
