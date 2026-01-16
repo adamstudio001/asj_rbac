@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import Navbar from "@src/Components/Navbar";
 import Pagination from "@src/Components/Pagination";
 import { useSearch } from "@src/Providers/SearchProvider";
-import { IoIosArrowDown } from "react-icons/io";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
 import {
   buildHeaders,

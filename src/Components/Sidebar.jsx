@@ -4,12 +4,10 @@ import { LiaHomeSolid } from "react-icons/lia";
 import Logo from "@assets/logo.png";
 import { FaRegUser } from "react-icons/fa6";
 import { BsPersonLock } from "react-icons/bs";
-import { GoGear } from "react-icons/go";
 import { Link } from "react-router-dom";
 import { IoFileTrayStacked } from "react-icons/io5";
 import { useAuth } from "@/Providers/AuthProvider";
 import { useState } from "react";
-import axios from "axios";
 import { useToast } from "@/Providers/ToastProvider";
 
 const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
@@ -18,7 +16,8 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const noactive = "bg-[#F8F8F8] text-[#515151]";
   const currentPath = location.pathname;
 
-  const { logout, token, hasPermission, isAdminAccess, isCompanyAccess } = useAuth();
+  const { logout, token, hasPermission, isAdminAccess, isCompanyAccess } =
+    useAuth();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +31,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
       //     headers: {
       //       Authorization: `Bearer ${token}`,
       //     },
-      // }); 
+      // });
       // const body = res.data;
       // console.log(body)
 
@@ -55,6 +54,10 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
     }
   };
 
+  const isAdmin = isAdminAccess() || isCompanyAccess();
+
+  const hasGrantedShowMenuLog = hasPermission("VIEW_LOG_HISTORY") || isAdmin;
+
   return (
     <>
       {/* Sidebar */}
@@ -66,7 +69,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
         <div className="flex flex-col">
           {/* Sidebar Content */}
           <div className="flex justify-center items-center gap-3 mb-4">
-            <img src={Logo} alt="logo" className='w-[120px] aspect-square'/>
+            <img src={Logo} alt="logo" className="w-[120px] aspect-square" />
           </div>
 
           {/* Sidebar Menu */}
@@ -74,62 +77,93 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
             <li>
               <Link
                 to="/dashboard"
-                className={`flex items-center gap-3 ${["/dashboard"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
+                className={`flex items-center gap-3 ${
+                  ["/dashboard"].some((p) => currentPath.startsWith(p))
+                    ? active
+                    : noactive
+                } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                 onClick={toggleSidebar} // Tutup sidebar saat di mobile
               >
                 <LiaHomeSolid size={24} />
-                <span className={`${isCollapsed ? "hidden" : "block"}`}>Dashboard</span>
+                <span className={`${isCollapsed ? "hidden" : "block"}`}>
+                  Dashboard
+                </span>
               </Link>
             </li>
             <li>
               <Link
                 to="/filemanager"
-                className={`flex items-center gap-3 ${["/filemanager"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
+                className={`flex items-center gap-3 ${
+                  ["/filemanager"].some((p) => currentPath.startsWith(p))
+                    ? active
+                    : noactive
+                } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                 onClick={toggleSidebar} // Tutup sidebar saat di mobile
               >
                 <IoFileTrayStacked size={18} />
-                <span className={`${isCollapsed ? "hidden" : "block"}`}>File Management</span>
+                <span className={`${isCollapsed ? "hidden" : "block"}`}>
+                  File Management
+                </span>
               </Link>
             </li>
-            {
-            (isAdminAccess() || isCompanyAccess())?
-            <>
+            {isAdmin ? (
+              <>
+                <li>
+                  <Link
+                    to="/users"
+                    className={`flex items-center gap-3 ${
+                      ["/users"].some((p) => currentPath.startsWith(p))
+                        ? active
+                        : noactive
+                    } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
+                    onClick={toggleSidebar} // Tutup sidebar saat di mobile
+                  >
+                    <FaRegUser size={18} />
+                    <span className={`${isCollapsed ? "hidden" : "block"}`}>
+                      Users
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/role_permissions"
+                    className={`flex items-center gap-3 ${
+                      ["/role_permissions"].some((p) =>
+                        currentPath.startsWith(p)
+                      )
+                        ? active
+                        : noactive
+                    } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
+                    onClick={toggleSidebar} // Tutup sidebar saat di mobile
+                  >
+                    <BsPersonLock size={24} />
+                    <span className={`${isCollapsed ? "hidden" : "block"}`}>
+                      Role & Permissions
+                    </span>
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <></>
+            )}
+            {hasGrantedShowMenuLog && (
               <li>
                 <Link
-                  to="/users"
-                  className={`flex items-center gap-3 ${["/users"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
+                  to="/logs"
+                  className={`flex items-center gap-3 ${
+                    ["/logs"].some((p) => currentPath.startsWith(p))
+                      ? active
+                      : noactive
+                  } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                   onClick={toggleSidebar} // Tutup sidebar saat di mobile
                 >
-                  <FaRegUser size={18} />
-                  <span className={`${isCollapsed ? "hidden" : "block"}`}>Users</span>
+                  <IoNotificationsOutline size={24} />
+                  <span className={`${isCollapsed ? "hidden" : "block"}`}>
+                    Logs History
+                  </span>
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/role_permissions"
-                  className={`flex items-center gap-3 ${["/role_permissions"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
-                  onClick={toggleSidebar} // Tutup sidebar saat di mobile
-                >
-                  <BsPersonLock size={24} />
-                  <span className={`${isCollapsed ? "hidden" : "block"}`}>Role & Permissions</span>
-                </Link>
-              </li>
-            </> : <></>
-            }
-            {
-              (
-                hasPermission("VIEW_LOG_HISTORY") || 
-                (isAdminAccess() || isCompanyAccess())
-              ) && <li>
-              <Link
-                to="/logs"
-                className={`flex items-center gap-3 ${["/logs"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
-                onClick={toggleSidebar} // Tutup sidebar saat di mobile
-              >
-                <IoNotificationsOutline size={24} />
-                <span className={`${isCollapsed ? "hidden" : "block"}`}>Logs History</span>
-              </Link>
-            </li>}
+            )}
             {/* <li>
               <Link
                 to="/settings"
@@ -144,9 +178,19 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
         </div>
 
         <div className="flex flex-col flex-wrap gap-2">
-          <hr className="border border-t border-gray-300"/>
-          <button disabled={loading} className={`flex items-center gap-3 hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition text-venter`}>
-            <span className={`w-full text-center ${isCollapsed ? "hidden" : "block"}`} onClick={()=>onLogout()}>{loading? "Loading...":"Logout"}</span>
+          <hr className="border border-t border-gray-300" />
+          <button
+            disabled={loading}
+            className={`flex items-center gap-3 hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition text-venter`}
+          >
+            <span
+              className={`w-full text-center ${
+                isCollapsed ? "hidden" : "block"
+              }`}
+              onClick={() => onLogout()}
+            >
+              {loading ? "Loading..." : "Logout"}
+            </span>
           </button>
         </div>
       </div>
