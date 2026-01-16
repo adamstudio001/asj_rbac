@@ -116,7 +116,11 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
               </li>
             </> : <></>
             }
-            {hasPermission("VIEW_LOG_HISTORY") && <li>
+            {
+              (
+                hasPermission("VIEW_LOG_HISTORY") || 
+                (isAdminAccess() || isCompanyAccess())
+              ) && <li>
               <Link
                 to="/logs"
                 className={`flex items-center gap-3 ${["/logs"].some((p) => currentPath.startsWith(p))? active:noactive} hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}

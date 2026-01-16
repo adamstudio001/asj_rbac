@@ -113,6 +113,8 @@ const FileManagementContent = () => {
   const [isLoadVisible, setIsLoadVisible] = useState(false);
   const [listVisible, setListVisible] = useState([]);
 
+  const isAdmin = isAdminAccess() || isCompanyAccess();
+
   useEffect(() => {
     if (!textRef.current) return;
 
@@ -140,16 +142,16 @@ const FileManagementContent = () => {
     const selectedItem = listVisible.find((v) => v.is_default);
     const selectedIdentifier = selectedItem?.identifier ?? "";
 
-    if(isEmpty(selectedIdentifier)){
+    if (isEmpty(selectedIdentifier)) {
       return;
     }
-    
+
     if (isExpired()) {
       await refreshSession();
     }
 
     const baseUrl =
-      isAdminAccess() || isCompanyAccess()
+      isAdmin
         ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
         : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
 
@@ -274,13 +276,13 @@ const FileManagementContent = () => {
 
     let urlDelete = null; //[check] masih belum bedain antara delete folder dengan file
     if (fileSelected.type_identifier.toLowerCase() == "folder") {
-      if (isAdminAccess() || isCompanyAccess()) {
+      if (isAdmin) {
         urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
       } else {
         urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
       }
     } else {
-      if (isAdminAccess() || isCompanyAccess()) {
+      if (isAdmin) {
         urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/file/${fileSelected.id}`;
       } else {
         urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/file/${fileSelected.id}`;
@@ -302,7 +304,7 @@ const FileManagementContent = () => {
         addToast("success", response?.success);
         loadData();
       } else {
-        addToast("errors", response?.error);
+        addToast("error", response?.error);
       }
       console.log(response);
     } catch (err) {
@@ -328,12 +330,71 @@ const FileManagementContent = () => {
     }
   }
 
+  function hasGrantedDownloadHandler(file) {
+    return (
+      file?.visibility_identifier != "GENERAL" &&
+      !hasPermission("DOWNLOAD_SECRET_FILE") &&
+      isUserAccess()
+    );
+  }
+
+  const hasGrantedButtonDownload =
+    hasPermission("DOWNLOAD_FILE") || isAdmin;
+
+  const hasGrantedInfoPopper =
+    hasPermission("GET_INFO_FILE_FOLDER") ||
+    isAdminAccess() ||
+    isCompanyAccess();
+
+  const hasGrantedButtonRelete =
+    hasPermission("REMOVE_FILE_FOLDER") || isAdmin;
+
+  function hasGrantedCheckboxFilter(visible) {
+    const isGeneral = visible?.identifier == "GENERAL";
+    const isSecret =
+      visible?.identifier == "SECRET" &&
+      hasPermission("VIEW_SECRET_FOLDER_FILE");
+    const isSuperSecret =
+      visible?.identifier == "SUPER_SECRET" &&
+      hasPermission("VIEW_SUPER_SECRET_FOLDER_FILE");
+
+    return isAdmin || isGeneral || isSecret || isSuperSecret;
+  }
+
+  const hasGrantedButtonUploadFile = hasPermission("UPLOAD_FILE") ||
+                  isAdminAccess() ||
+                  isCompanyAccess();
+
+  function renderCreateFolder() {
+    const hasGrantedInRoot = isRoot && hasPermission("CREATE_FOLDER");
+    const hasGrantedInFolder = !isRoot && hasPermission("CREATE_FOLDER");
+
+    if (isRoot && isAdmin) {
+      return <></>;
+    }
+
+    return (
+      (hasGrantedInRoot || hasGrantedInFolder) && (
+        <button
+          onClick={() => {
+            setIsModalFolderOpen(true);
+            setFileSelected(null);
+          }}
+          className="flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
+        >
+          <img src={FolderCreate} width={18} />
+          Create Folder
+        </button>
+      )
+    );
+  }
+
   async function downloadHandler(file) {
     if (!file) {
       addToast("error", "belum pilih file/folder yang di download");
       return;
     }
-    if(file?.visibility_identifier!="GENERAL" && !hasPermission("DOWNLOAD_SECRET_FILE")){
+    if (hasGrantedDownloadHandler(file)) {
       addToast("error", "anda tidak memiliki akses DOWNLOAD_SECRET_FILE");
       return;
     }
@@ -343,7 +404,7 @@ const FileManagementContent = () => {
     }
 
     const urlDownload =
-      isAdminAccess() || isCompanyAccess()
+      isAdmin
         ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${file.id}/url-download`
         : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${file.id}/url-download`;
 
@@ -545,7 +606,7 @@ const FileManagementContent = () => {
                   >
                     <img src={Copy} alt="copy" /> Copy
                   </button>
-                  {hasPermission("DOWNLOAD_FILE") && (
+                  {hasGrantedButtonDownload && (
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                       onClick={() => downloadHandler(file)}
@@ -559,7 +620,7 @@ const FileManagementContent = () => {
                   >
                     <img src={Rename} alt="Rename" /> Rename
                   </button>
-                  {hasPermission("GET_INFO_FILE_FOLDER") && (
+                  {hasGrantedInfoPopper && (
                     <FileInfoPopper
                       file={file}
                       changeFile={setSelectedFile}
@@ -568,7 +629,7 @@ const FileManagementContent = () => {
                       types={itemType}
                     />
                   )}
-                  {hasPermission("REMOVE_FILE_FOLDER") && (
+                  {hasGrantedButtonRelete && (
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                       onClick={() => {
@@ -639,11 +700,7 @@ const FileManagementContent = () => {
               </>
             ) : (
               listVisible.map((visible, index) =>
-                visible?.identifier == "GENERAL" ||
-                (visible?.identifier == "SECRET" &&
-                  hasPermission("VIEW_SECRET_FOLDER_FILE")) ||
-                (visible?.identifier == "SUPER_SECRET" &&
-                  hasPermission("VIEW_SUPER_SECRET_FOLDER_FILE")) ? (
+                hasGrantedCheckboxFilter(visible) ? (
                   <>
                     <label
                       key={visible.id ?? index}
@@ -677,19 +734,7 @@ const FileManagementContent = () => {
             <div
               className={`max-w-[24rem]:w-full flex flex-wrap items-center gap-4`}
             >
-              {((isRoot && hasPermission("CREATE_FOLDER")) ||
-                (!isRoot && hasPermission("CREATE_FOLDER"))) && (
-                <button //!isRoot || (isUserAccess() || isCompanyAccess())
-                  onClick={() => {
-                    setIsModalFolderOpen(true);
-                    setFileSelected(null);
-                  }}
-                  className="flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
-                >
-                  <img src={FolderCreate} width={18} />
-                  Create Folder
-                </button>
-              )}
+              {renderCreateFolder()}
               {/* {isAdminAccess &&  */}
               <button
                 onClick={() => {}}
@@ -699,19 +744,19 @@ const FileManagementContent = () => {
                 Restore File
               </button>
               {/* } */}
-              {folderKeys && hasPermission("UPLOAD_FILE") && (
-                <button
-                  onClick={() => {
-                    setIsModalOpen(true);
-                  }}
-                  className={`${
-                    isWrapped ? "w-full" : "max-w-[24rem]"
-                  } flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
-                >
-                  <img src={UploadFile} width={18} />
-                  Upload file
-                </button>
-              )}
+              {folderKeys && hasGrantedButtonUploadFile && (
+                  <button
+                    onClick={() => {
+                      setIsModalOpen(true);
+                    }}
+                    className={`${
+                      isWrapped ? "w-full" : "max-w-[24rem]"
+                    } flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
+                  >
+                    <img src={UploadFile} width={18} />
+                    Upload file
+                  </button>
+                )}
             </div>
 
             {/* <div className="flex items-center gap-2">
@@ -876,7 +921,7 @@ const FileManagementContent = () => {
                 </table>
               </div>
             </div>
-            
+
             <hr className="h-px my-8 bg-[#DDDDDD] border-0"></hr>
 
             {/* More Info Section */}
@@ -950,7 +995,9 @@ const FileManagementContent = () => {
         refreshData={() => loadData()}
         idFolder={folderKeys}
         token={token}
-        hasPermission={hasPermission("UPLOAD_FILE")}
+        hasPermission={
+          hasPermission("UPLOAD_FILE") || isAdmin
+        }
         initialFiles={files}
         isAdmin={isAdminAccess()}
         isCompany={isCompanyAccess()}
@@ -994,8 +1041,19 @@ export function ModalFolder({
   extraAction = function () {},
   listVisible = [],
 }) {
+  const { addToast } = useToast();
+  const {
+    token,
+    hasPermission,
+    isAdminAccess,
+    isCompanyAccess,
+    isExpired,
+    refreshSession,
+  } = useAuth();
+
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState(null);
+  const isAdmin = isAdminAccess() || isCompanyAccess();
 
   const {
     register,
@@ -1009,15 +1067,6 @@ export function ModalFolder({
     },
   });
 
-  const { addToast } = useToast();
-  const {
-    token,
-    hasPermission,
-    isAdminAccess,
-    isCompanyAccess,
-    isExpired,
-    refreshSession,
-  } = useAuth();
   const isEdit = mode == "edit";
   const isRoot =
     !folderKeys ||
@@ -1043,14 +1092,14 @@ export function ModalFolder({
         folder_name: values.folder_name,
         visibility_identifier: category ?? "GENERAL",
       };
-      if (!isEdit && !hasPermission("CREATE_FOLDER")) {
+      if (!isEdit && !hasPermission("CREATE_FOLDER") && isUserAccess()) {
         addToast("error", "anda tidak memiliki permission CREATE_FOLDER");
         setLoading(false);
         return;
       }
 
       let url = null;
-      if (isAdminAccess() || isCompanyAccess()) {
+      if (isAdmin) {
         if (isEdit) {
           url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`;
         } else {
@@ -1058,12 +1107,12 @@ export function ModalFolder({
         }
       } else {
         if (isRoot) {
-          // if (isEdit) { 
+          // if (isEdit) {
           //   setLoading(true);
           //   alert("fitur edit root folder belum ada");
           //   return;
           // } else {
-            url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/root/folder`;
+          url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/root/folder`;
           // }
         } else {
           if (isEdit) {
@@ -1172,8 +1221,19 @@ export function ModalRenameFile({
   extraAction = function () {},
   listVisible = [],
 }) {
+  const { addToast } = useToast();
+  const {
+    token,
+    hasPermission,
+    isAdminAccess,
+    isCompanyAccess,
+    isExpired,
+    refreshSession,
+  } = useAuth();
+
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState(null);
+  const isAdmin = isAdminAccess() || isCompanyAccess();
 
   const {
     register,
@@ -1186,16 +1246,6 @@ export function ModalRenameFile({
       file_name: data?.name ?? "",
     },
   });
-
-  const { addToast } = useToast();
-  const {
-    token,
-    hasPermission,
-    isAdminAccess,
-    isCompanyAccess,
-    isExpired,
-    refreshSession,
-  } = useAuth();
 
   useEffect(() => {
     reset({
@@ -1217,7 +1267,7 @@ export function ModalRenameFile({
         visibility_identifier: category ?? "GENERAL",
       };
       const url =
-        isAdminAccess() || isCompanyAccess()
+        isAdmin
           ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/file/${data.id}`
           : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/file/${data.id}`;
 

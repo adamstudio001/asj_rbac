@@ -18,7 +18,15 @@ import axios from "axios";
 const LogHistoryPage = () => {
   const { addToast } = useToast();
   const { search, setSearch } = useSearch();
-  const { token, hasPermission, isAdminAccess, isCompanyAccess, isUserAccess, isExpired, refreshSession } = useAuth();
+  const {
+    token,
+    hasPermission,
+    isAdminAccess,
+    isCompanyAccess,
+    isUserAccess,
+    isExpired,
+    refreshSession,
+  } = useAuth();
 
   const [_, setTick] = useState(0);
   const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
@@ -30,44 +38,48 @@ const LogHistoryPage = () => {
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const isAdmin = isAdminAccess() || isCompanyAccess();
 
   // Base URL sesuai role
   const baseUrl =
-    isAdminAccess() || isCompanyAccess()
+    isAdmin
       ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
       : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
 
   const fetchLogs = async () => {
-    setTimeout(async ()=>{
+    setTimeout(async () => {
       try {
         if (isExpired()) await refreshSession();
 
         setLoading(true);
         setError("");
 
-        const response = await axios.get(`${baseUrl}/log?page=${page}&order_by[]=full_name&sort_by[]=ASC`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          `${baseUrl}/log?page=${page}&order_by[]=full_name&sort_by[]=ASC`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const res = response.data;
         if (res?.success) {
           setLogs(res.data || []);
           setTotalPages(res?.last_page ?? 1);
-        } else{
+        } else {
           addToast("error", res?.error);
         }
       } catch (err) {
         addToast(
           "error",
           err?.response?.data?.error ||
-          err?.message ||
-          "Terjadi masalah saat mengambil file."
+            err?.message ||
+            "Terjadi masalah saat mengambil file."
         );
       } finally {
         setLoading(false);
       }
-    },1500);
+    }, 1500);
   };
 
   useEffect(() => {
@@ -98,28 +110,46 @@ const LogHistoryPage = () => {
   };
 
   function renderTable() {
-    if(loading){
-      return <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-[#f8f8f8]">
-            <tr className="border border-gray-200">
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">User</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">Browser</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">Operating System</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">Last Activity</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">Division</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">IP Address</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">City</th>
-            </tr>
-          </thead>
+    const hasGrantedShowIp =
+      hasPermission("VIEW_IP_ADDRESS") || isAdmin;
 
-          <tbody>
-            {error? 
-                    <tr>
-                      <td colSpan={7} className="text-center flex-col gap-2">
-                        <p>{error}</p>
-                        <button
-                            className="
+    if (loading) {
+      return (
+        <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#f8f8f8]">
+              <tr className="border border-gray-200">
+                <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                  User
+                </th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                  Browser
+                </th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                  Operating System
+                </th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                  Last Activity
+                </th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                  Division
+                </th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                  IP Address
+                </th>
+                <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                  City
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {error ? (
+                <tr>
+                  <td colSpan={7} className="text-center flex-col gap-2">
+                    <p>{error}</p>
+                    <button
+                      className="
                               px-3 py-1
                               rounded
                               border-0
@@ -128,14 +158,20 @@ const LogHistoryPage = () => {
                               focus:outline-none focus:ring-2 focus:ring-gray-400
                               transition-all duration-150
                             "
-                            onClick={()=>loadData()}
-                          >
-                            Klik muat ulang
-                          </button>
-                      </td>
-                    </tr> : 
-                    Array(3).fill(null).map((_, i) => (
-                    <tr key={i} className="hover:bg-gray-50 transition border-b border-gray-200">
+                      onClick={() => loadData()}
+                    >
+                      Klik muat ulang
+                    </button>
+                  </td>
+                </tr>
+              ) : (
+                Array(3)
+                  .fill(null)
+                  .map((_, i) => (
+                    <tr
+                      key={i}
+                      className="hover:bg-gray-50 transition border-b border-gray-200"
+                    >
                       <td className="px-4 py-3">
                         <div className="skeleton h-4 w-full"></div>
                       </td>
@@ -146,7 +182,7 @@ const LogHistoryPage = () => {
                         <div className="skeleton h-4 w-full"></div>
                       </td>
                       <td className="px-4 py-3">
-                      <div className="skeleton h-4 w-full"></div>
+                        <div className="skeleton h-4 w-full"></div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="skeleton h-4 w-full"></div>
@@ -158,32 +194,52 @@ const LogHistoryPage = () => {
                         <div className="skeleton h-4 w-full"></div>
                       </td>
                     </tr>
-                    ))
-              }
-          </tbody>
-        </table>
-      </div>;
+                  ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      );
     }
     return (
       <div className="w-full overflow-x-scroll scroll-custom rounded-lg">
         <table className="w-full text-left text-sm">
           <thead className="bg-[#f8f8f8]">
             <tr className="border border-gray-200">
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">User</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">Browser</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">Operating System</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">Last Activity</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">Division</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">IP Address</th>
-              <th className="px-4 py-3 font-inter font-medium text-[14px]">City</th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                User
+              </th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                Browser
+              </th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                Operating System
+              </th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                Last Activity
+              </th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                Division
+              </th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                IP Address
+              </th>
+              <th className="px-4 py-3 font-inter font-medium text-[14px]">
+                City
+              </th>
             </tr>
           </thead>
 
           <tbody>
             {filteredLogs.map((log) => (
-              <tr key={log.id} className="hover:bg-gray-50 transition border-b border-gray-200">
+              <tr
+                key={log.id}
+                className="hover:bg-gray-50 transition border-b border-gray-200"
+              >
                 <td className="px-4 py-3">
-                  <EllipsisTooltip className={"w-[200px]"}>{log.full_name}</EllipsisTooltip>
+                  <EllipsisTooltip className={"w-[200px]"}>
+                    {log.full_name}
+                  </EllipsisTooltip>
                 </td>
 
                 <td className="px-4 py-3">{log.browser_name || "-"}</td>
@@ -198,10 +254,13 @@ const LogHistoryPage = () => {
                 <td className="px-4 py-3">{log.job_identifier || "-"}</td>
 
                 <td className="px-4 py-3 text-[#007BFF]">
-                  {hasPermission("VIEW_IP_ADDRESS")? 
-                  <button onClick={() => openModal(log)}>
-                    {log.ip_address || "-"}
-                  </button> : "***.***.***.***"}
+                  {hasGrantedShowIp ? (
+                    <button onClick={() => openModal(log)}>
+                      {log.ip_address || "-"}
+                    </button>
+                  ) : (
+                    "***.***.***.***"
+                  )}
                 </td>
 
                 <td className="px-4 py-3">{log.city || "-"}</td>
@@ -213,21 +272,25 @@ const LogHistoryPage = () => {
     );
   }
 
-  function renderPaging(){
-        if(loading){
-          return  <div className="flex items-center justify-center">
-            <div className="skeleton h-4 w-32 mt-8"></div>
-          </div>;
-        } else if(error){
-          return <></>;
-        }
-    
-        return <Pagination
-            className="mt-8"
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
+  function renderPaging() {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center">
+          <div className="skeleton h-4 w-32 mt-8"></div>
+        </div>
+      );
+    } else if (error) {
+      return <></>;
+    }
+
+    return (
+      <Pagination
+        className="mt-8"
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
+    );
   }
 
   return (
@@ -239,11 +302,13 @@ const LogHistoryPage = () => {
         {renderPaging()}
       </main>
 
-      {(!loading && !error) && <ModalInfoIp
-        open={isModalDetailOpen}
-        onOpenChange={setIsModalDetailOpen}
-        data={modalData}
-      />}
+      {!loading && !error && (
+        <ModalInfoIp
+          open={isModalDetailOpen}
+          onOpenChange={setIsModalDetailOpen}
+          data={modalData}
+        />
+      )}
     </>
   );
 };
@@ -254,25 +319,24 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
   if (!open) return null;
 
   function timeFormat() {
-  if (!data?.latest_log_datetime) return "";
+    if (!data?.latest_log_datetime) return "";
 
-  // buat Date dari UTC
-  const date = new Date(data.latest_log_datetime);
+    // buat Date dari UTC
+    const date = new Date(data.latest_log_datetime);
 
-  // konversi ke Jakarta (UTC+7)
-  const jakartaOffset = 7 * 60; // menit
-  const jakartaDate = new Date(date.getTime() + jakartaOffset * 60 * 1000);
+    // konversi ke Jakarta (UTC+7)
+    const jakartaOffset = 7 * 60; // menit
+    const jakartaDate = new Date(date.getTime() + jakartaOffset * 60 * 1000);
 
-  // format manual YYYY-MM-DD HH:mm WIB
-  const year = jakartaDate.getFullYear();
-  const month = String(jakartaDate.getMonth() + 1).padStart(2, "0");
-  const day = String(jakartaDate.getDate()).padStart(2, "0");
-  const hours = String(jakartaDate.getHours()).padStart(2, "0");
-  const minutes = String(jakartaDate.getMinutes()).padStart(2, "0");
+    // format manual YYYY-MM-DD HH:mm WIB
+    const year = jakartaDate.getFullYear();
+    const month = String(jakartaDate.getMonth() + 1).padStart(2, "0");
+    const day = String(jakartaDate.getDate()).padStart(2, "0");
+    const hours = String(jakartaDate.getHours()).padStart(2, "0");
+    const minutes = String(jakartaDate.getMinutes()).padStart(2, "0");
 
-  return `Asia/Jakarta (UTC+7) ${year}-${month}-${day} ${hours}:${minutes} WIB`;
-}
-
+    return `Asia/Jakarta (UTC+7) ${year}-${month}-${day} ${hours}:${minutes} WIB`;
+  }
 
   return (
     <DialogModal open={open} onOpenChange={onOpenChange}>
@@ -301,7 +365,8 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
                         Country / State / City:
                       </td>
                       <td className="py-2 px-4 text-[16px] text-black break-all">
-                        {data?.country || "-"}, {data?.state || "-"}, {data?.city || "-"}
+                        {data?.country || "-"}, {data?.state || "-"},{" "}
+                        {data?.city || "-"}
                       </td>
                     </tr>
 
@@ -328,7 +393,8 @@ export function ModalInfoIp({ open, onOpenChange, data }) {
                         ASN Number & ASN Name:
                       </td>
                       <td className="py-2 px-4 text-[16px] text-black leading-relaxed">
-                        {data?.asn_number || "-"} / {data?.asn_organization || "-"}
+                        {data?.asn_number || "-"} /{" "}
+                        {data?.asn_organization || "-"}
                       </td>
                     </tr>
 

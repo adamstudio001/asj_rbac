@@ -51,11 +51,18 @@ const RolePermissionContent = () => {
   const [datas, setDatas] = useState([]);
   const [listRole, setListRole] = useState([]);
   const [listPermission, setListPermissions] = useState([]);
-  
+
   const [sortConfig, setSortConfig] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
-  const { token, hasPermission, isAdminAccess, isCompanyAccess, isExpired, refreshSession } =
-    useAuth();
+  const {
+    token,
+    hasPermission,
+    isAdminAccess,
+    isCompanyAccess,
+    isUserAccess,
+    isExpired,
+    refreshSession,
+  } = useAuth();
 
   // const datas = [
   //   {
@@ -97,41 +104,44 @@ const RolePermissionContent = () => {
     loadData();
   }, []);
 
+  const isAdmin = isAdminAccess() || isCompanyAccess();
+
   async function loadData() {
     if (isExpired()) {
       await refreshSession();
     }
 
-    if (isAdminAccess() || isCompanyAccess()) {
+    if (isAdmin) {
       setIsLoad(true);
       setTimeout(async () => {
         try {
-          const [roleOriRes, roleRes, userRes, permissionRes] = await Promise.allSettled([
-            axios.get(
-              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role",
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            ),
-            axios.get(
-              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/role-with-user",
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            ),
-            axios.get(
-              `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user`, //?page=${page}
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            ),
-            axios.get(
-              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/permission",
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            ),
-          ]);
+          const [roleOriRes, roleRes, userRes, permissionRes] =
+            await Promise.allSettled([
+              axios.get(
+                "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role",
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              ),
+              axios.get(
+                "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/role-with-user",
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              ),
+              axios.get(
+                `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user`, //?page=${page}
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              ),
+              axios.get(
+                "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/permission",
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              ),
+            ]);
 
           const roleOris =
             roleOriRes.status === "fulfilled"
@@ -206,9 +216,7 @@ const RolePermissionContent = () => {
           identifier: r.id,
           label: r.name,
         })),
-        permissions: [
-          ...new Set(roles.flatMap((r) => r.permission_list)),
-        ],
+        permissions: [...new Set(roles.flatMap((r) => r.permission_list))],
         position: employment?.job_identifier ?? "",
       };
     });
@@ -221,7 +229,7 @@ const RolePermissionContent = () => {
       const roleName = role.name;
       const roleId = role.id;
 
-      return {identifier: roleId, label: roleName};
+      return { identifier: roleId, label: roleName };
     });
   }
 
@@ -269,9 +277,9 @@ const RolePermissionContent = () => {
     });
   }, [datas, search, sortConfig]);
 
-  const allChecked =
-    filteredDatas.length > 0 &&
-    filteredDatas.every((row) => selectedIds.includes(row.id));
+  // const allChecked =
+  //   filteredDatas.length > 0 &&
+  //   filteredDatas.every((row) => selectedIds.includes(row.id));
 
   const SortableTh = ({ column, className, left, children }) => {
     return (
@@ -325,6 +333,18 @@ const RolePermissionContent = () => {
       </th>
     );
   };
+
+  const hasGrantedButtonNewRole = isAdmin || hasPermission("ADD_NEW_ROLE");
+
+  const hasGrantedShowButtonAction =
+    hasPermission("CHANGE_PERMISSIONS") ||
+    hasPermission("CHANGE_ROLE") ||
+    isAdmin;
+
+  const hasGrantedButtonPermission =
+    hasPermission("CHANGE_PERMISSIONS") || isAdmin;
+
+  const hasGrantedButtonRole = hasPermission("CHANGE_ROLE") || isAdmin;
 
   function renderTable() {
     if (isLoad) {
@@ -388,16 +408,16 @@ const RolePermissionContent = () => {
               column="user"
               className="w-[250px]"
               left={<></>}
-                // <Checkbox
-                //   checked={allChecked}
-                //   onCheckedChange={(checked) => {
-                //     if (checked) {
-                //       setSelectedIds(filteredDatas.map((r) => r.id));
-                //     } else {
-                //       setSelectedIds([]);
-                //     }
-                //   }}
-                // />
+              // <Checkbox
+              //   checked={allChecked}
+              //   onCheckedChange={(checked) => {
+              //     if (checked) {
+              //       setSelectedIds(filteredDatas.map((r) => r.id));
+              //     } else {
+              //       setSelectedIds([]);
+              //     }
+              //   }}
+              // />
             >
               List User
             </SortableTh>
@@ -442,15 +462,14 @@ const RolePermissionContent = () => {
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
                 {Array.isArray(data.role) && data.role.length > 0
-                  ? data.role.map(r => r.label).join(", ")
+                  ? data.role.map((r) => r.label).join(", ")
                   : "-"}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
                 {data.position}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {
-                  (hasPermission("CHANGE_PERMISSIONS") || hasPermission("CHANGE_ROLE")) && 
+                {hasGrantedShowButtonAction && (
                   <TableActionMenuImage>
                     {/* <button
                       className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
@@ -462,31 +481,41 @@ const RolePermissionContent = () => {
                       <img src={add_team} alt="view profile" />
                       Edit
                     </button> */}
-                    {(hasPermission("CHANGE_PERMISSIONS") && isCompanyAccess()) && <button
-                      className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                      onClick={() => {
-                        setSelectedData(data);
-                        setIsModalPermissionOpen(true);
-                      }}
-                    >
-                      <img src={change_permission} alt="permission" />
-                      Change Permission
-                    </button>}
-                    {hasPermission("CHANGE_ROLE") && <button
-                      className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                      onClick={() => {
-                        if(Array.isArray(data.role) && data.role.length > 1){
-                          addToast("error","tidak dapat ubah role karena sudah terdaftar role lebih dari 1");
-                          return;
-                        }
+                    {hasGrantedButtonPermission && (
+                      <button
+                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        onClick={() => {
+                          setSelectedData(data);
+                          setIsModalPermissionOpen(true);
+                        }}
+                      >
+                        <img src={change_permission} alt="permission" />
+                        Change Permission
+                      </button>
+                    )}
+                    {hasGrantedButtonRole && (
+                      <button
+                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        onClick={() => {
+                          if (
+                            Array.isArray(data.role) &&
+                            data.role.length > 1
+                          ) {
+                            addToast(
+                              "error",
+                              "tidak dapat ubah role karena sudah terdaftar role lebih dari 1"
+                            );
+                            return;
+                          }
 
-                        setSelectedData(data);
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      <img src={change_role} alt="role" />
-                      Change role
-                    </button>}
+                          setSelectedData(data);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        <img src={change_role} alt="role" />
+                        Change role
+                      </button>
+                    )}
                     {/* <button
                           className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                           onClick={() => setIsModalDeleteOpen(true)}
@@ -494,7 +523,7 @@ const RolePermissionContent = () => {
                           Delete
                         </button> */}
                   </TableActionMenuImage>
-                }
+                )}
               </td>
             </tr>
           ))}
@@ -506,17 +535,21 @@ const RolePermissionContent = () => {
   return (
     <>
       <Navbar
-        renderActionModal={() => hasPermission("ADD_NEW_ROLE")? (
-          <button
-            onClick={() => {
-              setIsModalNewOpen(true);
-              setSelectedData(null);
-            }}
-            className={`max-w-[24rem] flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
-          >
-            <IoMdAdd/> Add Role
-          </button>
-        ) : <></>}
+        renderActionModal={() =>
+          hasGrantedButtonNewRole ? (
+            <button
+              onClick={() => {
+                setIsModalNewOpen(true);
+                setSelectedData(null);
+              }}
+              className={`max-w-[24rem] flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
+            >
+              <IoMdAdd /> Add Role
+            </button>
+          ) : (
+            <></>
+          )
+        }
       />
 
       <main className="flex-1 items-center p-6 overflow-auto scroll-custom">
@@ -557,7 +590,7 @@ const RolePermissionContent = () => {
       <ModalForm
         open={isModalNewOpen}
         data={selectedData}
-        mode={selectedData? "update":"create"}
+        mode={selectedData ? "update" : "create"}
         onOpenChange={setIsModalNewOpen}
         extraAction={() => loadData()}
       />
@@ -574,16 +607,23 @@ export function ModalPermission({
   listPermission = [],
   extraAction = () => {},
 }) {
-  const { token, hasPermission, isExpired, refreshSession, isAdminAccess, isCompanyAccess } = useAuth();
+  const {
+    token,
+    hasPermission,
+    isExpired,
+    refreshSession,
+    isAdminAccess,
+    isCompanyAccess,
+  } = useAuth();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
 
   const accessGroups = listPermission;
   const getAllPermissions = (groups) => groups.flatMap((g) => g.permissions);
-  const mapPermissionByIdentifier = (allPermissions, selectedIdentifiers = []) =>
-    allPermissions.filter((p) =>
-      selectedIdentifiers.includes(p.identifier)
-    );
+  const mapPermissionByIdentifier = (
+    allPermissions,
+    selectedIdentifiers = []
+  ) => allPermissions.filter((p) => selectedIdentifiers.includes(p.identifier));
 
   const {
     control,
@@ -594,7 +634,7 @@ export function ModalPermission({
   } = useForm({
     defaultValues: {
       name: data?.full_name ?? "",
-      permission: [], 
+      permission: [],
     },
   });
 
@@ -615,17 +655,24 @@ export function ModalPermission({
   }, [data, listPermission, reset]);
 
   const onSubmit = async (values) => {
-    console.log("submit", values)
-    if(data?.role===undefined || data?.role===null || (Array.isArray(data.role) && data.role.length ==0)){
-      addToast("error","anda belum memberikan role pada user ini");
+    console.log("submit", values);
+    if (
+      data?.role === undefined ||
+      data?.role === null ||
+      (Array.isArray(data.role) && data.role.length == 0)
+    ) {
+      addToast("error", "anda belum memberikan role pada user ini");
       return;
     }
     if (!values.permission.length) {
       addToast("error", "Permission cannot be empty");
       return;
     }
-    if(Array.isArray(data.role) && data.role.length > 1){
-      addToast("error","tidak dapat ubah role karena sudah terdaftar role lebih dari 1");
+    if (Array.isArray(data.role) && data.role.length > 1) {
+      addToast(
+        "error",
+        "tidak dapat ubah role karena sudah terdaftar role lebih dari 1"
+      );
       return;
     }
 
@@ -638,7 +685,8 @@ export function ModalPermission({
     try {
       console.log(values);
       const formData = {
-        permission_identifier: values.permission.flatMap(p => p.identifier) ?? [],
+        permission_identifier:
+          values.permission.flatMap((p) => p.identifier) ?? [],
       };
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
@@ -744,7 +792,7 @@ export function ModalPermission({
               disabled={loading}
               className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
             >
-              {loading? "Loading...":"Save"}
+              {loading ? "Loading..." : "Save"}
             </Button>
           </DialogModalFooter>
         </form>
@@ -757,7 +805,9 @@ function PermissionGroup({ accessGroups, field, className }) {
   const find = (name) => accessGroups.find((g) => g.group_name === name);
 
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 ${className}`}>
+    <div
+      className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 ${className}`}
+    >
       <div className="flex flex-col gap-10">
         <PermissionSection group={find("General")} field={field} />
         <PermissionSection group={find("User")} field={field} />
@@ -833,10 +883,16 @@ function PermissionItem({ permission, field }) {
   );
 }
 
-export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction = () => {}, }) {
+export function ModalRole({
+  data,
+  listRole = [],
+  open,
+  onOpenChange,
+  extraAction = () => {},
+}) {
   const [loading, setLoading] = useState(false);
   const { token, hasPermission, isExpired, refreshSession } = useAuth();
-  console.log(data, listRole)
+  console.log(data, listRole);
 
   const {
     control,
@@ -868,15 +924,15 @@ export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction =
 
     setLoading(true);
 
-    if(!data?.id){
-      addToast("error","anda belum pilih usernya");
+    if (!data?.id) {
+      addToast("error", "anda belum pilih usernya");
       return;
     }
 
     try {
       console.log(values);
       const formData = {
-        user_id: values?.role?.identifier && data?.id? [data.id]:[],
+        user_id: values?.role?.identifier && data?.id ? [data.id] : [],
       };
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
@@ -984,7 +1040,13 @@ export function ModalRole({ data, listRole=[], open, onOpenChange, extraAction =
   );
 }
 
-export function ModalForm({ data, open, onOpenChange, mode="create", extraAction = function () {}, }) {
+export function ModalForm({
+  data,
+  open,
+  onOpenChange,
+  mode = "create",
+  extraAction = function () {},
+}) {
   const { token, hasPermission, isExpired, refreshSession } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -1034,7 +1096,8 @@ export function ModalForm({ data, open, onOpenChange, mode="create", extraAction
       const baseUrl =
         "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role";
 
-      const url = mode === "create" ? baseUrl : `${baseUrl}/${data?.id_role ?? 0}`;
+      const url =
+        mode === "create" ? baseUrl : `${baseUrl}/${data?.id_role ?? 0}`;
 
       const method = mode === "create" ? "post" : "put";
 
@@ -1081,7 +1144,7 @@ export function ModalForm({ data, open, onOpenChange, mode="create", extraAction
         {/* HEADER */}
         <DialogModalHeader className="shrink-0">
           <DialogModalTitle className="px-6 pt-4 font-inter font-bold text-[22px] text-[#1B2E48]">
-            {mode=="create"? "Add New":"Edit"} Role
+            {mode == "create" ? "Add New" : "Edit"} Role
           </DialogModalTitle>
         </DialogModalHeader>
 
@@ -1123,7 +1186,6 @@ export function ModalForm({ data, open, onOpenChange, mode="create", extraAction
 
               <div className="mt-8"></div>
             </div>
-
           </DialogModalDescription>
 
           {/* FOOTER (TETAP DI DALAM FORM TAPI TIDAK SCROLL KELUAR) */}

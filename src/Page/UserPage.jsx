@@ -50,30 +50,37 @@ const UserPageContent = () => {
 
   const [isLoad, setIsLoad] = useState(false);
   const [error, setError] = useState(false);
-  
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [page, setPage] = useState(1);
-  
+
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalViewOpen, setIsModalViewOpen] = useState(false);
   const [isModalResetOpen, setIsModalResetOpen] = useState(false);
-  
+
   const [totalPages, setTotalPages] = useState(1);
 
-  const { token, hasPermission, isAdminAccess, isCompanyAccess, isExpired, refreshSession } =
-    useAuth();
+  const {
+    token,
+    hasPermission,
+    isAdminAccess,
+    isCompanyAccess,
+    isExpired,
+    refreshSession,
+  } = useAuth();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [branches, setBranches] = useState([]);
+  const isAdmin = isAdminAccess() || isCompanyAccess();
 
   async function loadData() {
     if (isExpired()) {
       await refreshSession();
     }
 
-    if (isAdminAccess() || isCompanyAccess()) {
+    if (isAdmin) {
       setIsLoad(true);
       setTimeout(async () => {
         try {
@@ -143,7 +150,7 @@ const UserPageContent = () => {
   // }
 
   function deleteCloseHandler() {
-    if (isAdminAccess() || isCompanyAccess()) {
+    if (isAdmin) {
       setIsModalDeleteOpen(false);
       setSelectedUser(null);
     }
@@ -154,7 +161,7 @@ const UserPageContent = () => {
       refreshSession();
     }
 
-    if (isAdminAccess() || isCompanyAccess()) {
+    if (isAdmin) {
       setLoading(true);
       // setErrorMessage("");
       try {
@@ -201,6 +208,23 @@ const UserPageContent = () => {
   const filteredUsers = users.filter((user) =>
     user.full_name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const hasGrantedShowButtonAction =
+    hasPermission("VIEW_USER") ||
+    hasPermission("EDIT_USER") ||
+    hasPermission("RESET_PASSWORD_USER") ||
+    hasPermission("DELETE_USER") ||
+    isAdmin;
+
+  const hasGrantedButtonViewUser = hasPermission("VIEW_USER") || isAdmin;
+
+  const hasGrantedButtonEditUser = hasPermission("EDIT_USER") || isAdmin;
+
+  const hasGrantedButtonResetUser = hasPermission("RESET_PASSWORD_USER") || isAdmin;
+
+  const hasGrantedButtonDeleteUser = hasPermission("DELETE_USER") || isAdmin;
+
+  const hasGrantedButtonNewUser = hasPermission("ADD_NEW_USER") || isAdmin;
 
   function renderTable() {
     if (isLoad) {
@@ -297,66 +321,76 @@ const UserPageContent = () => {
                 className="hover:bg-gray-50 transition border-b border-gray-200"
               >
                 <td className="px-4 py-3">
-                  {
-                    (
-                      hasPermission("VIEW_USER") ||
-                      hasPermission("EDIT_USER") ||
-                      hasPermission("RESET_PASSWORD_USER") ||
-                      hasPermission("DELETE_USER")
-                    ) &&
+                  {hasGrantedShowButtonAction && (
                     <TableActionMenu>
-                      {hasPermission("VIEW_USER") && <button
-                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setIsModalViewOpen(true);
-                        }}
-                      >
-                        <img src={view_user} alt="view user" />
-                        View User
-                      </button>}
+                      {hasGrantedButtonViewUser && (
+                        <button
+                          className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setIsModalViewOpen(true);
+                          }}
+                        >
+                          <img src={view_user} alt="view user" />
+                          View User
+                        </button>
+                      )}
 
                       {/* Edit User */}
-                      {hasPermission("EDIT_USER") && <button
-                        className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <img
-                          src={user_edit}
-                          alt="edit user"
-                          className="w-4 h-4 hover:text-white"
-                        />
-                        Edit User
-                      </button>}
+                      {hasGrantedButtonEditUser && (
+                        <button
+                          className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <img
+                            src={user_edit}
+                            alt="edit user"
+                            className="w-4 h-4 hover:text-white"
+                          />
+                          Edit User
+                        </button>
+                      )}
 
                       {/* Reset Password */}
-                      {hasPermission("RESET_PASSWORD_USER") && <button
-                        className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setIsModalResetOpen(true);
-                        }}
-                      >
-                        <img src={reset} alt="reset password" className="w-4 h-4" />
-                        Reset Password
-                      </button>}
+                      {hasGrantedButtonResetUser && (
+                        <button
+                          className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setIsModalResetOpen(true);
+                          }}
+                        >
+                          <img
+                            src={reset}
+                            alt="reset password"
+                            className="w-4 h-4"
+                          />
+                          Reset Password
+                        </button>
+                      )}
 
                       {/* Delete User */}
-                      {hasPermission("DELETE_USER") && <button
-                        className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
-                        onClick={() => {
-                          setIsModalDeleteOpen(true);
-                          setSelectedUser(user);
-                        }}
-                      >
-                        <img src={trash} alt="delete user" className="w-4 h-4" />
-                        Delete User
-                      </button>}
+                      {hasGrantedButtonDeleteUser && (
+                        <button
+                          className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                          onClick={() => {
+                            setIsModalDeleteOpen(true);
+                            setSelectedUser(user);
+                          }}
+                        >
+                          <img
+                            src={trash}
+                            alt="delete user"
+                            className="w-4 h-4"
+                          />
+                          Delete User
+                        </button>
+                      )}
                     </TableActionMenu>
-                  }
+                  )}
                 </td>
 
                 <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
@@ -408,7 +442,7 @@ const UserPageContent = () => {
     <>
       <Navbar
         renderActionModal={() =>
-          hasPermission("ADD_NEW_USER") ? ( //(isAdminAccess() || isCompanyAccess())
+          hasGrantedButtonNewUser ? ( //(isAdminAccess() || isCompanyAccess())
             <button
               disabled={isLoad}
               onClick={() => {
@@ -468,41 +502,36 @@ const UserPageContent = () => {
         onOpenChange={setIsModalViewOpen}
         data={selectedUser}
       />
-
     </>
   );
 };
 
 export default UserPage;
 
-export function ModalViewUser({
-  open,
-  onOpenChange,
-  data = null,
-}) {
-  function renderValue(data, type){
-    if(type=="division"){
+export function ModalViewUser({ open, onOpenChange, data = null }) {
+  function renderValue(data, type) {
+    if (type == "division") {
       const employe = data?.employment ?? [];
-      if(employe.length == 1){
+      if (employe.length == 1) {
         return employe?.[0]?.job_identifier ?? "";
-      } else if(employe.length > 1){
-        return employe?.job_identifier.join(", ")
+      } else if (employe.length > 1) {
+        return employe?.job_identifier.join(", ");
       }
       return "";
-    } else if(type=="branch"){
+    } else if (type == "branch") {
       const employe = data?.employment ?? [];
-      if(employe.length == 1){
+      if (employe.length == 1) {
         return employe?.[0]?.branch_location_identifier ?? "";
-      } else if(employe.length > 1){
-        return employe?.branch_location_identifier.join(", ")
+      } else if (employe.length > 1) {
+        return employe?.branch_location_identifier.join(", ");
       }
       return "";
-    } else if(type=="role"){
-      if(data?.has_admin_access_status){
+    } else if (type == "role") {
+      if (data?.has_admin_access_status) {
         return "Super Admin";
-      } else if(data?.has_company_access_status){
+      } else if (data?.has_company_access_status) {
         return "Admin";
-      } else if(data?.has_user_access_status){
+      } else if (data?.has_user_access_status) {
         return "User";
       }
 
@@ -522,67 +551,103 @@ export function ModalViewUser({
             View User
           </DialogModalTitle>
 
-            <DialogModalDescription asChild>
-              <div className="px-6 pb-8 space-y-8">
-                <div>
-                  <h5 className="font-inter font-bold text-lg text-[#1B2E48] pb-4">
-                    Personal Information
-                  </h5>
+          <DialogModalDescription asChild>
+            <div className="px-6 pb-8 space-y-8">
+              <div>
+                <h5 className="font-inter font-bold text-lg text-[#1B2E48] pb-4">
+                  Personal Information
+                </h5>
 
-                  <div className="space-y-6">
-                    <div className="flex flex-col gap-6">
-                      <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">First Name:</b>
-                        <p className="text-black text-sm font-normal">{data?.first_name ?? ""}</p>
-                      </div>
-                      <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Last Name:</b>
-                        <p className="text-black text-sm font-normal">{data?.last_name ?? ""}</p>
-                      </div>
-                      <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Whatsapp No:</b>
-                        <p className="text-black text-sm font-normal">{data?.whatsapp_number ?? ""}</p>
-                      </div>
-                      <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Password:</b>
-                        <p className="text-black text-sm font-normal">****************</p>
-                      </div>
-                      <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Address:</b>
-                        <p className="text-black text-sm font-normal">{data?.address ?? ""}</p>
-                      </div>
+                <div className="space-y-6">
+                  <div className="flex flex-col gap-6">
+                    <div className="inline-flex">
+                      <b className="min-w-[15cqi] font-bold text-black">
+                        First Name:
+                      </b>
+                      <p className="text-black text-sm font-normal">
+                        {data?.first_name ?? ""}
+                      </p>
                     </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h5 className="font-inter font-bold text-lg text-[#1B2E48] pb-4">
-                    Professional Information
-                  </h5>
-
-                  <div className="space-y-6">
-                    <div className="flex flex-col gap-6">
-                      <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Employee ID:</b>
-                        <p className="text-black text-sm font-normal">{data?.employment?.[0]?.employee_id ?? ""}</p>
-                      </div>
-                      <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Division:</b>
-                        <p className="text-black text-sm font-normal">{renderValue(data, "division")}</p>
-                      </div>
-                      <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Work Location / Branch:</b>
-                        <p className="text-black text-sm font-normal">{renderValue(data, "branch")}</p>
-                      </div>
-                      <div className="inline-flex">
-                        <b className="min-w-[15cqi] font-bold text-black">Role:</b>
-                        <p className="text-black text-sm font-normal">{renderValue(data, "role")}</p>
-                      </div>
+                    <div className="inline-flex">
+                      <b className="min-w-[15cqi] font-bold text-black">
+                        Last Name:
+                      </b>
+                      <p className="text-black text-sm font-normal">
+                        {data?.last_name ?? ""}
+                      </p>
+                    </div>
+                    <div className="inline-flex">
+                      <b className="min-w-[15cqi] font-bold text-black">
+                        Whatsapp No:
+                      </b>
+                      <p className="text-black text-sm font-normal">
+                        {data?.whatsapp_number ?? ""}
+                      </p>
+                    </div>
+                    <div className="inline-flex">
+                      <b className="min-w-[15cqi] font-bold text-black">
+                        Password:
+                      </b>
+                      <p className="text-black text-sm font-normal">
+                        ****************
+                      </p>
+                    </div>
+                    <div className="inline-flex">
+                      <b className="min-w-[15cqi] font-bold text-black">
+                        Address:
+                      </b>
+                      <p className="text-black text-sm font-normal">
+                        {data?.address ?? ""}
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
-            </DialogModalDescription>
+
+              <div>
+                <h5 className="font-inter font-bold text-lg text-[#1B2E48] pb-4">
+                  Professional Information
+                </h5>
+
+                <div className="space-y-6">
+                  <div className="flex flex-col gap-6">
+                    <div className="inline-flex">
+                      <b className="min-w-[15cqi] font-bold text-black">
+                        Employee ID:
+                      </b>
+                      <p className="text-black text-sm font-normal">
+                        {data?.employment?.[0]?.employee_id ?? ""}
+                      </p>
+                    </div>
+                    <div className="inline-flex">
+                      <b className="min-w-[15cqi] font-bold text-black">
+                        Division:
+                      </b>
+                      <p className="text-black text-sm font-normal">
+                        {renderValue(data, "division")}
+                      </p>
+                    </div>
+                    <div className="inline-flex">
+                      <b className="min-w-[15cqi] font-bold text-black">
+                        Work Location / Branch:
+                      </b>
+                      <p className="text-black text-sm font-normal">
+                        {renderValue(data, "branch")}
+                      </p>
+                    </div>
+                    <div className="inline-flex">
+                      <b className="min-w-[15cqi] font-bold text-black">
+                        Role:
+                      </b>
+                      <p className="text-black text-sm font-normal">
+                        {renderValue(data, "role")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DialogModalDescription>
         </DialogModalHeader>
       </DialogModalContent>
     </DialogModal>
@@ -641,8 +706,7 @@ export function ModalResetPassword({
 
   /* ================= CLOSE CONTEXT MENU ================= */
   useEffect(() => {
-    const close = () =>
-      setContextMenu((c) => ({ ...c, open: false }));
+    const close = () => setContextMenu((c) => ({ ...c, open: false }));
 
     document.addEventListener("click", close);
     return () => document.removeEventListener("click", close);
@@ -693,7 +757,6 @@ export function ModalResetPassword({
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogModalDescription asChild>
               <div className="px-6 pb-8 space-y-6">
-
                 <CustomInput
                   label="First Name"
                   name="firstName"
@@ -766,9 +829,7 @@ export function ModalResetPassword({
                     />
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPasswordConfirm((p) => !p)
-                      }
+                      onClick={() => setShowPasswordConfirm((p) => !p)}
                       className="absolute right-3 top-1/2 -translate-y-1/2"
                     >
                       <img
@@ -816,8 +877,7 @@ export function ModalResetPassword({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {
-              isEmpty(clipboardValue)?
+            {isEmpty(clipboardValue) ? (
               <button
                 className="w-full px-3 py-2 text-left hover:bg-gray-100"
                 onClick={() => {
@@ -829,7 +889,8 @@ export function ModalResetPassword({
                 }}
               >
                 Copy
-              </button> : 
+              </button>
+            ) : (
               <>
                 <button
                   className="w-full px-3 py-2 text-left hover:bg-gray-100"
@@ -843,7 +904,7 @@ export function ModalResetPassword({
                   Paste
                 </button>
               </>
-            }
+            )}
           </div>,
           document.body
         )}
@@ -927,26 +988,29 @@ export function ModalUser({
 
     try {
       console.log(values);
-      const formData = mode=="create"? {
-        first_name: values.firstName,
-        last_name: values.lastName,
-        password: values.password,
-        whatsapp_number: values.whatsapp,
-        email: values.email,
-        address: values.address,
-        job_identifier: values.jobPosition?.identifier ?? "",
-        branch_location_identifier: values.branch?.identifier ?? "",
-        employee_id: values.employee_id
-      } : {
-        first_name: values.firstName,
-        last_name: values.lastName,
-        whatsapp_number: values.whatsapp,
-        email: values.email,
-        address: values.address,
-        job_identifier: values.jobPosition?.identifier ?? "",
-        branch_location_identifier: values.branch?.identifier ?? "",
-        employee_id: values.employee_id
-      };
+      const formData =
+        mode == "create"
+          ? {
+              first_name: values.firstName,
+              last_name: values.lastName,
+              password: values.password,
+              whatsapp_number: values.whatsapp,
+              email: values.email,
+              address: values.address,
+              job_identifier: values.jobPosition?.identifier ?? "",
+              branch_location_identifier: values.branch?.identifier ?? "",
+              employee_id: values.employee_id,
+            }
+          : {
+              first_name: values.firstName,
+              last_name: values.lastName,
+              whatsapp_number: values.whatsapp,
+              email: values.email,
+              address: values.address,
+              job_identifier: values.jobPosition?.identifier ?? "",
+              branch_location_identifier: values.branch?.identifier ?? "",
+              employee_id: values.employee_id,
+            };
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
@@ -1067,7 +1131,12 @@ export function ModalUser({
                         }
                       /> */}
                       <div className="flex-1 min-w-[250px]">
-                        <label data-slot="label" className="text-sm leading-4 font-medium text-foreground select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Password</label>
+                        <label
+                          data-slot="label"
+                          className="text-sm leading-4 font-medium text-foreground select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                        >
+                          Password
+                        </label>
 
                         <div className="flex flex-col">
                           <div className="relative">
@@ -1081,10 +1150,18 @@ export function ModalUser({
                                 errors.password &&
                                   "border-red-500 focus:border-red-500"
                               )}
-                              {...register("password", mode=="create"? {
-                                required: "Password is required",
-                                minLength: { value: 6, message: "Min 6 chars" },
-                              }: {})}
+                              {...register(
+                                "password",
+                                mode == "create"
+                                  ? {
+                                      required: "Password is required",
+                                      minLength: {
+                                        value: 6,
+                                        message: "Min 6 chars",
+                                      },
+                                    }
+                                  : {}
+                              )}
                             />
 
                             {/* ICON */}
@@ -1096,7 +1173,11 @@ export function ModalUser({
                               {showPasswordUser ? (
                                 <img src={eye} alt="hide" className="w-5 h-5" />
                               ) : (
-                                <img src={eyehide} alt="hide" className="w-5 h-5" />
+                                <img
+                                  src={eyehide}
+                                  alt="hide"
+                                  className="w-5 h-5"
+                                />
                               )}
                             </button>
                           </div>
