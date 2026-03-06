@@ -21,6 +21,7 @@ import DeleteModal from "@/Components/DeleteModal";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import Copy from "@assets/copy.svg";
 import Rename from "@assets/edit.svg";
+import Collaboration from "@assets/collaboration.svg";
 import Trash from "@assets/trash.svg";
 import FolderCreate from "@assets/folder_create.svg";
 import RestoreFile from "@assets/restore.svg";
@@ -36,7 +37,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import FileInfoPopper from "@/Components/FileInfoPopper";
 import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   DialogModal,
   DialogModalClose,
@@ -57,6 +58,7 @@ import { createFileObject } from "@/Common/FileFactory";
 import UserProfileMenu from "@/Components/UserProfileMenu";
 import { Checkbox } from "@/Components/ui/Checkbox";
 import RadioGroup from "@/Components/RadioGroup";
+import CustomSelect from "@/Components/CustomSelect";
 
 const FileManagementPage = () => {
   return (
@@ -95,6 +97,7 @@ const FileManagementContent = () => {
   } = useAuth();
   const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
   const [isModalRenameFileOpen, setIsModalRenameFileOpen] = useState(false);
+  const [isModalCollaboratorOpen, setIsModalCollaboratorOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [itemType, setItemType] = useState([]);
   const [lists, setLists] = useState([]);
@@ -122,7 +125,7 @@ const FileManagementContent = () => {
         // jika tinggi lebih dari line-height, berarti wrap
         const lineHeight = parseInt(
           getComputedStyle(entry.target).lineHeight,
-          10
+          10,
         );
         if (entry.contentRect.height > lineHeight) {
           setIsWrapped(true);
@@ -149,10 +152,9 @@ const FileManagementContent = () => {
       await refreshSession();
     }
 
-    const baseUrl =
-      isAdmin
-        ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
-        : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
+    const baseUrl = isAdmin
+      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
+      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
 
     const url = `${baseUrl}/${
       !isRoot ? `storage/${folderKeys}` : `storage`
@@ -174,16 +176,26 @@ const FileManagementContent = () => {
         const promises = [
           axios.get(
             "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-type",
-            { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
+            {
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              },
+            },
           ),
-          axios.get(url, { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }),
+          axios.get(url, {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            },
+          }),
         ];
 
         if (hasFolder) {
           promises.push(
             axios.get(urlBreadcrumb, {
-              headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
-            })
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              },
+            }),
           );
         } else {
           // Push resolved promise berisi array kosong untuk breadcrumb
@@ -191,9 +203,8 @@ const FileManagementContent = () => {
         }
 
         // === Jalankan paralel ===
-        const [resItemType, resList, resBreadcrumb] = await Promise.all(
-          promises
-        );
+        const [resItemType, resList, resBreadcrumb] =
+          await Promise.all(promises);
 
         const dataList = resList.data;
         const dataBreadcrumb = resBreadcrumb.data;
@@ -205,7 +216,7 @@ const FileManagementContent = () => {
           isEmpty(dataList?.success)
         ) {
           throw new Error(
-            "One of the API responses returned unsuccessful status."
+            "One of the API responses returned unsuccessful status.",
           );
         }
 
@@ -235,7 +246,9 @@ const FileManagementContent = () => {
       try {
         // --- Buat array promise dinamis ---
         const res = await axios.get(url, {
-          headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
         });
         const body = res.data;
 
@@ -330,6 +343,16 @@ const FileManagementContent = () => {
     }
   }
 
+  function collaboratorHandler(file) {
+    if (!file) {
+      addToast("error", "belum pilih file/folder yang di collaboration");
+      return;
+    }
+
+    setIsModalCollaboratorOpen(true);
+    setFileSelected(file);
+  }
+
   function hasGrantedDownloadHandler(file) {
     return (
       file?.visibility_identifier != "GENERAL" &&
@@ -338,16 +361,14 @@ const FileManagementContent = () => {
     );
   }
 
-  const hasGrantedButtonDownload =
-    hasPermission("DOWNLOAD_FILE") || isAdmin;
+  const hasGrantedButtonDownload = hasPermission("DOWNLOAD_FILE") || isAdmin;
 
   const hasGrantedInfoPopper =
     hasPermission("GET_INFO_FILE_FOLDER") ||
     isAdminAccess() ||
     isCompanyAccess();
 
-  const hasGrantedButtonRelete =
-    hasPermission("REMOVE_FILE_FOLDER") || isAdmin;
+  const hasGrantedButtonRelete = hasPermission("REMOVE_FILE_FOLDER") || isAdmin;
 
   function hasGrantedCheckboxFilter(visible) {
     const isGeneral = visible?.identifier == "GENERAL";
@@ -361,9 +382,8 @@ const FileManagementContent = () => {
     return isAdmin || isGeneral || isSecret || isSuperSecret;
   }
 
-  const hasGrantedButtonUploadFile = hasPermission("UPLOAD_FILE") ||
-                  isAdminAccess() ||
-                  isCompanyAccess();
+  const hasGrantedButtonUploadFile =
+    hasPermission("UPLOAD_FILE") || isAdminAccess() || isCompanyAccess();
 
   function renderCreateFolder() {
     const hasGrantedInRoot = isRoot && hasPermission("CREATE_FOLDER");
@@ -403,10 +423,9 @@ const FileManagementContent = () => {
       await refreshSession();
     }
 
-    const urlDownload =
-      isAdmin
-        ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${file.id}/url-download`
-        : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${file.id}/url-download`;
+    const urlDownload = isAdmin
+      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${file.id}/url-download`
+      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${file.id}/url-download`;
 
     // const newTab = window.open("about:blank");
     // if (!newTab) {
@@ -425,7 +444,7 @@ const FileManagementContent = () => {
         {},
         {
           headers: headers,
-        }
+        },
       );
       console.log(response, {
         responseType: "blob",
@@ -465,7 +484,7 @@ const FileManagementContent = () => {
         "error",
         err?.response?.data?.error ||
           err?.message ||
-          "Terjadi masalah saat mengambil file."
+          "Terjadi masalah saat mengambil file.",
       );
     } finally {
       setIsModalLoading(false);
@@ -585,7 +604,7 @@ const FileManagementContent = () => {
                       {getFileIcon(
                         file.name,
                         file.type_identifier.toLowerCase() == "folder",
-                        24
+                        24,
                       )}
                       <EllipsisTooltip className={"w-[250px]"}>
                         {file.name}
@@ -640,6 +659,12 @@ const FileManagementContent = () => {
                       <img src={Trash} alt="Trash" /> Remove
                     </button>
                   )}
+                  <button
+                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                    onClick={() => collaboratorHandler(file)}
+                  >
+                    <img src={Collaboration} alt="Collabolator" /> Add Collaborator
+                  </button>
                 </>
               </TableRowActionMenu>
             ))
@@ -718,7 +743,7 @@ const FileManagementContent = () => {
                               }
                               // unselect all others
                               return { ...v, is_default: false };
-                            })
+                            }),
                           );
                         }}
                       />
@@ -727,7 +752,7 @@ const FileManagementContent = () => {
                   </>
                 ) : (
                   <></>
-                )
+                ),
               )
             )}
 
@@ -745,18 +770,18 @@ const FileManagementContent = () => {
               </button>
               {/* } */}
               {folderKeys && hasGrantedButtonUploadFile && (
-                  <button
-                    onClick={() => {
-                      setIsModalOpen(true);
-                    }}
-                    className={`${
-                      isWrapped ? "w-full" : "max-w-[24rem]"
-                    } flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
-                  >
-                    <img src={UploadFile} width={18} />
-                    Upload file
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setIsModalOpen(true);
+                  }}
+                  className={`${
+                    isWrapped ? "w-full" : "max-w-[24rem]"
+                  } flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition`}
+                >
+                  <img src={UploadFile} width={18} />
+                  Upload file
+                </button>
+              )}
             </div>
 
             {/* <div className="flex items-center gap-2">
@@ -876,7 +901,7 @@ const FileManagementContent = () => {
                       <td className="font-medium">
                         {getLabelByIdentifier(
                           selectedFile?.type_identifier,
-                          itemType
+                          itemType,
                         )}
                       </td>
                     </tr>
@@ -939,7 +964,7 @@ const FileManagementContent = () => {
                       <td className="font-medium">
                         {getLabelByIdentifier(
                           selectedFile?.type_identifier,
-                          itemType
+                          itemType,
                         )}
                       </td>
                     </tr>
@@ -995,9 +1020,7 @@ const FileManagementContent = () => {
         refreshData={() => loadData()}
         idFolder={folderKeys}
         token={sessionStorage.getItem("token")}
-        hasPermission={
-          hasPermission("UPLOAD_FILE") || isAdmin
-        }
+        hasPermission={hasPermission("UPLOAD_FILE") || isAdmin}
         initialFiles={files}
         isAdmin={isAdminAccess()}
         isCompany={isCompanyAccess()}
@@ -1023,6 +1046,14 @@ const FileManagementContent = () => {
         data={fileSelected}
         extraAction={() => loadData()}
         listVisible={listVisible}
+      />
+
+      <ModalCollaborator
+        open={isModalCollaboratorOpen}
+        onOpenChange={setIsModalCollaboratorOpen}
+        folderKeys={folderKeys}
+        data={fileSelected}
+        extraAction={() => loadData()}
       />
 
       <ModalLoader show={isModalLoading} />
@@ -1266,10 +1297,9 @@ export function ModalRenameFile({
         file_name: values.file_name,
         visibility_identifier: category ?? "GENERAL",
       };
-      const url =
-        isAdmin
-          ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/file/${data.id}`
-          : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/file/${data.id}`;
+      const url = isAdmin
+        ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/file/${data.id}`
+        : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/file/${data.id}`;
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
@@ -1338,6 +1368,151 @@ export function ModalRenameFile({
                   orientation="horizontal"
                   options={listVisible}
                 />
+              </div>
+            </DialogModalDescription>
+
+            <DialogModalFooter className="px-6 pb-6 items-center">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+              >
+                {loading ? "Sending..." : "Save"}
+              </Button>
+            </DialogModalFooter>
+          </form>
+        </DialogModalHeader>
+      </DialogModalContent>
+    </DialogModal>
+  );
+}
+
+export function ModalCollaborator({
+  open,
+  onOpenChange,
+  folderKeys,
+  data,
+  extraAction = function () {},
+}) {
+  // const { addToast } = useToast();
+  // const {
+  //   token,
+  //   hasPermission,
+  //   isAdminAccess,
+  //   isCompanyAccess,
+  //   isExpired,
+  //   refreshSession,
+  // } = useAuth();
+
+  const [loading, setLoading] = useState(false);
+  // const isAdmin = isAdminAccess() || isCompanyAccess();
+
+  const names = [
+    { identifier: "0424096001", label: "Desy Puji Astuti" },
+    { identifier: "0423106505", label: "Andhika Mahendra" },
+    { identifier: "0004096908", label: "Andhika Mahendra" },
+    { identifier: "0012075802", label: "Andhika Mahendra" },
+    { identifier: "0019066501", label: "Andhika Mahendra" },
+    { identifier: "0404117202", label: "Andhika Mahendra" },
+    { identifier: "0403086301", label: "Andhika Mahendra" },
+    { identifier: "0406046201", label: "Andhika Mahendra" },
+    { identifier: "0304097004", label: "Andhika Mahendra" },
+    { identifier: "0424058209", label: "Andhika Mahendra" }
+  ]
+
+  const peopleWithAccess = [
+    { name: "Desy Puji Astuti", role: "HR/GA" },
+    { name: "Andhika Mahendra", role: "FDA" },
+    { name: "Andhika Mahendra", role: "FDA" },
+    { name: "Andhika Mahendra", role: "FDA" },
+    { name: "Andhika Mahendra", role: "FDA" },
+    { name: "Andhika Mahendra", role: "FDA" },
+  ];
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: {
+      targets: data?.targets ?? [],
+    },
+  });
+
+  useEffect(() => {
+    reset({
+      targets: data?.targets ?? [],
+    });
+  }, [data, reset]);
+
+  const onSubmit = async (values) => {
+    // if (isExpired()) {
+    //   await refreshSession();
+    // }
+  };
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+    }
+  }, [open, reset]);
+
+  return (
+    <DialogModal open={open} onOpenChange={onOpenChange}>
+      <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-full sm:max-w-xl">
+        {" "}
+        {/*max-h-[min(640px,80vh)]*/}
+        <DialogModalHeader>
+          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+            Add Collaborator
+          </DialogModalTitle>
+
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="overflow-y-auto scroll-custom"
+          >
+            <DialogModalDescription asChild>
+              <div className="px-6 pb-8 space-y-8">
+                <Controller
+                  name="targets"
+                  control={control}
+                  // rules={{ required: "target is required" }}
+                  render={({ field }) => (
+                    <CustomSelect
+                      label="Name"
+                      records={names}
+                      // sourceUrl="https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job"
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={errors.targets?.message}
+                    />
+                  )}
+                />
+
+                <div className="space-y-4">
+                  <h3 className="font-inter font-semibold text-[18px] text-[#1B2E48]">
+                    People With Access
+                  </h3>
+
+                  <div className="max-h-[220px] overflow-y-auto pr-2 scroll-custom space-y-5">
+                    {peopleWithAccess.map((person, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="text-[18px] font-medium text-black">
+                          {person.name}
+                        </span>
+
+                        <span className="text-[18px] text-gray-400 font-medium">
+                          {person.role}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </DialogModalDescription>
 

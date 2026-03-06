@@ -228,3 +228,41 @@
 //     </div>
 //   )
 // }
+
+// import React, { useState } from "react"
+// import { Button } from "./Components/ui/Button"
+// import { ModalCollaborator } from "./Page/FileManagementPage"
+
+// export default function Test() {
+
+//   const [open, setOpen] = useState(false)
+
+//   const data = {
+//     targets: []
+//   }
+
+//   const folderKeys = ["folder-1"]
+
+//   return (
+//     <div className="p-10">
+
+//       <Button
+//         onClick={() => setOpen(true)}
+//         className="bg-blue-600 text-white px-4 py-2 rounded-md"
+//       >
+//         Add Collaborator
+//       </Button>
+
+//       <ModalCollaborator
+//         open={open}
+//         onOpenChange={setOpen}
+//         folderKeys={folderKeys}
+//         data={data}
+//         extraAction={() => {
+//           console.log("extra action")
+//         }}
+//       />
+
+//     </div>
+//   )
+// }
