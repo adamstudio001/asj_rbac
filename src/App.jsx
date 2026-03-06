@@ -6,7 +6,7 @@ import LogHistoryPage from "./Page/LogHistoryPage";
 import { SidebarProvider } from "./Providers/SidebarProvider";
 import RolePermissionPage from "./Page/RolePermissionPage";
 import PanelLayout from "./Template/PanelLayout";
-import SettingPage from "./Page/SettingPage";
+// import SettingPage from "./Page/SettingPage";
 import FileManagementPage from "./Page/FileManagementPage";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import { AuthProvider } from "./Providers/AuthProvider";
