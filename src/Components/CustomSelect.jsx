@@ -148,7 +148,7 @@ const CustomSelect = React.memo(function CustomSelect({
 
         {loading
           ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
-          : <TiArrowSortedDown className="w-4 h-4 text-black" />
+          : <TiArrowSortedDown className="w-5 h-5 text-black" />
         }
 
       </button>
