@@ -12,6 +12,7 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import { AuthProvider } from "./Providers/AuthProvider";
 import { ToastProvider } from "./Providers/ToastProvider";
 import AccessControlRoute from "./Components/AccessControlRoute";
+import NotFoundPage from "./Page/NotFoundPage";
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
                   {/* <Route path="/settings/" element={<SettingPage />} /> */}
                 </Route>
               </Route>
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </AuthProvider>
         </Router>
