@@ -60,7 +60,8 @@ export function getFileIconBig(fileName, isFolder = false) {
   return <CgFileDocument size={"100%"} className="text-gray-400 text-xl" />; // default
 }
 export function formatFileSize(bytes) {
-  if (bytes === 0 || bytes === "0" || bytes === undefined || bytes === null) return "0 Bytes";
+  if (bytes === 0 || bytes === "0" || bytes === undefined || bytes === null)
+    return "0 Bytes";
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   const size = bytes / Math.pow(1024, i);
@@ -81,26 +82,60 @@ export function formatFileType(fullFileName) {
 
   return "Folder";
 }
-export function formatDate(dateString) {
-  const date = new Date(dateString);
+export function formatDate(dateString, version = 1) {
+  if (version == 1) {
+    const date = new Date(dateString);
 
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
 
-  let hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "pm" : "am";
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "pm" : "am";
 
-  hours = hours % 12 || 12; // ubah 0 jadi 12
+    hours = hours % 12 || 12; // ubah 0 jadi 12
 
-  return (
-    <span className="flex gap-2">
-      <p>{`${year}/${month}/${day}`}</p>
-      <span className="text-[#e0e0e0] text-[16px]">|</span>
-      <p>{`${hours}:${minutes} ${ampm}`}</p>
-    </span>
-  );
+    return (
+      <span className="flex gap-2">
+        <p>{`${year}/${month}/${day}`}</p>
+        <span className="text-[#e0e0e0] text-[16px]">|</span>
+        <p>{`${hours}:${minutes} ${ampm}`}</p>
+      </span>
+    );
+  } else {
+    const date = new Date(dateString);
+
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return (
+      <span className="flex gap-2">
+        <p>{`${day} ${month} ${year}`}</p>
+        <span className="text-[#e0e0e0] text-[16px]">|</span>
+        <p>{`${hours}:${minutes}`}</p>
+      </span>
+    );
+  }
 }
 export function formatDatetime(dateString) {
   if (!dateString) return "";

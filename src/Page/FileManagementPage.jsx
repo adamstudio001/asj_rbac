@@ -19,6 +19,7 @@ import ModalUpload from "@/Components/ModalUpload";
 import { TableRowActionMenu } from "@/Components/TableRowActionMenu";
 import DeleteModal from "@/Components/DeleteModal";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
+import { FiRotateCcw } from "react-icons/fi";
 import Copy from "@assets/copy.svg";
 import Rename from "@assets/edit.svg";
 import Collaboration from "@assets/collaboration.svg";
@@ -51,7 +52,7 @@ import {
 import CustomInput from "@/Components/CustomInput";
 import { Button } from "@/Components/ui/Button";
 // import { IoDownload } from "react-icons/io5";
-import { Download } from "lucide-react";
+import { Download, X } from "lucide-react";
 import { MenuProvider, useMenu } from "@/Providers/MenuContext";
 import { useLongPress } from "@/Hooks/useLongPress";
 import { createFileObject } from "@/Common/FileFactory";
@@ -79,6 +80,7 @@ const FileManagementContent = () => {
 
   const { search, setSearch } = useSearch();
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
+  const [isModalDeleteRestoreOpen, setIsModalDeleteRestoreOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -117,6 +119,8 @@ const FileManagementContent = () => {
   const [listVisible, setListVisible] = useState([]);
 
   const isAdmin = isAdminAccess() || isCompanyAccess();
+
+  const [mode, setMode] = useState("default");
 
   useEffect(() => {
     if (!textRef.current) return;
@@ -222,6 +226,37 @@ const FileManagementContent = () => {
         setLists(dataList?.data ?? []);
         setTotalPages(dataList?.last_page ?? 1);
         setListsPath(dataBreadcrumb?.data ?? []);
+      } catch (err) {
+        console.error(err);
+        setError("Terjadi kesalahan saat memuat data.");
+      } finally {
+        setIsLoad(false);
+      }
+    }, 1500);
+  }
+
+  async function loadDataRestore() {
+    if (isExpired()) {
+      await refreshSession();
+    }
+
+    setIsLoad(true);
+    setError(null);
+
+    setTimeout(async () => {
+      try {
+        // --- Buat array promise dinamis ---
+        const dataList = await axios.get(
+          `${BASEURL}/api/v1/app/company/1/restore/storage`,
+          {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            },
+          },
+        );
+
+        setLists(dataList?.data?.data ?? []);
+        setTotalPages(dataList?.last_page ?? 1);
       } catch (err) {
         console.error(err);
         setError("Terjadi kesalahan saat memuat data.");
@@ -367,7 +402,8 @@ const FileManagementContent = () => {
     isCompanyAccess();
 
   const hasGrantedButtonReleteFile = hasPermission("DELETE_FILE") || isAdmin;
-  const hasGrantedButtonReleteFolder = hasPermission("DELETE_FOLDER") || isAdmin;
+  const hasGrantedButtonReleteFolder =
+    hasPermission("DELETE_FOLDER") || isAdmin;
 
   function hasGrantedCheckboxFilter(visible) {
     const isGeneral = visible?.identifier == "GENERAL";
@@ -647,7 +683,10 @@ const FileManagementContent = () => {
                       types={itemType}
                     />
                   )}
-                  {((hasGrantedButtonReleteFile && file.type_identifier!="FOLDER") || (hasGrantedButtonReleteFolder && file.type_identifier=="FOLDER")) && (
+                  {((hasGrantedButtonReleteFile &&
+                    file.type_identifier != "FOLDER") ||
+                    (hasGrantedButtonReleteFolder &&
+                      file.type_identifier == "FOLDER")) && (
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                       onClick={() => {
@@ -667,6 +706,139 @@ const FileManagementContent = () => {
                   </button>
                 </>
               </TableRowActionMenu>
+            ))
+          )}
+        </tbody>
+      </table>
+    );
+  }
+
+  function renderTableRestore() {
+    if (isLoad) {
+      return (
+        <table className="w-full table-auto border-collapse">
+          <thead className="bg-[#F3F3F3]">
+            <tr className="border border-gray-200">
+              <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B] w-[250px]">
+                File Name
+              </th>
+              <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+                File Type
+              </th>
+              <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+                Delete On
+              </th>
+              <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+                Delete
+              </th>
+              <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+                Restore
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array(3)
+              .fill(null)
+              .map((_, i) => (
+                <tr key={i}>
+                  <td className="border px-4 py-2">
+                    <div className="skeleton h-4 w-full"></div>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <div className="skeleton h-4 w-full"></div>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <div className="skeleton h-4 w-full"></div>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <div className="skeleton h-4 w-full"></div>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <div className="skeleton h-4 w-full"></div>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    return (
+      <table className="w-full text-left text-sm">
+        <thead className="bg-[#F3F3F3]">
+          <tr className="border border-gray-200">
+            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B] w-[250px]">
+              File Name
+            </th>
+            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+              File Type
+            </th>
+            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+              Delete On
+            </th>
+            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+              Delete
+            </th>
+            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+              Restore
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {error ? (
+            <tr>
+              <td colSpan={5} className="text-center flex-col gap-2">
+                <p>{error}</p>
+                <button
+                  className="
+                              px-3 py-1
+                              rounded
+                              border-0
+                              hover:border hover:border-gray-400
+                              active:border active:border-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-gray-400
+                              transition-all duration-150
+                            "
+                  onClick={() => window.location.reload()}
+                >
+                  Klik muat ulang
+                </button>
+              </td>
+            </tr>
+          ) : (
+            sortedFiles.map((file) => (
+              <tr>
+                <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
+                  {getFileIcon(
+                    file.name,
+                    file.type_identifier.toLowerCase() == "folder",
+                    24,
+                  )}
+                  <EllipsisTooltip className={"w-[250px]"}>
+                    {file.name}
+                  </EllipsisTooltip>
+                </td>
+                <td className="px-4 py-3">{formatFileType(file.name)}</td>
+                <td className="px-4 py-3">{formatDate(file.deleted_at, 2)}</td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => {
+                      handlerRemoveRestore(file);
+                    }}
+                  >
+                    <X size={16} />
+                  </button>
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => {
+                      handlerRestore(file);
+                    }}
+                  >
+                    <FiRotateCcw size={16} />
+                  </button>
+                </td>
+              </tr>
             ))
           )}
         </tbody>
@@ -694,6 +866,84 @@ const FileManagementContent = () => {
       />
     );
   }
+
+  const handlerRemoveRestore = async (file) => {
+    setFileSelected(file);
+    setIsModalDeleteRestoreOpen(true);
+
+    console.log("remove:", file);
+  };
+
+  const doRemoveRestore = async () => {
+    if (!fileSelected) {
+      addToast("error", "belum pilih file/folder yang di hapus");
+      return;
+    }
+
+    if (isExpired()) {
+      await refreshSession();
+    }
+
+    // setLoading(true);
+    setIsModalDeleteRestoreOpen(false);
+    try {
+      // const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      // const headers = buildHeaders(info, token);
+      // const request = await axios.delete(`${BASEURL}/api/v1/app/company/1/restore/storage/${fileSelected.id}}`, {
+      //   headers: headers,
+      // });
+      // const response = request.data;
+      // if (response?.success) {
+      //   addToast("success", response?.success);
+      //   loadData();
+      // } else {
+      //   addToast("error", response?.error);
+      // }
+      // console.log(response);
+    } catch (err) {
+      console.error(err);
+      // addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setIsModalDeleteRestoreOpen(false);
+    }
+  };
+
+  const handlerRestore = async (file) => {
+    setFileSelected(file);
+
+    console.log("restore:", fileSelected);
+    if (!fileSelected) {
+      addToast("error", "belum pilih file/folder yang di hapus");
+      return;
+    }
+
+    if (isExpired()) {
+      await refreshSession();
+    }
+
+    // setLoading(true);
+    // setIsModalDeleteOpen(false);
+    try {
+      // const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      // const headers = buildHeaders(info, token);
+      // const request = await axios.post(`${BASEURL}/api/v1/app/company/1/restore/storage/${fileSelected.id}}`, {
+      //   headers: headers,
+      // });
+      // const response = request.data;
+      // if (response?.success) {
+      //   addToast("success", response?.success);
+      //   loadData();
+      // } else {
+      //   addToast("error", response?.error);
+      // }
+      // console.log(response);
+    } catch (err) {
+      console.error(err);
+      // addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      // setIsModalDeleteOpen(false);
+    }
+  };
 
   const handleContextMenu = (e) => {
     e.preventDefault();
@@ -762,8 +1012,14 @@ const FileManagementContent = () => {
               {renderCreateFolder()}
               {/* {isAdminAccess &&  */}
               <button
-                onClick={() => {}}
-                className="flex max-sm:flex-1 items-center gap-3 bg-[#F3F3F3] text-[#1E293B] font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#e6e5e5] transition"
+                onClick={() => {
+                  setMode((prev) =>
+                    prev === "restore" ? "default" : "restore",
+                  );
+                  setFileSelected(null);
+                  loadDataRestore();
+                }}
+                className={`flex max-sm:flex-1 items-center gap-3 ${mode != "default" ? "border border-[#1B2E48]" : "bg-[#F3F3F3] text-[#1E293B]"} font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#e6e5e5] transition`}
               >
                 <img src={RestoreFile} width={18} />
                 Restore File
@@ -835,8 +1091,9 @@ const FileManagementContent = () => {
         <div className="w-full rounded-lg space-y-6">
           {" "}
           {/* overflow-x-scroll scroll-custom  */}
-          {renderBreadCrumb()}
-          {renderTable()}
+          {mode == "default" && renderBreadCrumb()}
+          {mode == "default" && renderTable()}
+          {mode == "restore" && renderTableRestore()}
         </div>
 
         {renderPaging()}
@@ -849,6 +1106,14 @@ const FileManagementContent = () => {
         isOpen={isModalDeleteOpen}
         onClose={() => setIsModalDeleteOpen(false)}
         onConfirm={() => deleteHandler()}
+      />
+
+      <DeleteModal
+        titleMessage="Delete File Permanenly"
+        message={"Are you sure want to delete this item?"}
+        isOpen={isModalDeleteRestoreOpen}
+        onClose={() => setIsModalDeleteRestoreOpen(false)}
+        onConfirm={() => doRemoveRestore()}
       />
 
       {/* Modal Info */}
