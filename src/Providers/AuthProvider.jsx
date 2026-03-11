@@ -1,3 +1,4 @@
+import { BASEURL } from "@/Common/Constant";
 import axios from "axios";
 import React, { createContext, useContext, useState, useEffect } from "react";
 
@@ -130,7 +131,7 @@ export function AuthProvider({ children }) {
       console.info("🔄 Token sudah expired, memproses refresh...");
 
       const res = await axios.post(
-        "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/refresh-token",
+        `${BASEURL}/api/v1/refresh-token`,
         {},
         {
           headers: { Authorization: `Bearer ${storedTokenRaw}` },

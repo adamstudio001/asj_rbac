@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/Components/ui/Tooltip"
+import { BASEURL } from '@/Common/Constant';
 // import { filterAndSortFiles } from '@/Common/Utils';
 
 function FileListView({ lists, folderKeys, mode, isLoading=false }) {
@@ -59,7 +60,7 @@ function FileListView({ lists, folderKeys, mode, isLoading=false }) {
             key={index} 
             onClick={()=>{
                 window.open(
-                  `https://staging-backend.rbac.asj-shipagency.co.id/download/${file.name}`,
+                  `${BASEURL}/download/${file.name}`,
                   '_blank',
                   'noopener,noreferrer'
                 );

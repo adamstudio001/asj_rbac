@@ -18,6 +18,7 @@ import axios from "axios";
 import { buildHeaders, isEmpty } from "@/Common/Utils";
 import { createFileObject } from "@/Common/FileFactory";
 import RadioGroup from "./RadioGroup";
+import { BASEURL } from "@/Common/Constant";
 
 export default function ModalUpload({
   refreshData = () => {},
@@ -184,8 +185,8 @@ export default function ModalUpload({
             throw Error("ada masalah data ketika di copy");
           }
           const urlDownload = (isAdmin || isCompany)? 
-          `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${f?.reference?.id}/url-download`: 
-          `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${f?.reference?.id}/url-download`;
+          `${BASEURL}/api/v1/company/1/storage/${f?.reference?.id}/url-download`: 
+          `${BASEURL}/api/v1/app/company/1/storage/${f?.reference?.id}/url-download`;
 
           const resDownloadUrl = await fetch(urlDownload, {
             method: "POST",
@@ -222,8 +223,8 @@ export default function ModalUpload({
         // const headers = buildHeaders(info, token, false);
 
         const url = (isAdmin || isCompany)
-          ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${idFolder}/file`
-          : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${idFolder}/file`;
+          ? `${BASEURL}/api/v1/company/1/storage/${idFolder}/file`
+          : `${BASEURL}/api/v1/app/company/1/storage/${idFolder}/file`;
 
         const response = await axios.post(url, formData, {
           headers: headers,

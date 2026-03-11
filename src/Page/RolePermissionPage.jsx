@@ -29,6 +29,7 @@ import axios from "axios";
 import CustomTextArea from "@/Components/CustomTextArea";
 import { IoMdAdd } from "react-icons/io";
 import { buildHeaders } from "@/Common/Utils";
+import { BASEURL } from "@/Common/Constant";
 
 const RolePermissionPage = () => {
   return (
@@ -118,25 +119,25 @@ const RolePermissionContent = () => {
           const [roleOriRes, roleRes, userRes, permissionRes] =
             await Promise.allSettled([
               axios.get(
-                "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role",
+                `${BASEURL}/api/v1/company/1/role`,
                 {
                   headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
               ),
               axios.get(
-                "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/role-with-user",
+                `${BASEURL}/api/v1/company/1/role/role-with-user`,
                 {
                   headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
               ),
               axios.get(
-                `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user`, //?page=${page}
+                `${BASEURL}/api/v1/company/1/user`, //?page=${page}
                 {
                   headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
               ),
               axios.get(
-                "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/permission",
+                `${BASEURL}/api/v1/helper/permission`,
                 {
                   headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
@@ -692,7 +693,7 @@ export function ModalPermission({
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
 
-      const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/${data?.role?.[0]?.identifier}/permission`;
+      const url = `${BASEURL}/api/v1/company/1/role/${data?.role?.[0]?.identifier}/permission`;
       const method = "put";
 
       const res = await axios({
@@ -938,7 +939,7 @@ export function ModalRole({
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
 
-      const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/${values?.role?.identifier}/user`;
+      const url = `${BASEURL}/api/v1/company/1/role/${values?.role?.identifier}/user`;
       const method = "put";
 
       const res = await axios({
@@ -1011,7 +1012,7 @@ export function ModalRole({
                   <CustomSelect
                     label="Select Role"
                     records={listRole}
-                    // sourceUrl="https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job"
+                    // sourceUrl=`${BASEURL}/api/v1/helper/job`
                     value={field.value}
                     onChange={field.onChange}
                     error={errors.role?.message}
@@ -1094,7 +1095,7 @@ export function ModalForm({
       const headers = buildHeaders(info, token);
 
       const baseUrl =
-        "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role";
+        `${BASEURL}/api/v1/company/1/role`;
 
       const url =
         mode === "create" ? baseUrl : `${baseUrl}/${data?.id_role ?? 0}`;

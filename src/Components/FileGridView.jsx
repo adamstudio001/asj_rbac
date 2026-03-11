@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 // import { filterAndSortFiles } from '@/Common/Utils';
 import { useEffect } from 'react';
+import { BASEURL } from '@/Common/Constant';
 
 function FileGridView({ lists, folderKeys, mode, isLoading=false }) {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ function FileGridView({ lists, folderKeys, mode, isLoading=false }) {
               key={index}
               onClick={()=>{
                 window.open(
-                  `https://staging-backend.rbac.asj-shipagency.co.id/download/${file.name}`,
+                  `${BASEURL}/download/${file.name}`,
                   '_blank',
                   'noopener,noreferrer'
                 );

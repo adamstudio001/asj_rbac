@@ -59,6 +59,7 @@ import UserProfileMenu from "@/Components/UserProfileMenu";
 import { Checkbox } from "@/Components/ui/Checkbox";
 import RadioGroup from "@/Components/RadioGroup";
 import CustomSelect from "@/Components/CustomSelect";
+import { BASEURL } from "@/Common/Constant";
 
 const FileManagementPage = () => {
   return (
@@ -153,8 +154,8 @@ const FileManagementContent = () => {
     }
 
     const baseUrl = isAdmin
-      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
-      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
+      ? `${BASEURL}/api/v1/company/1`
+      : `${BASEURL}/api/v1/app/company/1`;
 
     const url = `${baseUrl}/${
       !isRoot ? `storage/${folderKeys}` : `storage`
@@ -175,7 +176,7 @@ const FileManagementContent = () => {
         // --- Buat array promise dinamis ---
         const promises = [
           axios.get(
-            "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-type",
+            `${BASEURL}/api/v1/helper/storage-item-type`,
             {
               headers: {
                 Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -238,7 +239,7 @@ const FileManagementContent = () => {
       await refreshSession();
     }
 
-    const url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-visibility`;
+    const url = `${BASEURL}/api/v1/helper/storage-item-visibility`;
 
     setIsLoadVisible(true);
 
@@ -290,15 +291,15 @@ const FileManagementContent = () => {
     let urlDelete = null; //[check] masih belum bedain antara delete folder dengan file
     if (fileSelected.type_identifier.toLowerCase() == "folder") {
       if (isAdmin) {
-        urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
       } else {
-        urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
       }
     } else {
       if (isAdmin) {
-        urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/file/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/company/1/storage/${folderKeys}/file/${fileSelected.id}`;
       } else {
-        urlDelete = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/file/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/file/${fileSelected.id}`;
       }
     }
 
@@ -424,8 +425,8 @@ const FileManagementContent = () => {
     }
 
     const urlDownload = isAdmin
-      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${file.id}/url-download`
-      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${file.id}/url-download`;
+      ? `${BASEURL}/api/v1/company/1/storage/${file.id}/url-download`
+      : `${BASEURL}/api/v1/app/company/1/storage/${file.id}/url-download`;
 
     // const newTab = window.open("about:blank");
     // if (!newTab) {
@@ -1132,9 +1133,9 @@ export function ModalFolder({
       let url = null;
       if (isAdmin) {
         if (isEdit) {
-          url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`;
+          url = `${BASEURL}/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`;
         } else {
-          url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/folder`;
+          url = `${BASEURL}/api/v1/company/1/storage/${folderKeys}/folder`;
         }
       } else {
         if (isRoot) {
@@ -1143,13 +1144,13 @@ export function ModalFolder({
           //   alert("fitur edit root folder belum ada");
           //   return;
           // } else {
-          url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/root/folder`;
+          url = `${BASEURL}/api/v1/app/company/1/storage/root/folder`;
           // }
         } else {
           if (isEdit) {
-            url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}`;
+            url = `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}`;
           } else {
-            url = `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/folder`;
+            url = `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/folder`;
           }
         }
       }
@@ -1298,8 +1299,8 @@ export function ModalRenameFile({
         visibility_identifier: category ?? "GENERAL",
       };
       const url = isAdmin
-        ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/storage/${folderKeys}/file/${data.id}`
-        : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1/storage/${folderKeys}/file/${data.id}`;
+        ? `${BASEURL}/api/v1/company/1/storage/${folderKeys}/file/${data.id}`
+        : `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/file/${data.id}`;
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
@@ -1483,7 +1484,7 @@ export function ModalCollaborator({
                     <CustomSelect
                       label="Name"
                       records={names}
-                      // sourceUrl="https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job"
+                      // sourceUrl=`${BASEURL}/api/v1/helper/job`
                       value={field.value}
                       onChange={field.onChange}
                       error={errors.targets?.message}

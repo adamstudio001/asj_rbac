@@ -14,6 +14,7 @@ import {
 import Pagination from "@/Components/Pagination";
 import { useToast } from "@/Providers/ToastProvider";
 import axios from "axios";
+import { BASEURL } from "@/Common/Constant";
 
 const LogHistoryPage = () => {
   const { addToast } = useToast();
@@ -43,8 +44,8 @@ const LogHistoryPage = () => {
   // Base URL sesuai role
   const baseUrl =
     isAdmin
-      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
-      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
+      ? `${BASEURL}/api/v1/company/1`
+      : `${BASEURL}/api/v1/app/company/1`;
 
   const fetchLogs = async () => {
     setTimeout(async () => {

@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { Label } from "@/Components/ui/Label";
 import { Input } from "@/Components/ui/Input";
+import { BASEURL } from "@/Common/Constant";
 
 const UserPage = () => {
   return (
@@ -87,7 +88,7 @@ const UserPageContent = () => {
         try {
           const [usersRes, jobsRes, branchesRes] = await Promise.allSettled([
             axios.get(
-              `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user?page=${page}`,
+              `${BASEURL}/api/v1/company/1/user?page=${page}`,
               {
                 headers: {
                   Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -95,7 +96,7 @@ const UserPageContent = () => {
               }
             ),
             axios.get(
-              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job",
+              `${BASEURL}/api/v1/helper/job`,
               {
                 headers: {
                   Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -103,7 +104,7 @@ const UserPageContent = () => {
               }
             ),
             axios.get(
-              "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location",
+              `${BASEURL}/api/v1/helper/branch-location`,
               {
                 headers: {
                   Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -190,7 +191,7 @@ const UserPageContent = () => {
         const headers = buildHeaders(info, token);
 
         const res = await axios.delete(
-          `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${
+          `${BASEURL}/api/v1/company/1/user/${
             selectedUser?.id ?? 0
           }`,
           {
@@ -741,7 +742,7 @@ export function ModalResetPassword({
 
     try {
       const res = await axios.put(
-        `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user/${data.id}/reset-password`,
+        `${BASEURL}/api/v1/company/1/user/${data.id}/reset-password`,
         {
           password: values.newPassword,
           password_confirmation: values.confirmPassword,
@@ -1038,7 +1039,7 @@ export function ModalUser({
       const headers = buildHeaders(info, token);
 
       const baseUrl =
-        "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/user";
+        `${BASEURL}/api/v1/company/1/user`;
 
       const url = mode === "create" ? baseUrl : `${baseUrl}/${data?.id ?? 0}`;
 
@@ -1257,7 +1258,7 @@ export function ModalUser({
                           <CustomSelect
                             label="Division"
                             records={jobs}
-                            // sourceUrl="https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/job"
+                            // sourceUrl=`${BASEURL}/api/v1/helper/job`
                             value={field.value}
                             disabled={mode !== "create"}
                             onChange={field.onChange}
@@ -1274,7 +1275,7 @@ export function ModalUser({
                           <CustomSelect
                             label="Work Location / Branch"
                             records={branches}
-                            // sourceUrl="https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/branch-location"
+                            // sourceUrl=`${BASEURL}/api/v1/helper/branch-location`
                             value={field.value}
                             disabled={mode !== "create"}
                             onChange={field.onChange}

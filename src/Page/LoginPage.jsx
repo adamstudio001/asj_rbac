@@ -9,6 +9,7 @@ import { useAuth } from "@/Providers/AuthProvider";
 import slide1 from "@/assets/slide1.jpeg";
 import slide2 from "@/assets/slide2.jpeg";
 import slide3 from "@/assets/slide3.jpeg";
+import { BASEURL } from "@/Common/Constant";
 
 const images = [
   slide1,slide2,slide3
@@ -77,7 +78,7 @@ function LoginContent() {
       console.log(info);
       // addToast("success", JSON.stringify(info));
 
-      const res = await axios.post("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/login", data); 
+      const res = await axios.post(`${BASEURL}/api/v1/login`, data); 
       const body = res.data;
 
       if (body.error) {
@@ -86,7 +87,7 @@ function LoginContent() {
       } else if (body.data && body.data.auth) {
         const auth = body.data.auth;
 
-        // const resRoles = await axios.get("https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1/role/role-with-user",{headers: { Authorization: `Bearer ${auth.token}` },});
+        // const resRoles = await axios.get(`${BASEURL}/api/v1/company/1/role/role-with-user`,{headers: { Authorization: `Bearer ${auth.token}` },});
         // const dataRoles = resRoles.data?.data ?? [];
 
         const user = {

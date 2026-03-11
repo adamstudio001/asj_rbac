@@ -18,6 +18,7 @@ import { filterAndSortFiles, isEmpty } from "@/Common/Utils";
 import Pagination from "@/Components/Pagination";
 import { useNavigate } from "react-router-dom";
 import UserProfileMenu from "@/Components/UserProfileMenu";
+import { BASEURL } from "@/Common/Constant";
 
 const DashboardPage = () => {
   return (
@@ -95,8 +96,8 @@ const DashboardContent = () => {
 
   const baseUrlFiles =
     isAdminAccess() || isCompanyAccess()
-      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
-      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
+      ? `${BASEURL}/api/v1/company/1`
+      : `${BASEURL}/api/v1/app/company/1`;
 
   async function loadFilterAction() {
     setLoading(true);
@@ -107,7 +108,7 @@ const DashboardContent = () => {
         // PARALLEL REQUEST
         const [filtersRes, listRes] = await Promise.all([
           axios.get(
-            "https://staging-backend.rbac.asj-shipagency.co.id/api/v1/helper/storage-item-type",
+            `${BASEURL}/api/v1/helper/storage-item-type`,
             { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
           ),
           Promise.resolve({ data: { data: [] } }),
@@ -429,8 +430,8 @@ function RecentOpened() {
 
   const baseUrlFiles =
     isAdminAccess() || isCompanyAccess()
-      ? `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/company/1`
-      : `https://staging-backend.rbac.asj-shipagency.co.id/api/v1/app/company/1`;
+      ? `${BASEURL}/api/v1/company/1`
+      : `${BASEURL}/api/v1/app/company/1`;
 
   useEffect(() => {
     if (!token) return;
@@ -457,7 +458,7 @@ function RecentOpened() {
             preview: imageExtensions.includes(
               item.storage_item_extension?.toLowerCase()
             )
-              ? `https://staging-backend.rbac.asj-shipagency.co.id/download/${item.storage_item_name}`
+              ? `${BASEURL}/download/${item.storage_item_name}`
               : null,
           }));
 
@@ -571,7 +572,7 @@ function RecentOpened() {
                 navigate(`/filemanager/${file.storage_item_id}`);
               } else {
                 window.open(
-                  `https://staging-backend.rbac.asj-shipagency.co.id/download/${file.name}`,
+                  `${BASEURL}/download/${file.name}`,
                   "_blank",
                   "noopener,noreferrer"
                 );
