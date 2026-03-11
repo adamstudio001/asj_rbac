@@ -401,6 +401,20 @@ const RolePermissionContent = () => {
       );
     }
 
+    function MenuItem({ children, onClick, closeMenu }) {
+      return (
+        <button
+          className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4]"
+          onClick={(e) => {
+            onClick?.(e);
+            closeMenu?.();
+          }}
+        >
+          {children}
+        </button>
+      );
+    }
+
     return (
       <table className="w-full text-left text-sm">
         <thead className="bg-[#F3F3F3]">
@@ -483,8 +497,7 @@ const RolePermissionContent = () => {
                       Edit
                     </button> */}
                     {hasGrantedButtonPermission && (
-                      <button
-                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                      <MenuItem
                         onClick={() => {
                           setSelectedData(data);
                           setIsModalPermissionOpen(true);
@@ -492,11 +505,10 @@ const RolePermissionContent = () => {
                       >
                         <img src={change_permission} alt="permission" />
                         Change Permission
-                      </button>
+                      </MenuItem>
                     )}
                     {hasGrantedButtonRole && (
-                      <button
-                        className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                      <MenuItem
                         onClick={() => {
                           if (
                             Array.isArray(data.role) &&
@@ -515,7 +527,7 @@ const RolePermissionContent = () => {
                       >
                         <img src={change_role} alt="role" />
                         Change role
-                      </button>
+                      </MenuItem>
                     )}
                     {/* <button
                           className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"

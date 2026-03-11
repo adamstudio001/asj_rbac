@@ -12,6 +12,8 @@ export function TableActionMenuBase({
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
 
+  const closeMenu = () => setShowMenu(false);
+
   useEffect(() => {
     if (showMenu && buttonRef.current && menuRef.current) {
       const popper = createPopper(buttonRef.current, menuRef.current, {
@@ -57,9 +59,11 @@ export function TableActionMenuBase({
       {showMenu && (
         <div
           ref={menuRef}
-          className={`z-50 bg-white border border-gray-200 rounded-lg shadow-md py-2 w-40 w-[max-content] ${menuClassName}`}
+          className={`z-50 bg-white border border-gray-200 rounded-lg shadow-md py-2 w-[max-content] ${menuClassName}`}
         >
-          {children}
+          {React.Children.map(children, (child) =>
+            React.cloneElement(child, { closeMenu })
+          )}
         </div>
       )}
     </div>

@@ -62,7 +62,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
     <>
       {/* Sidebar */}
       <div
-        className={`fixed lg:relative top-0 left-0 h-[-webkit-fill-available] overflow-y-auto scroll-custom bg-[#fff] border-r-2 border-[#E3E3E3] transition-all duration-300 ease-in-out z-50 p-3 flex flex-col justify-between
+        className={`fixed lg:relative top-0 left-0 h-[-webkit-fill-available] overflow-y-auto scroll-custom bg-[#fff] border-r-2 border-[#E3E3E3] transition-all duration-300 ease-in-out z-40 p-3 flex flex-col justify-between
           ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 
           ${isCollapsed ? "w-18" : "w-64"}`}
       >
@@ -198,7 +198,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
       {/* Overlay untuk Mobile */}
       {isOpen && (
         <div
-          className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-40 lg:hidden"
+          className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-30 lg:hidden"
           onClick={toggleSidebar}
         ></div>
       )}

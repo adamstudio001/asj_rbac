@@ -175,14 +175,11 @@ const FileManagementContent = () => {
       try {
         // --- Buat array promise dinamis ---
         const promises = [
-          axios.get(
-            `${BASEURL}/api/v1/helper/storage-item-type`,
-            {
-              headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-              },
+          axios.get(`${BASEURL}/api/v1/helper/storage-item-type`, {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
             },
-          ),
+          }),
           axios.get(url, {
             headers: {
               Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -664,7 +661,8 @@ const FileManagementContent = () => {
                     className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                     onClick={() => collaboratorHandler(file)}
                   >
-                    <img src={Collaboration} alt="Collabolator" /> Add Collaborator
+                    <img src={Collaboration} alt="Collabolator" /> Add
+                    Collaborator
                   </button>
                 </>
               </TableRowActionMenu>
@@ -1395,40 +1393,101 @@ export function ModalCollaborator({
   data,
   extraAction = function () {},
 }) {
-  // const { addToast } = useToast();
-  // const {
-  //   token,
-  //   hasPermission,
-  //   isAdminAccess,
-  //   isCompanyAccess,
-  //   isExpired,
-  //   refreshSession,
-  // } = useAuth();
+  const { addToast } = useToast();
+  const {
+    token,
+    hasPermission,
+    isAdminAccess,
+    isCompanyAccess,
+    isExpired,
+    refreshSession,
+  } = useAuth();
 
   const [loading, setLoading] = useState(false);
-  // const isAdmin = isAdminAccess() || isCompanyAccess();
+  const [collaborations, setCollaborations] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  const names = [
-    { identifier: "0424096001", label: "Desy Puji Astuti" },
-    { identifier: "0423106505", label: "Andhika Mahendra" },
-    { identifier: "0004096908", label: "Andhika Mahendra" },
-    { identifier: "0012075802", label: "Andhika Mahendra" },
-    { identifier: "0019066501", label: "Andhika Mahendra" },
-    { identifier: "0404117202", label: "Andhika Mahendra" },
-    { identifier: "0403086301", label: "Andhika Mahendra" },
-    { identifier: "0406046201", label: "Andhika Mahendra" },
-    { identifier: "0304097004", label: "Andhika Mahendra" },
-    { identifier: "0424058209", label: "Andhika Mahendra" }
-  ]
+  const [isLoad, setIsLoad] = useState(false);
+  const [error, setError] = useState(null);
+  const isAdmin = isAdminAccess() || isCompanyAccess();
 
-  const peopleWithAccess = [
-    { name: "Desy Puji Astuti", role: "HR/GA" },
-    { name: "Andhika Mahendra", role: "FDA" },
-    { name: "Andhika Mahendra", role: "FDA" },
-    { name: "Andhika Mahendra", role: "FDA" },
-    { name: "Andhika Mahendra", role: "FDA" },
-    { name: "Andhika Mahendra", role: "FDA" },
-  ];
+  const url_collaboration =
+    isAdmin || isCompany
+      ? `${BASEURL}/api/v1/company/1/storage/${data?.id ?? "#"}/collaboration`
+      : `${BASEURL}/api/v1/app/company/1/storage/${data?.id ?? "#"}/collaboration`;
+  const url_user = `${BASEURL}/api/v1/company/1/user`;
+
+  async function loadData() {
+    if (isExpired()) {
+      await refreshSession();
+    }
+
+    if (isAdmin) {
+      setError(null);
+      setIsLoad(true);
+      setTimeout(async () => {
+        try {
+          const [collaborationRes, usersRes] = await Promise.allSettled([
+            axios.get(url_collaboration, {
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              },
+            }),
+            axios.get(url_user, {
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              },
+            }),
+          ]);
+
+          const collaboration =
+            collaborationRes.status === "fulfilled"
+              ? collaborationRes.value.data?.data || []
+              : [];
+
+          const user =
+            usersRes.status === "fulfilled"
+              ? usersRes.value.data?.data || []
+              : null;
+
+          if (
+            isEmpty(usersRes?.value?.data?.success) ||
+            isEmpty(collaborationRes?.value?.data?.success)
+          ) {
+            throw new Error(
+              "One of the API responses returned unsuccessful status.",
+            );
+          }
+
+          setUsers(
+            user.map((u) => ({
+              identifier: u.id,
+              label: u.full_name,
+            })),
+          );
+          // setTotalPages(users?.last_page ?? 1);
+          setCollaborations(
+            collaboration.map((c) => ({
+              id: c.id,
+              name: c?.employment?.user?.full_name ?? "-",
+              role: c?.employment?.job_identifier ?? "?",
+            })),
+          );
+        } catch (err) {
+          console.error(err);
+          setError("Terjadi kesalahan saat memuat data.");
+        } finally {
+          setIsLoad(false);
+        }
+      }, 1500);
+    }
+  }
+
+  useEffect(() => {
+    if (open) {
+      loadData();
+    }
+  }, [open, data?.id]);
 
   const {
     register,
@@ -1449,9 +1508,36 @@ export function ModalCollaborator({
   }, [data, reset]);
 
   const onSubmit = async (values) => {
-    // if (isExpired()) {
-    //   await refreshSession();
-    // }
+    setLoading(true);
+
+    try {
+      const formData = {
+        employment_id: values.targets.identifier,
+      };
+
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const res = await axios.post(url_collaboration, formData, {
+        headers: headers,
+      });
+      const body = res.data;
+      console.log(body);
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+        onOpenChange(false);
+        extraAction();
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+    console.log(values);
   };
 
   useEffect(() => {
@@ -1475,46 +1561,86 @@ export function ModalCollaborator({
             className="overflow-y-auto scroll-custom"
           >
             <DialogModalDescription asChild>
-              <div className="px-6 pb-8 space-y-8">
-                <Controller
-                  name="targets"
-                  control={control}
-                  // rules={{ required: "target is required" }}
-                  render={({ field }) => (
-                    <CustomSelect
-                      label="Name"
-                      records={names}
-                      // sourceUrl=`${BASEURL}/api/v1/helper/job`
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={errors.targets?.message}
+              {error ? (
+                <div className="px-6 pb-8 space-y-4 text-center">
+                  <p>{error}</p>
+
+                  <button
+                    type="button"
+                    className="
+          px-3 py-1
+          rounded
+          border-0
+          hover:border hover:border-gray-400
+          active:border active:border-gray-500
+          focus:outline-none focus:ring-2 focus:ring-gray-400
+          transition-all duration-150
+        "
+                    onClick={loadData}
+                  >
+                    Klik muat ulang
+                  </button>
+                </div>
+              ) : (
+                <div className="px-6 pb-8 space-y-8">
+                  {/* CustomSelect */}
+                  {isLoad ? (
+                    <div className="space-y-2">
+                      <div className="skeleton h-4 w-24"></div>
+                      <div className="skeleton h-10 w-full"></div>
+                    </div>
+                  ) : (
+                    <Controller
+                      name="targets"
+                      control={control}
+                      rules={{ required: "Name is required" }}
+                      render={({ field }) => (
+                        <CustomSelect
+                          label="Name"
+                          records={users}
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={errors.targets?.message}
+                        />
+                      )}
                     />
                   )}
-                />
 
-                <div className="space-y-4">
-                  <h3 className="font-inter font-semibold text-[18px] text-[#1B2E48]">
-                    People With Access
-                  </h3>
+                  {/* People With Access */}
+                  <div className="space-y-4">
+                    <h3 className="font-inter font-semibold text-[18px] text-[#1B2E48]">
+                      People With Access
+                    </h3>
 
-                  <div className="max-h-[220px] overflow-y-auto pr-2 scroll-custom space-y-5">
-                    {peopleWithAccess.map((person, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="text-[18px] font-medium text-black">
-                          {person.name}
-                        </span>
+                    <div className="max-h-[220px] overflow-y-auto pr-2 scroll-custom space-y-5">
+                      {isLoad
+                        ? Array.from({ length: 3 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center justify-between"
+                            >
+                              <div className="skeleton h-4 w-40"></div>
+                              <div className="skeleton h-4 w-20"></div>
+                            </div>
+                          ))
+                        : collaborations.map((c, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between"
+                            >
+                              <span className="text-[18px] font-medium text-black">
+                                {c.name}
+                              </span>
 
-                        <span className="text-[18px] text-gray-400 font-medium">
-                          {person.role}
-                        </span>
-                      </div>
-                    ))}
+                              <span className="text-[18px] text-gray-400 font-medium">
+                                {c.role}
+                              </span>
+                            </div>
+                          ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </DialogModalDescription>
 
             <DialogModalFooter className="px-6 pb-6 items-center">

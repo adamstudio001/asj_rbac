@@ -89,7 +89,7 @@ export function TableRowActionMenu({ isFolder = true, refId, children, rowCells 
         createPortal(
           <div
             ref={menuRef}
-            className="z-[9999] bg-white border border-gray-200 rounded-lg shadow-md px-1 py-2 w-40"
+            className="w-[max-content] z-[9999] bg-white border border-gray-200 rounded-lg shadow-md px-1 py-2 w-40"
             style={{ position: "absolute" }}
           >
             {flattenChildren(children).map((child, idx) => {
