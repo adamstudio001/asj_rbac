@@ -80,7 +80,8 @@ const FileManagementContent = () => {
 
   const { search, setSearch } = useSearch();
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
-  const [isModalDeleteRestoreOpen, setIsModalDeleteRestoreOpen] = useState(false);
+  const [isModalDeleteRestoreOpen, setIsModalDeleteRestoreOpen] =
+    useState(false);
   const [page, setPage] = useState(1);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -716,7 +717,65 @@ const FileManagementContent = () => {
   function renderTableRestore() {
     if (isLoad) {
       return (
-        <table className="w-full table-auto border-collapse">
+        <>
+          <div className="skeleton h-4 w-[100px]"></div>
+          <table className="w-full table-auto border-collapse">
+            <thead className="bg-[#F3F3F3]">
+              <tr className="border border-gray-200">
+                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B] w-[250px]">
+                  File Name
+                </th>
+                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+                  File Type
+                </th>
+                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+                  Delete On
+                </th>
+                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+                  Delete
+                </th>
+                <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+                  Restore
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array(3)
+                .fill(null)
+                .map((_, i) => (
+                  <tr key={i}>
+                    <td className="border px-4 py-2">
+                      <div className="skeleton h-4 w-full"></div>
+                    </td>
+                    <td className="border px-4 py-2">
+                      <div className="skeleton h-4 w-full"></div>
+                    </td>
+                    <td className="border px-4 py-2">
+                      <div className="skeleton h-4 w-full"></div>
+                    </td>
+                    <td className="border px-4 py-2">
+                      <div className="skeleton h-4 w-full"></div>
+                    </td>
+                    <td className="border px-4 py-2">
+                      <div className="skeleton h-4 w-full"></div>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <div
+          className={`flex max-sm:flex-1 items-center gap-3 font-inter font-medium text-[14px] rounded-md transition`}
+        >
+          <img src={RestoreFile} width={18} />
+          Restore File
+        </div>
+        <table className="w-full text-left text-sm">
           <thead className="bg-[#F3F3F3]">
             <tr className="border border-gray-200">
               <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B] w-[250px]">
@@ -737,60 +796,12 @@ const FileManagementContent = () => {
             </tr>
           </thead>
           <tbody>
-            {Array(3)
-              .fill(null)
-              .map((_, i) => (
-                <tr key={i}>
-                  <td className="border px-4 py-2">
-                    <div className="skeleton h-4 w-full"></div>
-                  </td>
-                  <td className="border px-4 py-2">
-                    <div className="skeleton h-4 w-full"></div>
-                  </td>
-                  <td className="border px-4 py-2">
-                    <div className="skeleton h-4 w-full"></div>
-                  </td>
-                  <td className="border px-4 py-2">
-                    <div className="skeleton h-4 w-full"></div>
-                  </td>
-                  <td className="border px-4 py-2">
-                    <div className="skeleton h-4 w-full"></div>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      );
-    }
-
-    return (
-      <table className="w-full text-left text-sm">
-        <thead className="bg-[#F3F3F3]">
-          <tr className="border border-gray-200">
-            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B] w-[250px]">
-              File Name
-            </th>
-            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
-              File Type
-            </th>
-            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
-              Delete On
-            </th>
-            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
-              Delete
-            </th>
-            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
-              Restore
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {error ? (
-            <tr>
-              <td colSpan={5} className="text-center flex-col gap-2">
-                <p>{error}</p>
-                <button
-                  className="
+            {error ? (
+              <tr>
+                <td colSpan={5} className="text-center flex-col gap-2">
+                  <p>{error}</p>
+                  <button
+                    className="
                               px-3 py-1
                               rounded
                               border-0
@@ -799,50 +810,53 @@ const FileManagementContent = () => {
                               focus:outline-none focus:ring-2 focus:ring-gray-400
                               transition-all duration-150
                             "
-                  onClick={() => window.location.reload()}
-                >
-                  Klik muat ulang
-                </button>
-              </td>
-            </tr>
-          ) : (
-            sortedFiles.map((file) => (
-              <tr>
-                <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
-                  {getFileIcon(
-                    file.name,
-                    file.type_identifier.toLowerCase() == "folder",
-                    24,
-                  )}
-                  <EllipsisTooltip className={"w-[250px]"}>
-                    {file.name}
-                  </EllipsisTooltip>
-                </td>
-                <td className="px-4 py-3">{formatFileType(file.name)}</td>
-                <td className="px-4 py-3">{formatDate(file.deleted_at, 2)}</td>
-                <td className="px-4 py-3">
-                  <button
-                    onClick={() => {
-                      handlerRemoveRestore(file);
-                    }}
+                    onClick={() => window.location.reload()}
                   >
-                    <X size={16} />
-                  </button>
-                </td>
-                <td className="px-4 py-3">
-                  <button
-                    onClick={() => {
-                      handlerRestore(file);
-                    }}
-                  >
-                    <FiRotateCcw size={16} />
+                    Klik muat ulang
                   </button>
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              sortedFiles.map((file) => (
+                <tr>
+                  <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
+                    {getFileIcon(
+                      file.name,
+                      file.type_identifier.toLowerCase() == "folder",
+                      24,
+                    )}
+                    <EllipsisTooltip className={"w-[250px]"}>
+                      {file.name}
+                    </EllipsisTooltip>
+                  </td>
+                  <td className="px-4 py-3">{formatFileType(file.name)}</td>
+                  <td className="px-4 py-3">
+                    {formatDate(file.deleted_at, 2)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => {
+                        handlerRemoveRestore(file);
+                      }}
+                    >
+                      <X size={16} />
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => {
+                        handlerRestore(file);
+                      }}
+                    >
+                      <FiRotateCcw size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </>
     );
   }
 
