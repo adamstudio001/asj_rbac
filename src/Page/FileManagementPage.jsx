@@ -366,7 +366,8 @@ const FileManagementContent = () => {
     isAdminAccess() ||
     isCompanyAccess();
 
-  const hasGrantedButtonRelete = hasPermission("REMOVE_FILE_FOLDER") || isAdmin;
+  const hasGrantedButtonReleteFile = hasPermission("DELETE_FILE") || isAdmin;
+  const hasGrantedButtonReleteFolder = hasPermission("DELETE_FOLDER") || isAdmin;
 
   function hasGrantedCheckboxFilter(visible) {
     const isGeneral = visible?.identifier == "GENERAL";
@@ -646,7 +647,7 @@ const FileManagementContent = () => {
                       types={itemType}
                     />
                   )}
-                  {hasGrantedButtonRelete && (
+                  {((hasGrantedButtonReleteFile && file.type_identifier!="FOLDER") || (hasGrantedButtonReleteFolder && file.type_identifier=="FOLDER")) && (
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                       onClick={() => {
@@ -1412,7 +1413,7 @@ export function ModalCollaborator({
   const isAdmin = isAdminAccess() || isCompanyAccess();
 
   const url_collaboration =
-    isAdmin || isCompany
+    isAdmin || isCompanyAccess
       ? `${BASEURL}/api/v1/company/1/storage/${data?.id ?? "#"}/collaboration`
       : `${BASEURL}/api/v1/app/company/1/storage/${data?.id ?? "#"}/collaboration`;
   const url_user = `${BASEURL}/api/v1/company/1/user`;
