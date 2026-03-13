@@ -1694,8 +1694,8 @@ export function ModalCollaborator({
 
   const url_collaboration =
     isAdmin || isCompanyAccess
-      ? `${BASEURL}/api/v1/company/1/storage/${data?.id ?? "#"}/collaboration`
-      : `${BASEURL}/api/v1/app/company/1/storage/${data?.id ?? "#"}/collaboration`;
+      ? `${BASEURL}/api/v1/app/company/1/storage/${data?.id ?? "#"}/collaboration`
+      : `${BASEURL}/api/v1/company/1/storage/${data?.id ?? "#"}/collaboration`;
   const url_user = `${BASEURL}/api/v1/app/company/1/user/all`;
 
   async function fetchUsers(token, url) {
@@ -1752,7 +1752,7 @@ export function ModalCollaborator({
       await refreshSession();
     }
 
-    if (isAdmin) {
+    // if (isAdmin) {
       setError(null);
       setIsLoad(true);
       setTimeout(async () => {
@@ -1791,7 +1791,7 @@ export function ModalCollaborator({
           setIsLoad(false);
         }
       }, 1500);
-    }
+    // }
   }
 
   useEffect(() => {
