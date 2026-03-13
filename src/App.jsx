@@ -26,8 +26,18 @@ export default function App() {
                 <Route element={<PanelLayout />}>
                   <Route path="/dashboard/:folderKeys?" element={<DashboardPage />} />
                   <Route path="/filemanager/:folderKeys?" element={<FileManagementPage />} />
-                  <Route element={<AccessControlRoute checkAccess={(auth) => (auth.isAdminAccess() || auth.isCompanyAccess())} />}>
+                  <Route element={<AccessControlRoute checkAccess={(auth) => {
+                    const isAdmin = auth.isAdminAccess() || auth.isCompanyAccess();
+                    const hasGrantedShowMenuUser = auth.canAccessModule("User") || isAdmin;
+                    return hasGrantedShowMenuUser;
+                  }} />}>
                     <Route path="/users" element={<UserPage />} />
+                  </Route>
+                  <Route element={<AccessControlRoute checkAccess={(auth) => {
+                    const isAdmin = auth.isAdminAccess() || auth.isCompanyAccess();
+                    const hasGrantedShowMenuRole = auth.canAccessModule("Role Access") || isAdmin;
+                    return hasGrantedShowMenuRole;
+                  }} />}>
                     <Route path="/role_permissions" element={<RolePermissionPage />} />
                   </Route>
                   <Route path="/logs/" element={<LogHistoryPage />} />

@@ -11,9 +11,7 @@ import slide2 from "@/assets/slide2.jpeg";
 import slide3 from "@/assets/slide3.jpeg";
 import { BASEURL } from "@/Common/Constant";
 
-const images = [
-  slide1,slide2,slide3
-];
+const images = [slide1, slide2, slide3];
 
 const LoginPage = () => {
   return (
@@ -52,8 +50,8 @@ function LoginContent() {
               img.src = src;
               img.onload = resolve;
               img.onerror = reject;
-            })
-        )
+            }),
+        ),
       );
       setIsLoaded(true);
     };
@@ -78,7 +76,7 @@ function LoginContent() {
       console.log(info);
       // addToast("success", JSON.stringify(info));
 
-      const res = await axios.post(`${BASEURL}/api/v1/login`, data); 
+      const res = await axios.post(`${BASEURL}/api/v1/login`, data);
       const body = res.data;
 
       if (body.error) {
@@ -86,27 +84,54 @@ function LoginContent() {
         // setErrorMessage(body.error);
       } else if (body.data && body.data.auth) {
         const auth = body.data.auth;
+        const permission_flat = getPermissions(body.data);
 
-        const resVisibility = await axios.get(`${BASEURL}/api/v1/helper/storage-item-visibility`,{headers: { Authorization: `Bearer ${auth.token}` },});
+        const resVisibility = await axios.get(
+          `${BASEURL}/api/v1/helper/storage-item-visibility`,
+          { headers: { Authorization: `Bearer ${auth.token}` } },
+        );
         const dataVisibility = resVisibility.data?.data ?? [];
+
+        const resPermission = await axios.get(
+          `${BASEURL}/api/v1/helper/permission`,
+          { headers: { Authorization: `Bearer ${auth.token}` } },
+        );
+        const dataPermission = resPermission.data?.data ?? [];
+        const filteredPermissions = dataPermission
+          .map((group) => {
+            const permissions = group.permissions.filter((p) =>
+              permission_flat.includes(p.identifier),
+            );
+
+            return {
+              ...group,
+              permissions,
+            };
+          })
+          .filter((group) => group.permissions.length > 0);
 
         const user = {
           full_name: body.data.full_name,
           email: body.data.email,
           company: body.data.company,
           expires_at: body.data.auth.expires_at, //import.meta.env.VITE_SOURCE=="fake"? new Date(Date.now() + 2 * 60 * 1000):body.data.auth.expires_at
-          admin_access: body.data.has_admin_access_status? 1:0, 
-          company_access: body.data.has_company_access_status? 1:0,
-          user_access: body.data.has_user_access_status? 1:0,
-          permissions: getPermissions(body.data),
+          admin_access: body.data.has_admin_access_status ? 1 : 0,
+          company_access: body.data.has_company_access_status ? 1 : 0,
+          user_access: body.data.has_user_access_status ? 1 : 0,
+          permissions: permission_flat,
         };
 
-        console.log(getPermissions(body.data))
+        console.log(permission_flat);
 
         sessionStorage.setItem("info", JSON.stringify(info));
         sessionStorage.setItem("token", auth.token);
         sessionStorage.setItem("user", JSON.stringify(user));
-        sessionStorage.setItem("storage_visibility", JSON.stringify(dataVisibility));
+        sessionStorage.setItem(
+          "storage_visibility",
+          JSON.stringify(dataVisibility),
+        );
+        sessionStorage.setItem("permissions", JSON.stringify(dataPermission));
+        sessionStorage.setItem("granted_permission", JSON.stringify(filteredPermissions));
         setToken(auth.token);
         setUser(user);
 
@@ -137,11 +162,10 @@ function LoginContent() {
       ...new Set(
         user.employment
           .filter((e) => e.is_active_status)
-          .flatMap((e) => e.role?.permission_list ?? [])
+          .flatMap((e) => e.role?.permission_list ?? []),
       ),
     ];
   }
-
 
   return (
     <div className="min-h-screen flex flex-row">
@@ -168,8 +192,8 @@ function LoginContent() {
                 className={cn(
                   `w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 `,
                   errors.email
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500",
                 )}
                 // value="admin_rbac@yopmail.com"
                 {...register("email", {
@@ -211,9 +235,9 @@ function LoginContent() {
                   placeholder="Masukkan password"
                   className={cn(
                     `w-full border rounded-lg px-3 py-2 pr-10 focus:outline-none focus:ring-2 `,
-                     errors.password
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-300 focus:ring-blue-500"
+                    errors.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500",
                   )}
                   {...register("password", {
                     required: "Password harus diisi",
@@ -324,7 +348,7 @@ function LoginContent() {
               onClick={() => setCurrentIndex(idx)}
               className={cn(
                 `w-3 h-3 rounded-full transition `,
-                currentIndex === idx ? "bg-white" : "bg-white/50"
+                currentIndex === idx ? "bg-white" : "bg-white/50",
               )}
             ></button>
           ))}

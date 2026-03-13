@@ -16,8 +16,14 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const noactive = "bg-[#F8F8F8] text-[#515151]";
   const currentPath = location.pathname;
 
-  const { logout, token, hasPermission, isAdminAccess, isCompanyAccess } =
-    useAuth();
+  const {
+    logout,
+    token,
+    hasPermission,
+    canAccessModule,
+    isAdminAccess,
+    isCompanyAccess,
+  } = useAuth();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -57,6 +63,8 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const isAdmin = isAdminAccess() || isCompanyAccess();
 
   const hasGrantedShowMenuLog = hasPermission("VIEW_LOG_HISTORY") || isAdmin;
+  const hasGrantedShowMenuRole = canAccessModule("Role Access") || isAdmin;
+  const hasGrantedShowMenuUser = canAccessModule("User") || isAdmin;
 
   return (
     <>
@@ -106,46 +114,44 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
                 </span>
               </Link>
             </li>
-            {isAdmin ? (
-              <>
-                <li>
-                  <Link
-                    to="/users"
-                    className={`flex items-center gap-3 ${
-                      ["/users"].some((p) => currentPath.startsWith(p))
-                        ? active
-                        : noactive
-                    } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
-                    onClick={toggleSidebar} // Tutup sidebar saat di mobile
-                  >
-                    <FaRegUser size={18} />
-                    <span className={`${isCollapsed ? "hidden" : "block"}`}>
-                      Users
-                    </span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/role_permissions"
-                    className={`flex items-center gap-3 ${
-                      ["/role_permissions"].some((p) =>
-                        currentPath.startsWith(p)
-                      )
-                        ? active
-                        : noactive
-                    } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
-                    onClick={toggleSidebar} // Tutup sidebar saat di mobile
-                  >
-                    <BsPersonLock size={24} />
-                    <span className={`${isCollapsed ? "hidden" : "block"}`}>
-                      Role & Permissions
-                    </span>
-                  </Link>
-                </li>
-              </>
-            ) : (
-              <></>
+            {hasGrantedShowMenuUser && (
+              <li>
+                <Link
+                  to="/users"
+                  className={`flex items-center gap-3 ${
+                    ["/users"].some((p) => currentPath.startsWith(p))
+                      ? active
+                      : noactive
+                  } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
+                  onClick={toggleSidebar} // Tutup sidebar saat di mobile
+                >
+                  <FaRegUser size={18} />
+                  <span className={`${isCollapsed ? "hidden" : "block"}`}>
+                    Users
+                  </span>
+                </Link>
+              </li>
             )}
+
+            {hasGrantedShowMenuRole && (
+              <li>
+                <Link
+                  to="/role_permissions"
+                  className={`flex items-center gap-3 ${
+                    ["/role_permissions"].some((p) => currentPath.startsWith(p))
+                      ? active
+                      : noactive
+                  } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
+                  onClick={toggleSidebar} // Tutup sidebar saat di mobile
+                >
+                  <BsPersonLock size={24} />
+                  <span className={`${isCollapsed ? "hidden" : "block"}`}>
+                    Role & Permissions
+                  </span>
+                </Link>
+              </li>
+            )}
+
             {hasGrantedShowMenuLog && (
               <li>
                 <Link

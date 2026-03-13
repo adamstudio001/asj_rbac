@@ -51,7 +51,7 @@ const RolePermissionContent = () => {
 
   const [datas, setDatas] = useState([]);
   const [listRole, setListRole] = useState([]);
-  const [listPermission, setListPermissions] = useState([]);
+  const [listPermission, setListPermissions] = useState(JSON.parse(sessionStorage.getItem("permissions") ?? "[]"));
 
   const [sortConfig, setSortConfig] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
@@ -116,7 +116,7 @@ const RolePermissionContent = () => {
       setIsLoad(true);
       setTimeout(async () => {
         try {
-          const [roleOriRes, roleRes, userRes, permissionRes] =
+          const [roleOriRes, roleRes, userRes] =
             await Promise.allSettled([
               axios.get(
                 `${BASEURL}/api/v1/company/1/role`,
@@ -135,13 +135,7 @@ const RolePermissionContent = () => {
                 {
                   headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
-              ),
-              axios.get(
-                `${BASEURL}/api/v1/helper/permission`,
-                {
-                  headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
-                }
-              ),
+              )
             ]);
 
           const roleOris =
@@ -159,14 +153,9 @@ const RolePermissionContent = () => {
               ? userRes.value.data?.data || []
               : [];
 
-          const permissions =
-            permissionRes.status === "fulfilled"
-              ? permissionRes.value.data?.data || []
-              : [];
-
           setDatas(userRoleAdapter(users, roles));
           setListRole(roleAdapter(roleOris));
-          setListPermissions(permissions);
+          // setListPermissions(permissions);
         } catch (err) {
           console.error(err);
           addToast("error", "ada masalah pada aplikasi");
