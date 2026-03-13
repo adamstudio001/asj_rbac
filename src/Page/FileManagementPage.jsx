@@ -117,7 +117,7 @@ const FileManagementContent = () => {
   const [files, setFiles] = useState([]);
 
   const [isLoadVisible, setIsLoadVisible] = useState(false);
-  const [listVisible, setListVisible] = useState([]);
+  const [listVisible, setListVisible] = useState(JSON.parse(sessionStorage.getItem("storage_visibility") ?? "[]"));
 
   const isAdmin = isAdminAccess() || isCompanyAccess();
 
@@ -267,43 +267,47 @@ const FileManagementContent = () => {
     }, 1500);
   }
 
-  async function loadVisibility() {
-    if (isExpired()) {
-      await refreshSession();
-    }
+  // async function loadVisibility() {
+    // if (isExpired()) {
+    //   await refreshSession();
+    // }
 
-    const url = `${BASEURL}/api/v1/helper/storage-item-visibility`;
+    // const url = `${BASEURL}/api/v1/helper/storage-item-visibility`;
 
-    setIsLoadVisible(true);
+    // setIsLoadVisible(true);
 
-    setTimeout(async () => {
-      try {
-        // --- Buat array promise dinamis ---
-        const res = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-          },
-        });
-        const body = res.data;
+    // setTimeout(async () => {
+    //   try {
+    //     // --- Buat array promise dinamis ---
+    //     const res = await axios.get(url, {
+    //       headers: {
+    //         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+    //       },
+    //     });
+    //     const body = res.data;
 
-        setListVisible(body?.data ?? []);
-      } catch (err) {
-        console.error(err);
-        setError("Terjadi kesalahan saat memuat data.");
-      } finally {
-        setIsLoadVisible(false);
-      }
-    }, 1500);
-  }
+    //     setListVisible(body?.data ?? []);
+    //   } catch (err) {
+    //     console.error(err);
+    //     setError("Terjadi kesalahan saat memuat data.");
+    //   } finally {
+    //     setIsLoadVisible(false);
+    //   }
+    // }, 1500);
+  // }
 
   useEffect(() => {
     setSearch("");
-    loadVisibility();
+    // loadVisibility();
   }, []);
 
   useEffect(() => {
-    loadData();
-  }, [folderKeys, listVisible]);
+    if(mode=="restore"){
+      loadDataRestore();
+    } else{
+      loadData();
+    }
+  }, [folderKeys, listVisible, mode]);
 
   // const files = getFileDirectory(lists, folderKeys);
   const sortedFiles = filterAndSortFiles(lists, {
@@ -885,7 +889,7 @@ const FileManagementContent = () => {
     setFileSelected(file);
     setIsModalDeleteRestoreOpen(true);
 
-    console.log("remove:", file);
+    // console.log("remove:", file);
   };
 
   const doRemoveRestore = async () => {
@@ -901,32 +905,30 @@ const FileManagementContent = () => {
     // setLoading(true);
     setIsModalDeleteRestoreOpen(false);
     try {
-      // const info = JSON.parse(sessionStorage.getItem("info") || "{}");
-      // const headers = buildHeaders(info, token);
-      // const request = await axios.delete(`${BASEURL}/api/v1/app/company/1/restore/storage/${fileSelected.id}}`, {
-      //   headers: headers,
-      // });
-      // const response = request.data;
-      // if (response?.success) {
-      //   addToast("success", response?.success);
-      //   loadData();
-      // } else {
-      //   addToast("error", response?.error);
-      // }
-      // console.log(response);
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+      const request = await axios.delete(`${BASEURL}/api/v1/app/company/1/restore/storage/${fileSelected.id}`, {
+        headers: headers,
+      });
+      const response = request.data;
+      if (response?.success) {
+        addToast("success", response?.success);
+        loadDataRestore();
+      } else {
+        addToast("error", response?.error);
+      }
+      console.log(response);
     } catch (err) {
       console.error(err);
-      // addToast("error", "ada masalah pada aplikasi");
+      addToast("error", "ada masalah pada aplikasi");
     } finally {
       setIsModalDeleteRestoreOpen(false);
     }
   };
 
-  const handlerRestore = async (file) => {
-    setFileSelected(file);
-
-    console.log("restore:", fileSelected);
-    if (!fileSelected) {
+  const handlerRestore = async (file) => { //kenapa pertama kali klik selalu null tapi klik ke 2 ada datanya
+    // console.log("restore:", file);
+    if (!file) {
       addToast("error", "belum pilih file/folder yang di hapus");
       return;
     }
@@ -935,27 +937,26 @@ const FileManagementContent = () => {
       await refreshSession();
     }
 
-    // setLoading(true);
-    // setIsModalDeleteOpen(false);
+    // setIsLoad(true);
     try {
-      // const info = JSON.parse(sessionStorage.getItem("info") || "{}");
-      // const headers = buildHeaders(info, token);
-      // const request = await axios.post(`${BASEURL}/api/v1/app/company/1/restore/storage/${fileSelected.id}}`, {
-      //   headers: headers,
-      // });
-      // const response = request.data;
-      // if (response?.success) {
-      //   addToast("success", response?.success);
-      //   loadData();
-      // } else {
-      //   addToast("error", response?.error);
-      // }
-      // console.log(response);
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+      const request = await axios.post(`${BASEURL}/api/v1/app/company/1/restore/storage/${file.id}`, {}, {
+        headers: headers,
+      });
+      const response = request.data;
+      if (response?.success) {
+        addToast("success", response?.success);
+        loadDataRestore();
+      } else {
+        addToast("error", response?.error);
+      }
+      console.log(response);
     } catch (err) {
       console.error(err);
-      // addToast("error", "ada masalah pada aplikasi");
+      addToast("error", "ada masalah pada aplikasi");
     } finally {
-      // setIsModalDeleteOpen(false);
+      // setIsLoad(false);
     }
   };
 

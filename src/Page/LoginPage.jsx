@@ -87,8 +87,8 @@ function LoginContent() {
       } else if (body.data && body.data.auth) {
         const auth = body.data.auth;
 
-        // const resRoles = await axios.get(`${BASEURL}/api/v1/company/1/role/role-with-user`,{headers: { Authorization: `Bearer ${auth.token}` },});
-        // const dataRoles = resRoles.data?.data ?? [];
+        const resVisibility = await axios.get(`${BASEURL}/api/v1/helper/storage-item-visibility`,{headers: { Authorization: `Bearer ${auth.token}` },});
+        const dataVisibility = resVisibility.data?.data ?? [];
 
         const user = {
           full_name: body.data.full_name,
@@ -106,6 +106,7 @@ function LoginContent() {
         sessionStorage.setItem("info", JSON.stringify(info));
         sessionStorage.setItem("token", auth.token);
         sessionStorage.setItem("user", JSON.stringify(user));
+        sessionStorage.setItem("storage_visibility", JSON.stringify(dataVisibility));
         setToken(auth.token);
         setUser(user);
 
