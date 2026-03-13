@@ -1697,7 +1697,56 @@ export function ModalCollaborator({
       : `${BASEURL}/api/v1/app/company/1/storage/${data?.id ?? "#"}/collaboration`;
   const url_user = `${BASEURL}/api/v1/company/1/user`;
 
-  async function loadData() {
+  async function fetchUsers(token, url) {
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res?.data?.success) {
+        throw new Error("API users returned unsuccessful status");
+      }
+
+      const response = res?.data?.data || [];
+
+      return response.map((u) => ({
+        identifier: u.employment[0]?.id,
+        label: u.full_name,
+      }));
+    } catch (err) {
+      console.error("Fetch Users Error:", err);
+      throw err;
+    }
+  }
+
+  async function fetchCollaboration(token, url) {
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res?.data?.success) {
+        throw new Error("API users returned unsuccessful status");
+      }
+
+      const response = res?.data?.data || [];
+
+      return response.map((c) => ({
+        id: c.id,
+        name: c?.employment?.user?.full_name ?? "-",
+        role: c?.employment?.job_identifier ?? "",
+      }));
+    } catch (err) {
+      console.error("Fetch Users Error:", err);
+      throw err;
+    }
+  }
+
+  async function loadData(onlyCollaboration = false) {
     if (isExpired()) {
       await refreshSession();
     }
@@ -1707,52 +1756,33 @@ export function ModalCollaborator({
       setIsLoad(true);
       setTimeout(async () => {
         try {
-          const [collaborationRes, usersRes] = await Promise.allSettled([
-            axios.get(url_collaboration, {
-              headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-              },
-            }),
-            axios.get(url_user, {
-              headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-              },
-            }),
-          ]);
+          if (onlyCollaboration) {
+            const [collaborationRes] = await Promise.allSettled([
+              fetchCollaboration(token, url_collaboration),
+            ]);
 
-          const collaboration =
-            collaborationRes.status === "fulfilled"
-              ? collaborationRes.value.data?.data || []
-              : [];
+            const collaboration =
+              collaborationRes.status === "fulfilled"
+                ? collaborationRes.value
+                : [];
 
-          const user =
-            usersRes.status === "fulfilled"
-              ? usersRes.value.data?.data || []
-              : null;
+            setCollaborations(collaboration);
+          } else {
+            const [collaborationRes, usersRes] = await Promise.allSettled([
+              fetchCollaboration(token, url_collaboration),
+              fetchUsers(token, url_user),
+            ]);
 
-          if (
-            isEmpty(usersRes?.value?.data?.success) ||
-            isEmpty(collaborationRes?.value?.data?.success)
-          ) {
-            throw new Error(
-              "One of the API responses returned unsuccessful status.",
-            );
+            const collaboration =
+              collaborationRes.status === "fulfilled"
+                ? collaborationRes.value
+                : [];
+
+            const users = usersRes.status === "fulfilled" ? usersRes.value : [];
+
+            setUsers(users);
+            setCollaborations(collaboration);
           }
-
-          setUsers(
-            user.map((u) => ({
-              identifier: u.id,
-              label: u.full_name,
-            })),
-          );
-          // setTotalPages(users?.last_page ?? 1);
-          setCollaborations(
-            collaboration.map((c) => ({
-              id: c.id,
-              name: c?.employment?.user?.full_name ?? "-",
-              role: c?.employment?.job_identifier ?? "?",
-            })),
-          );
         } catch (err) {
           console.error(err);
           setError("Terjadi kesalahan saat memuat data.");
@@ -1808,8 +1838,37 @@ export function ModalCollaborator({
         addToast("error", body.error);
       } else if (body.success) {
         addToast("success", body.success);
-        onOpenChange(false);
-        extraAction();
+        // onOpenChange(false);
+        // extraAction();
+        loadData(true);
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoading(false);
+    }
+    console.log(values);
+  };
+
+  const revokeCollaborator = async (values) => {
+    setLoading(true);
+
+    try {
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const res = await axios.delete(`${url_collaboration}/${values.id}`, {
+        headers: headers,
+      });
+      const body = res.data;
+      console.log(body);
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+        loadData(true);
       }
     } catch (err) {
       console.error(err);
@@ -1912,9 +1971,18 @@ export function ModalCollaborator({
                                 {c.name}
                               </span>
 
-                              <span className="text-[18px] text-gray-400 font-medium">
-                                {c.role}
-                              </span>
+                              <div className="flex items-center justify-center gap-2">
+                                <span className="text-[18px] text-gray-400 font-medium">
+                                  {c.role}
+                                </span>
+                                <button
+                                  type="button"
+                                  className="bg-red-300 hover:bg-red-400 p-1 rounded-full"
+                                  onClick={() => revokeCollaborator(c)}
+                                >
+                                  <img src={Trash} />
+                                </button>
+                              </div>
                             </div>
                           ))}
                     </div>
