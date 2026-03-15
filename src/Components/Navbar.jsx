@@ -26,7 +26,7 @@ const Navbar = ({renderActionModal = null}) => {
 
                 {typeof renderActionModal === "function" && renderActionModal()}
             </>;
-        } else if(["/filemanager"].some((p) => currentPath.startsWith(p))){
+        } else if(["/filemanager","/collaboration"].some((p) => currentPath.startsWith(p))){
             return <>
                 <button onClick={toggleSidebar} className="lg:hidden flex items-center text-black text-left font-inter font-medium text-[14px] text-[#243874] gap-2 transition">
                     <BsArrowsAngleExpand className="-rotate-10" size={14}/>

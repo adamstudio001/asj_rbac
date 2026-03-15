@@ -12,7 +12,7 @@ const flattenChildren = (children) => {
   });
 };
 
-export function TableRowActionMenu({ isFolder = true, refId, children, rowCells }) {
+export function TableRowActionMenu({ isFolder = true, refId, children, rowCells, path = "filemanager" }) {
   const [showMenu, setShowMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const menuRef = useRef(null);
@@ -61,7 +61,7 @@ export function TableRowActionMenu({ isFolder = true, refId, children, rowCells 
     e.stopPropagation();
     closeMenu();
     if(isFolder){
-      navigate(`/filemanager/${encodeURIComponent(refId)}`);
+      navigate(`/${path}/${encodeURIComponent(refId)}`);
     }
     // alert("Double click terdeteksi pada baris!");
   };

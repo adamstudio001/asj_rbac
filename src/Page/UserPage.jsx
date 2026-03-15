@@ -87,30 +87,21 @@ const UserPageContent = () => {
       setTimeout(async () => {
         try {
           const [usersRes, jobsRes, branchesRes] = await Promise.allSettled([
-            axios.get(
-              `${BASEURL}/api/v1/company/1/user?page=${page}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-                },
-              }
-            ),
-            axios.get(
-              `${BASEURL}/api/v1/helper/job`,
-              {
-                headers: {
-                  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-                },
-              }
-            ),
-            axios.get(
-              `${BASEURL}/api/v1/helper/branch-location`,
-              {
-                headers: {
-                  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-                },
-              }
-            ),
+            axios.get(`${BASEURL}/api/v1/company/1/user?page=${page}`, {
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              },
+            }),
+            axios.get(`${BASEURL}/api/v1/helper/job`, {
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              },
+            }),
+            axios.get(`${BASEURL}/api/v1/helper/branch-location`, {
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              },
+            }),
           ]);
 
           const users =
@@ -128,12 +119,12 @@ const UserPageContent = () => {
               : [];
 
           if (
-            isEmpty(usersRes?.value?.data?.success) || 
+            isEmpty(usersRes?.value?.data?.success) ||
             isEmpty(jobsRes?.value?.data?.success) ||
             isEmpty(branchesRes?.value?.data?.success)
           ) {
             throw new Error(
-              "One of the API responses returned unsuccessful status."
+              "One of the API responses returned unsuccessful status.",
             );
           }
 
@@ -151,9 +142,9 @@ const UserPageContent = () => {
     }
   }
 
-  useEffect(()=>{
-    console.log(error)
-  },[error]);
+  useEffect(() => {
+    console.log(error);
+  }, [error]);
 
   function getJobPosition(value) {
     if (isEmpty(value)) {
@@ -191,12 +182,10 @@ const UserPageContent = () => {
         const headers = buildHeaders(info, token);
 
         const res = await axios.delete(
-          `${BASEURL}/api/v1/company/1/user/${
-            selectedUser?.id ?? 0
-          }`,
+          `${BASEURL}/api/v1/company/1/user/${selectedUser?.id ?? 0}`,
           {
             headers: headers,
-          }
+          },
         );
         const body = res.data;
         console.log(body);
@@ -228,7 +217,7 @@ const UserPageContent = () => {
   }, []);
 
   const filteredUsers = users.filter((user) =>
-    user.full_name.toLowerCase().includes(search.toLowerCase())
+    user.full_name.toLowerCase().includes(search.toLowerCase()),
   );
 
   const hasGrantedShowButtonAction =
@@ -297,6 +286,21 @@ const UserPageContent = () => {
       );
     }
 
+    function MenuItem({ icon, children, onClick, closeMenu }) {
+      return (
+        <button
+          className="mx-2 flex items-center gap-2 w-full rounded px-2 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+          onClick={(e) => {
+            onClick?.(e);
+            closeMenu?.();
+          }}
+        >
+          {icon && <img src={icon} alt="" className="w-4 h-4" />}
+          {children}
+        </button>
+      );
+    }
+
     return (
       <table className="w-full text-left text-sm">
         <thead className="bg-[#F3F3F3]">
@@ -347,70 +351,51 @@ const UserPageContent = () => {
                   {hasGrantedShowButtonAction && (
                     <TableActionMenu>
                       {hasGrantedButtonViewUser && (
-                        <button
-                          className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        <MenuItem
+                          icon={view_user}
                           onClick={() => {
                             setSelectedUser(user);
                             setIsModalViewOpen(true);
                           }}
                         >
-                          <img src={view_user} alt="view user" />
                           View User
-                        </button>
+                        </MenuItem>
                       )}
 
-                      {/* Edit User */}
                       {hasGrantedButtonEditUser && (
-                        <button
-                          className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        <MenuItem
+                          icon={user_edit}
                           onClick={() => {
                             setSelectedUser(user);
                             setIsModalOpen(true);
                           }}
                         >
-                          <img
-                            src={user_edit}
-                            alt="edit user"
-                            className="w-4 h-4 hover:text-white"
-                          />
                           Edit User
-                        </button>
+                        </MenuItem>
                       )}
 
-                      {/* Reset Password */}
                       {hasGrantedButtonResetUser && (
-                        <button
-                          className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        <MenuItem
+                          icon={reset}
                           onClick={() => {
                             setSelectedUser(user);
                             setIsModalResetOpen(true);
                           }}
                         >
-                          <img
-                            src={reset}
-                            alt="reset password"
-                            className="w-4 h-4"
-                          />
                           Reset Password
-                        </button>
+                        </MenuItem>
                       )}
 
-                      {/* Delete User */}
                       {hasGrantedButtonDeleteUser && (
-                        <button
-                          className="flex gap-2 items-center w-[-webkit-fill-available] rounded mx-2 px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
+                        <MenuItem
+                          icon={trash}
                           onClick={() => {
-                            setIsModalDeleteOpen(true);
                             setSelectedUser(user);
+                            setIsModalDeleteOpen(true);
                           }}
                         >
-                          <img
-                            src={trash}
-                            alt="delete user"
-                            className="w-4 h-4"
-                          />
                           Delete User
-                        </button>
+                        </MenuItem>
                       )}
                     </TableActionMenu>
                   )}
@@ -426,7 +411,7 @@ const UserPageContent = () => {
                 </td>
                 <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
                   {user.employment.map(
-                    (e) => getJobPosition(e.job_identifier)?.label ?? ""
+                    (e) => getJobPosition(e.job_identifier)?.label ?? "",
                   )}
                 </td>
                 {/* <td className="px-4 py-3 font-inter text-[14px] leading-[14px] text-gray-800">
@@ -751,7 +736,7 @@ export function ModalResetPassword({
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
           },
-        }
+        },
       );
 
       if (res.data?.error) {
@@ -929,7 +914,7 @@ export function ModalResetPassword({
               </>
             )}
           </div>,
-          document.body
+          document.body,
         )}
     </DialogModal>
   );
@@ -965,6 +950,7 @@ export function ModalUser({
       branch: "",
       // role: "",
       employee_id: "",
+      has_company_access_status: false,
     },
   });
 
@@ -983,6 +969,7 @@ export function ModalUser({
       branch: getBranch(data?.employment?.[0]?.branch_location_identifier),
       // role: data?.role ?? "",
       employee_id: data?.employment?.[0]?.employee_id ?? "",
+      has_company_access_status: data?.has_company_access_status ?? false
     });
   }, [data, reset]);
 
@@ -1023,6 +1010,7 @@ export function ModalUser({
               job_identifier: values.jobPosition?.identifier ?? "",
               branch_location_identifier: values.branch?.identifier ?? "",
               employee_id: values.employee_id,
+              has_company_access_status: values.has_company_access_status,
             }
           : {
               first_name: values.firstName,
@@ -1033,13 +1021,13 @@ export function ModalUser({
               job_identifier: values.jobPosition?.identifier ?? "",
               branch_location_identifier: values.branch?.identifier ?? "",
               employee_id: values.employee_id,
+              has_company_access_status: values.has_company_access_status,
             };
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
 
-      const baseUrl =
-        `${BASEURL}/api/v1/company/1/user`;
+      const baseUrl = `${BASEURL}/api/v1/company/1/user`;
 
       const url = mode === "create" ? baseUrl : `${baseUrl}/${data?.id ?? 0}`;
 
@@ -1171,7 +1159,7 @@ export function ModalUser({
                               className={cn(
                                 "flex h-12 w-full rounded-md border border-[#E2E2E2] bg-transparent px-3 pr-10 text-sm text-[#1B2E48] outline-none transition focus-visible:border-black",
                                 errors.password &&
-                                  "border-red-500 focus:border-red-500"
+                                  "border-red-500 focus:border-red-500",
                               )}
                               {...register(
                                 "password",
@@ -1183,7 +1171,7 @@ export function ModalUser({
                                         message: "Min 6 chars",
                                       },
                                     }
-                                  : {}
+                                  : {},
                               )}
                             />
 
@@ -1283,6 +1271,27 @@ export function ModalUser({
                           />
                         )}
                       />
+                    </div>
+
+                    <div>
+                      <label class="flex items-start gap-3 w-full rounded-lg cursor-pointer transition has-[:checked]:border-black"> {/*border p-3*/}
+                        <input
+                          type="checkbox"
+                          name="has_company_access_status"
+                          {...register("has_company_access_status")}
+                          class="mt-1 h-4 w-4 rounded border-[#E2E2E2] accent-black focus:ring-black"
+                        />
+
+                        <div class="flex flex-col gap-1">
+                          <span class="text-sm font-medium text-gray-900">
+                            I am a company administrator
+                          </span>
+
+                          {/* <p class="text-sm text-gray-500">
+                            You can enable or disable notifications at any time.
+                          </p> */}
+                        </div>
+                      </label>
                     </div>
 
                     {/* <div className="flex flex-wrap gap-4">

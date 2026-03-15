@@ -20,7 +20,6 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
     logout,
     token,
     hasPermission,
-    canAccessModule,
     isAdminAccess,
     isCompanyAccess,
   } = useAuth();
@@ -63,8 +62,6 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const isAdmin = isAdminAccess() || isCompanyAccess();
 
   const hasGrantedShowMenuLog = hasPermission("VIEW_LOG_HISTORY") || isAdmin;
-  const hasGrantedShowMenuRole = canAccessModule("Role Access") || isAdmin;
-  const hasGrantedShowMenuUser = canAccessModule("User") || isAdmin;
 
   return (
     <>
@@ -114,7 +111,23 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
                 </span>
               </Link>
             </li>
-            {hasGrantedShowMenuUser && (
+            <li>
+              <Link
+                to="/collaboration"
+                className={`flex items-center gap-3 ${
+                  ["/collaboration"].some((p) => currentPath.startsWith(p))
+                    ? active
+                    : noactive
+                } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
+                onClick={toggleSidebar} // Tutup sidebar saat di mobile
+              >
+                <IoFileTrayStacked size={18} />
+                <span className={`${isCollapsed ? "hidden" : "block"}`}>
+                  Collaboration
+                </span>
+              </Link>
+            </li>
+            {isAdmin && (
               <li>
                 <Link
                   to="/users"
@@ -133,7 +146,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
               </li>
             )}
 
-            {hasGrantedShowMenuRole && (
+            {isAdmin && (
               <li>
                 <Link
                   to="/role_permissions"

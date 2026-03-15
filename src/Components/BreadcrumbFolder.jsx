@@ -1,7 +1,7 @@
 import React from "react";
 import { Folder, ChevronRight } from "lucide-react";
 
-export default function BreadcrumbFolder({ lists, onNavigate }) {
+export default function BreadcrumbFolder({ lists, onNavigate, label = "File Management" }) {
   const folders = lists?.map((item) => ({
     key: item.id,
     name: item.name,
@@ -15,7 +15,7 @@ export default function BreadcrumbFolder({ lists, onNavigate }) {
         className="flex items-center space-x-1 text-gray-500 hover:text-black transition"
       >
         <Folder className="w-4 h-4 fill-gray-500" />
-        <span className="font-medium">File Management</span>
+        <span className="font-medium">{label}</span>
       </button>
 
       {/* FOLDERS */}

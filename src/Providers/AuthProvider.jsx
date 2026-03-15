@@ -56,21 +56,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const canAccessModule = (targetModule) => {
-    try {
-      const stored = sessionStorage.getItem("granted_permission");
-      if (!stored) return false;
-
-      const groups = JSON.parse(stored);
-      if (!Array.isArray(groups)) return false;
-
-      return groups.some((group) => group.group_name === targetModule);
-    } catch (err) {
-      console.error("canAccessModule error:", err);
-      return false;
-    }
-  };
-
   const isAdminAccess = () => {
     try {
       const storedUser = sessionStorage.getItem("user");
@@ -191,6 +176,9 @@ export function AuthProvider({ children }) {
       sessionStorage.removeItem("user");
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("info");
+      sessionStorage.removeItem("granted_permission");
+      sessionStorage.removeItem("permissions");
+      sessionStorage.removeItem("storage_visibility");
     } catch (error) {
       console.error("Error removing session:", error);
     } finally {
@@ -212,7 +200,6 @@ export function AuthProvider({ children }) {
         logout,
         isExpired,
         hasPermission,
-        canAccessModule,
         isAdminAccess,
         isCompanyAccess,
         isUserAccess,

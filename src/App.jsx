@@ -13,6 +13,7 @@ import { AuthProvider } from "./Providers/AuthProvider";
 import { ToastProvider } from "./Providers/ToastProvider";
 import AccessControlRoute from "./Components/AccessControlRoute";
 import NotFoundPage from "./Page/NotFoundPage";
+import CollaborationPage from "./Page/CollaborationPage";
 
 export default function App() {
   return (
@@ -26,17 +27,16 @@ export default function App() {
                 <Route element={<PanelLayout />}>
                   <Route path="/dashboard/:folderKeys?" element={<DashboardPage />} />
                   <Route path="/filemanager/:folderKeys?" element={<FileManagementPage />} />
+                  <Route path="/collaboration/:folderKeys?" element={<CollaborationPage />} />
                   <Route element={<AccessControlRoute checkAccess={(auth) => {
                     const isAdmin = auth.isAdminAccess() || auth.isCompanyAccess();
-                    const hasGrantedShowMenuUser = auth.canAccessModule("User") || isAdmin;
-                    return hasGrantedShowMenuUser;
+                    return isAdmin;
                   }} />}>
                     <Route path="/users" element={<UserPage />} />
                   </Route>
                   <Route element={<AccessControlRoute checkAccess={(auth) => {
                     const isAdmin = auth.isAdminAccess() || auth.isCompanyAccess();
-                    const hasGrantedShowMenuRole = auth.canAccessModule("Role Access") || isAdmin;
-                    return hasGrantedShowMenuRole;
+                    return isAdmin;
                   }} />}>
                     <Route path="/role_permissions" element={<RolePermissionPage />} />
                   </Route>

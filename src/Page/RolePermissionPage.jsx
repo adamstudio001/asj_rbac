@@ -808,15 +808,13 @@ function PermissionGroup({ accessGroups, field, className }) {
 
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 ${className}`}
+      className={`grid gap-10 grid-cols-1 md:grid-cols-2 ${className}`}
     >
-      <div className="flex flex-col gap-10">
-        <PermissionSection group={find("General")} field={field} />
-        <PermissionSection group={find("User")} field={field} />
-      </div>
-
-      <PermissionSection group={find("Role Access")} field={field} />
-      <PermissionSection group={find("File Management")} field={field} />
+      <PermissionSection group={find("General")} field={field} />
+      <PermissionSection
+        group={find("File Management")}
+        field={field}
+      />
     </div>
   );
 }
@@ -824,31 +822,30 @@ function PermissionGroup({ accessGroups, field, className }) {
 function PermissionSection({ group, field }) {
   if (!group) return null;
 
-  const isFile = group.group_name.toLowerCase() === "file management";
+  // const isFile = group.group_name.toLowerCase() === "file management";
   const items = group.permissions ?? [];
-  const useTwoColumns = isFile && items.length > 11;
+  // const useTwoColumns = isFile && items.length > 11;
 
-  const columns = useMemo(() => {
-    if (!useTwoColumns) return [items];
-    const mid = Math.ceil(items.length / 2);
-    return [items.slice(0, mid), items.slice(mid)];
-  }, [items, useTwoColumns]);
+  // const columns = useMemo(() => {
+  //   if (!useTwoColumns) return [items];
+  //   const mid = Math.ceil(items.length / 2);
+  //   return [items.slice(0, mid), items.slice(mid)];
+  // }, [items, useTwoColumns]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <h3 className="font-semibold text-[#5B84D6]">{group.group_name}</h3>
+     <div className="flex flex-col gap-4">
+      <h3 className="font-semibold text-[#5B84D6]">
+        {group.group_name}
+      </h3>
 
-      <div
-        className={`grid gap-3 ${
-          useTwoColumns ? "grid-cols-2" : "grid-cols-1"
-        }`}
-      >
-        {columns.map((col, idx) => (
-          <div key={idx} className="flex flex-col gap-3">
-            {col.map((p) => (
-              <PermissionItem key={p.identifier} permission={p} field={field} />
-            ))}
-          </div>
+      {/* responsive permission grid */}
+      <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(180px,1fr))] sm:grid-cols-2">
+        {items.map((permission) => (
+          <PermissionItem
+            key={permission.identifier}
+            permission={permission}
+            field={field}
+          />
         ))}
       </div>
     </div>
