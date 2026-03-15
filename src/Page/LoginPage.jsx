@@ -97,18 +97,6 @@ function LoginContent() {
           { headers: { Authorization: `Bearer ${auth.token}` } },
         );
         const dataPermission = resPermission.data?.data ?? [];
-        const filteredPermissions = dataPermission
-          .map((group) => {
-            const permissions = group.permissions.filter((p) =>
-              permission_flat.includes(p.identifier),
-            );
-
-            return {
-              ...group,
-              permissions,
-            };
-          })
-          .filter((group) => group.permissions.length > 0);
 
         const user = {
           full_name: body.data.full_name,
@@ -131,7 +119,6 @@ function LoginContent() {
           JSON.stringify(dataVisibility),
         );
         sessionStorage.setItem("permissions", JSON.stringify(dataPermission));
-        sessionStorage.setItem("granted_permission", JSON.stringify(filteredPermissions));
         setToken(auth.token);
         setUser(user);
 

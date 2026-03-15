@@ -176,7 +176,6 @@ export function AuthProvider({ children }) {
       sessionStorage.removeItem("user");
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("info");
-      sessionStorage.removeItem("granted_permission");
       sessionStorage.removeItem("permissions");
       sessionStorage.removeItem("storage_visibility");
     } catch (error) {
