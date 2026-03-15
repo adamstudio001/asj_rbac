@@ -916,7 +916,7 @@ export function ModalRole({
   const { addToast } = useToast();
 
   const onSubmit = async (values) => {
-    console.log(values);
+    console.log("submit", values);
     if (isExpired()) {
       await refreshSession();
     }
@@ -1074,7 +1074,7 @@ export function ModalForm({
   const { addToast } = useToast();
 
   const onSubmit = async (values) => {
-    console.log(values);
+    console.log("submit", values);
 
     if (isExpired()) {
       await refreshSession();

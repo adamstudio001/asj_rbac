@@ -25,10 +25,6 @@ function FileGridView({ lists, folderKeys, mode, isLoading=false }) {
 
   // const sortedFiles = filterAndSortFiles(lists, activeFilter, mode);
 
-  useEffect(()=>{
-    console.log(lists)
-  },[lists]);
-
   return (
     <div
       className="grid gap-4"

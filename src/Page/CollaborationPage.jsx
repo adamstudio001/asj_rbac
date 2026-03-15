@@ -209,7 +209,6 @@ const CollaborationContent = () => {
         const dataBreadcrumb = resBreadcrumb.data;
         const dataItemType = resItemType.data;
 
-        console.log(dataList?.success, dataBreadcrumb?.success); //undefined undefined
         if (
           (isEmpty(dataList?.success) && isEmpty(dataBreadcrumb?.success)) ||
           isEmpty(dataList?.success)
@@ -1263,7 +1262,7 @@ export function ModalRenameFile({
     setLoading(true);
     // setErrorMessage("");
     try {
-      console.log(values);
+      console.log("submit", values);
       const formData = {
         file_name: values.file_name,
         visibility_identifier: category ?? "GENERAL",

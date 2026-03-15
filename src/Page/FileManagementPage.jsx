@@ -213,7 +213,6 @@ const FileManagementContent = () => {
         const dataBreadcrumb = resBreadcrumb.data;
         const dataItemType = resItemType.data;
 
-        console.log(dataList?.success, dataBreadcrumb?.success); //undefined undefined
         if (
           (isEmpty(dataList?.success) && isEmpty(dataBreadcrumb?.success)) ||
           isEmpty(dataList?.success)
