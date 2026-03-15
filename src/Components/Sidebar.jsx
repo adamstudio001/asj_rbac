@@ -9,6 +9,7 @@ import { IoFileTrayStacked } from "react-icons/io5";
 import { useAuth } from "@/Providers/AuthProvider";
 import { useState } from "react";
 import { useToast } from "@/Providers/ToastProvider";
+import Collaboration from "@assets/collaboration.svg";
 
 const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   const location = useLocation();
@@ -121,7 +122,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
                 } hover:bg-[#272E3A1A] hover:text-[#515560] p-3 rounded-lg transition`}
                 onClick={toggleSidebar} // Tutup sidebar saat di mobile
               >
-                <IoFileTrayStacked size={18} />
+                <img src={Collaboration} alt="Collaboration" />
                 <span className={`${isCollapsed ? "hidden" : "block"}`}>
                   Collaboration
                 </span>
