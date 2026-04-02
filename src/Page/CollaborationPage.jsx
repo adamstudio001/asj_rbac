@@ -5,7 +5,7 @@ import { useSearch } from "@src/Providers/SearchProvider";
 import { useFileManager } from "@src/Providers/FileManagerProvider";
 import {
   buildHeaders,
-  filterAndSortFiles,
+  filterAndSortFilesCollaboration,
   formatDate,
   formatDatetime,
   formatFileSize,
@@ -160,7 +160,7 @@ const CollaborationContent = () => {
 
     const url = `${baseUrl}/${
       !isRoot ? `storage/collaboration/${folderKeys}` : `storage/collaboration`
-    }?order_by[]=name&sort_by[]=asc&visibility_identifier=${selectedIdentifier}`;
+    }?visibility_identifier=${selectedIdentifier}`;
 
     // --- Breadcrumb URL hanya jika folderKeys punya nilai ---
     const hasFolder =
@@ -241,7 +241,7 @@ const CollaborationContent = () => {
   }, [folderKeys, listVisible]);
 
   // const files = getFileDirectory(lists, folderKeys);
-  const sortedFiles = filterAndSortFiles(lists, {
+  const sortedFiles = filterAndSortFilesCollaboration(lists, {
     search: search,
     group: { extensions: [] },
   });
@@ -303,7 +303,7 @@ const CollaborationContent = () => {
       return;
     }
 
-    if (file.type_identifier.toLowerCase() == "folder") {
+    if (file.storageItem.type_identifier.toLowerCase() == "folder") {
       setIsModalFolderOpen(true);
       setFileSelected(file);
     } else {
@@ -395,8 +395,8 @@ const CollaborationContent = () => {
     }
 
     const urlDownload = isAdmin
-      ? `${BASEURL}/api/v1/company/1/storage/${file.id}/url-download`
-      : `${BASEURL}/api/v1/app/company/1/storage/${file.id}/url-download`;
+      ? `${BASEURL}/api/v1/company/1/storage/${file.storageItem.id}/url-download`
+      : `${BASEURL}/api/v1/app/company/1/storage/${file.storageItem.id}/url-download`;
 
     // const newTab = window.open("about:blank");
     // if (!newTab) {
@@ -437,7 +437,7 @@ const CollaborationContent = () => {
         a.href = blobUrl;
 
         // fallback nama file
-        a.download = file.name || "downloaded_file";
+        a.download = storageItem.name || "downloaded_file";
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -568,26 +568,26 @@ const CollaborationContent = () => {
             sortedFiles.map((file) => (
               <TableRowActionMenu
                 key={file.id}
-                isFolder={file.type_identifier.toLowerCase() == "folder"}
+                isFolder={file.storageItem.type_identifier.toLowerCase() == "folder"}
                 refId={file.id}
-                // path="collaboration"
+                path="collaboration"
                 rowCells={
                   <>
                     <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
                       {getFileIcon(
-                        file.name,
-                        file.type_identifier.toLowerCase() == "folder",
+                        file.storageItem.name,
+                        file.storageItem.type_identifier.toLowerCase() == "folder",
                         24,
                       )}
                       <EllipsisTooltip className={"w-[250px]"}>
-                        {file.name}
+                        {file.storageItem.name}
                       </EllipsisTooltip>
                     </td>
-                    <td className="px-4 py-3">{formatFileType(file.name)}</td>
+                    <td className="px-4 py-3">{formatFileType(file.storageItem.name)}</td>
                     <td className="px-4 py-3">
-                      {formatDate(file.updated_datetime)}
+                      {formatDate(file.storageItem.updated_datetime)}
                     </td>
-                    <td className="px-4 py-3">{formatFileSize(file.size)}</td>
+                    <td className="px-4 py-3">{formatFileSize(file.storageItem.size)}</td>
                   </>
                 }
               >
@@ -614,7 +614,7 @@ const CollaborationContent = () => {
                   </button> */}
                   {hasGrantedInfoPopper && (
                     <FileInfoPopper
-                      file={file}
+                      file={file.storageItem}
                       changeFile={setSelectedFile}
                       eventInfoModal={setIsInfoModalOpen}
                       paths={listsPath}

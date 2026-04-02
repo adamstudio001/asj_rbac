@@ -270,6 +270,44 @@ export function filterAndSortFiles(files, activeFilter) {
   });
 }
 
+export function filterAndSortFilesCollaboration(files, activeFilter) {
+  const isFolderFilter = activeFilter?.group?.label === "folder";
+  const searchQuery = activeFilter?.search?.toLowerCase() || "";
+
+  const filteredFiles = files.filter((file) => {
+    const isFolder = file.storageItem.type_identifier?.toLowerCase() === "folder";
+
+    // Filter folder
+    if (isFolderFilter) return isFolder;
+
+    // Filter ekstensi
+    if (activeFilter?.group?.extensions?.length > 0) {
+      const ext = (file.storageItem.extension || file.storageItem.name.split(".").pop())?.toLowerCase();
+      if (!isFolder && activeFilter.group.extensions.includes(ext)) {
+        return searchQuery
+          ? file.storageItem.name.toLowerCase().includes(searchQuery)
+          : true;
+      }
+      return false;
+    }
+
+    // Filter search
+    return searchQuery ? file.storageItem.name.toLowerCase().includes(searchQuery) : true;
+  });
+
+  // 🔥 SORT FIXED → Folder first, then alphabetical name
+  return [...filteredFiles].sort((a, b) => {
+    const aIsFolder = a.storageItem.type_identifier?.toLowerCase() === "folder";
+    const bIsFolder = b.storageItem.type_identifier?.toLowerCase() === "folder";
+
+    // 1) Folder ke atas
+    if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
+
+    // 2) Urutkan nama secara alphabetical
+    return a.storageItem.name.localeCompare(b.storageItem.name, "id", { sensitivity: "base" });
+  });
+}
+
 export const isEmpty = (str) =>
   !str || str.trim().length === 0 || str === undefined || str === null;
 
