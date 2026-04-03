@@ -166,7 +166,7 @@ const CollaborationContent = () => {
     const hasFolder =
       folderKeys !== undefined && folderKeys !== null && folderKeys !== "";
     const urlBreadcrumb = hasFolder
-      ? `${baseUrl}/storage/${folderKeys}/path`
+      ? `${baseUrl}/storage/collaboration/${folderKeys}/path`
       : null;
 
     setIsLoad(true);
