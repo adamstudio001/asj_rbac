@@ -571,6 +571,9 @@ const CollaborationContent = () => {
                 isFolder={file.storageItem.type_identifier.toLowerCase() == "folder"}
                 refId={file.id}
                 path="collaboration"
+                item={file}
+                selectedItem={selectedFile}
+                setSelectedItem={setSelectedFile}
                 rowCells={
                   <>
                     <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">

@@ -1,78 +1,106 @@
-import { getFileIcon } from '@src/Common/Utils';
-// import { useFileManager } from '../Providers/FileManagerProvider';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
-// import { filterAndSortFiles } from '@/Common/Utils';
-import { useEffect } from 'react';
-import { BASEURL } from '@/Common/Constant';
+import { getFileIcon } from "@src/Common/Utils";
+import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/Components/ui/Tooltip";
+import { BASEURL } from "@/Common/Constant";
+import { useState } from "react";
 
-function FileGridView({ lists, folderKeys, mode, isLoading=false }) {
+function FileGridView({ lists, folderKeys, mode, isLoading = false }) {
+  const [selected, setSelected] = useState(null);
   const navigate = useNavigate();
-  // const { 
-  //     activeFilter, 
-  //     getFileDirectory,
-  //   } = useFileManager();
 
-  // let files = getFileDirectory(lists, folderKeys);
-  if(mode=="Folders"){
-    lists = lists.filter((f) => f.type_identifier.toLowerCase()=="folder")
-  } else if(mode=="Files"){
-    lists = lists.filter((f) => f.type_identifier.toLowerCase()!="folder")
-  } 
-  // else{
-  //   files = files.filter((f) => f.name.toLowerCase().includes(activeFilter.search.toLowerCase()))
-  // }
+  if (mode == "Folders") {
+    lists = lists.filter((f) => f.type_identifier.toLowerCase() == "folder");
+  } else if (mode == "Files") {
+    lists = lists.filter((f) => f.type_identifier.toLowerCase() != "folder");
+  }
 
-  // const sortedFiles = filterAndSortFiles(lists, activeFilter, mode);
+  const handleNavigate = (file) => {
+    if (file.type_identifier.toLowerCase() === "folder") {
+      navigate(
+        `/dashboard/${encodeURIComponent(
+          folderKeys != file.parent_id ? file.parent_id : file.id
+        )}`
+      );
+    } else {
+      window.open(
+        `${BASEURL}/download/${file.name}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
 
   return (
     <div
       className="grid gap-4"
       style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}
     >
-      {isLoading?
-        <>
-          {Array(12).fill(null).map((_, i) => (
-            <div key={i} className="skeleton h-16 flex flex-row gap-2 bg-[#7979790D] p-4 rounded shadow-md transition cursor-pointer flex flex-col items-center text-center">
-            </div>
-          ))}
-        </> : 
-        (lists??[]).map((file, index) =>
-          file.type_identifier.toLowerCase()==="folder" ? (
-            <NavLink
-              key={index}
-              to={file.type_identifier.toLowerCase()=="folder"? `/dashboard/${encodeURIComponent(folderKeys!=file.parent_id? file.parent_id:file.id)}`:`#`}
-              className="flex flex-row gap-2 bg-[#7979790D] p-4 rounded shadow-md hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
-            >
-              <div className="text-4xl">{getFileIcon(file.name, true)}</div>
-              <div className="text-left text-[#1A1A1A] text-[13px] leading-[18px] font-inter font-medium truncate w-full">{file.name}</div>
-            </NavLink>
-          ) : (
+      {isLoading ? (
+        Array(12)
+          .fill(null)
+          .map((_, i) => (
+            <div
+              key={i}
+              className="skeleton h-16 bg-[#7979790D] p-4 rounded shadow-md"
+            />
+          ))
+      ) : (
+        (lists ?? []).map((file, index) => {
+          const isSelected = selected?.id === file.id;
+
+          return (
             <button
               key={index}
-              onClick={()=>{
-                window.open(
-                  `${BASEURL}/download/${file.name}`,
-                  '_blank',
-                  'noopener,noreferrer'
-                );
-              }}
-              className="flex flex-row gap-2 bg-[#7979790D] p-4 rounded shadow-md hover:shadow-md transition cursor-pointer flex flex-col items-center text-center"
+              onClick={() => setSelected(file)} // ✅ klik 1x = select
+              onDoubleClick={() => handleNavigate(file)} // ✅ double click = action
+              className={`
+                flex flex-col items-center text-center gap-2
+                p-4 rounded shadow-md transition cursor-pointer
+                bg-[#7979790D] hover:shadow-md
+                ${
+                  isSelected
+                    ? "border-1 border-blue-500 bg-blue-50"
+                    : "border border-transparent"
+                }
+              `}
             >
-              <div className="text-4xl">{getFileIcon(file.name, false)}</div>
-              <div className="text-left text-[#1A1A1A] text-[13px] leading-[18px] font-inter font-medium truncate w-full">{file.name}</div>
-            </button>
-          )
-        )
-      }
+              <div className="text-4xl">
+                {getFileIcon(
+                  file.name,
+                  file.type_identifier.toLowerCase() === "folder"
+                )}
+              </div>
 
-      {(lists ?? []).length > 0 && lists.length < 4 &&
+              <div className="w-full">
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-[#1A1A1A] text-[13px] leading-[18px] font-medium line-clamp-1">
+                        {file.name}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="px-2 py-1 text-xs">
+                      {file.name}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </button>
+          );
+        })
+      )}
+
+      {(lists ?? []).length > 0 &&
+        lists.length < 4 &&
         Array.from({ length: 4 - lists.length }).map((_, i) => (
-          <div key={uuidv4()}>
-            &nbsp;
-          </div>
-        ))
-      }
+          <div key={uuidv4()}>&nbsp;</div>
+        ))}
     </div>
   );
 }

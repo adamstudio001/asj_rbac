@@ -639,6 +639,9 @@ const FileManagementContent = () => {
                 key={file.id}
                 isFolder={file.type_identifier.toLowerCase() == "folder"}
                 refId={file.id}
+                item={file}
+                selectedItem={selectedFile}
+                setSelectedItem={setSelectedFile}
                 rowCells={
                   <>
                     <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
@@ -675,7 +678,7 @@ const FileManagementContent = () => {
                           handlerPaste(data);
                         }}
                       >
-                        <ClipboardIcon size={16}/> Paste
+                        <ClipboardIcon size={16} /> Paste
                       </button>
                       <button
                         className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
@@ -683,7 +686,7 @@ const FileManagementContent = () => {
                           setData(null);
                         }}
                       >
-                        <X size={18}/> Cancel
+                        <X size={18} /> Cancel
                       </button>
                     </>
                   )}
@@ -735,7 +738,7 @@ const FileManagementContent = () => {
                     className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                     onClick={() => {
                       setData(null);
-                      collaboratorHandler(file)
+                      collaboratorHandler(file);
                     }}
                   >
                     <img src={Collaboration} alt="Collabolator" /> Add
@@ -1001,13 +1004,13 @@ const FileManagementContent = () => {
   };
 
   const handlerPaste = async (file) => {
-        const fileObj = await createFileObject({
-        reference: file,
-        name: file?.name ?? "unknown",
-      });
-      setFiles([fileObj]);
-      setIsModalOpen(true);
-  }
+    const fileObj = await createFileObject({
+      reference: file,
+      name: file?.name ?? "unknown",
+    });
+    setFiles([fileObj]);
+    setIsModalOpen(true);
+  };
   const handleContextMenu = (e) => {
     e.preventDefault();
     showMenu(e.clientX, e.clientY, async (d) => {

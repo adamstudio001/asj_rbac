@@ -19,6 +19,9 @@ export function TableRowActionMenu({
   children,
   rowCells,
   path = "filemanager",
+  item,
+  selectedItem,
+  setSelectedItem,
 }) {
   const { data } = useMenu();
 
@@ -65,8 +68,7 @@ export function TableRowActionMenu({
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [anchorEl]);
 
   // ✅ Klik kiri → buka folder
@@ -99,15 +101,28 @@ export function TableRowActionMenu({
     clearTimeout(pressTimer.current);
   };
 
+  const handleSelect = (e) => {
+    e.stopPropagation();
+    console.log(item, refId)
+    setSelectedItem(item);
+  };
+
   const closeMenu = () => setShowMenu(false);
 
   return (
     <>
-      <tr className="hover:bg-gray-50 transition border-b border-gray-200">
+      <tr
+        className={`hover:bg-gray-50 transition border-b border-gray-200 transition border-b ${
+          selectedItem?.id === refId
+            ? "border-blue-500 bg-blue-50"
+            : "border-gray-200"
+        }`}
+      >
         {React.Children.map(rowCells.props.children, (cell, i) => (
           <td
             key={i}
-            onClick={handleCellClick}
+            onClick={handleSelect}
+            onDoubleClick={handleCellClick}
             onContextMenu={handleContextMenu}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
@@ -139,7 +154,7 @@ export function TableRowActionMenu({
               });
             })}
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );
