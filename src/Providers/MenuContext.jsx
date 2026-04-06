@@ -1,3 +1,4 @@
+import { ClipboardIcon, X } from "lucide-react";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 
 const MenuContext = createContext();
@@ -75,7 +76,7 @@ export const MenuProvider = ({ children }) => {
           style={{ top: menuPosition.y, left: menuPosition.x }}
         >
           <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+            className="w-full flex gap-2 items-center text-left px-4 py-2 hover:bg-gray-100"
             onClick={() => {
               if (typeof listenerRef.current === "function") {
                 listenerRef.current(data);
@@ -83,17 +84,17 @@ export const MenuProvider = ({ children }) => {
               hideMenu(); // sembunyikan menu tapi data tetap
             }}
           >
-            Paste
+            <ClipboardIcon size={16}/> Paste
           </button>
 
           <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+            className="w-full flex gap-2 items-center text-left px-4 py-2 hover:bg-gray-100"
             onClick={()=>{
                 hideMenu();
                 setData(null);
             }}
           >
-            Cancel
+            <X size={18}/> Cancel
           </button>
         </div>
       )}

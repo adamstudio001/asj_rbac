@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { createPopper } from "@popperjs/core";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { useMenu } from "@/Providers/MenuContext";
 
 const flattenChildren = (children) => {
   return React.Children.toArray(children).flatMap((child) => {
@@ -12,73 +13,105 @@ const flattenChildren = (children) => {
   });
 };
 
-export function TableRowActionMenu({ isFolder = true, refId, children, rowCells, path = "filemanager" }) {
+export function TableRowActionMenu({
+  isFolder = true,
+  refId,
+  children,
+  rowCells,
+  path = "filemanager",
+}) {
+  const { data } = useMenu();
+
   const [showMenu, setShowMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+
   const menuRef = useRef(null);
-  const lastClickTime = useRef(0);
+  const popperInstance = useRef(null);
+  const pressTimer = useRef(null);
+
   const navigate = useNavigate();
 
+  // ✅ Create & destroy popper
   useEffect(() => {
     if (showMenu && anchorEl && menuRef.current) {
-      createPopper(anchorEl, menuRef.current, {
+      popperInstance.current = createPopper(anchorEl, menuRef.current, {
         placement: "right-start",
         modifiers: [{ name: "offset", options: { offset: [8, 0] } }],
       });
     }
+
+    return () => {
+      popperInstance.current?.destroy();
+      popperInstance.current = null;
+    };
   }, [showMenu, anchorEl]);
 
+  // ✅ Close kalau clipboard berubah
+  useEffect(() => {
+    setShowMenu(false);
+  }, [data]);
+
+  // ✅ Click outside
   useEffect(() => {
     const handleClickOutside = (e) => {
+      if (!menuRef.current) return;
+
       if (
-        menuRef.current &&
         !menuRef.current.contains(e.target) &&
         !(anchorEl && anchorEl.contains(e.target))
       ) {
         setShowMenu(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, [anchorEl]);
 
+  // ✅ Klik kiri → buka folder
   const handleCellClick = (e) => {
     e.stopPropagation();
 
-    const now = Date.now();
-    const diff = now - lastClickTime.current;
-    lastClickTime.current = now;
-
-    // kalau klik cepat dua kali (misalnya < 250 ms), jangan munculkan menu
-    if (diff < 250) return;
-
-    // kalau bukan double click → tampilkan popup
-    setAnchorEl(e.currentTarget);
-    setShowMenu((prev) => !prev);
-  };
-
-  const handleCellDoubleClick = (e) => {
-    e.stopPropagation();
-    closeMenu();
-    if(isFolder){
+    if (isFolder) {
       navigate(`/${path}/${encodeURIComponent(refId)}`);
     }
-    // alert("Double click terdeteksi pada baris!");
+  };
+
+  // ✅ Klik kanan → buka menu
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setAnchorEl(e.currentTarget);
+    setShowMenu(true);
+  };
+
+  // ✅ Long press (mobile)
+  const handleTouchStart = (e) => {
+    pressTimer.current = setTimeout(() => {
+      setAnchorEl(e.currentTarget);
+      setShowMenu(true);
+    }, 500);
+  };
+
+  const handleTouchEnd = () => {
+    clearTimeout(pressTimer.current);
   };
 
   const closeMenu = () => setShowMenu(false);
 
   return (
     <>
-      <tr
-        className="hover:bg-gray-50 transition border-b border-gray-200"
-        onDoubleClick={handleCellDoubleClick}
-      >
+      <tr className="hover:bg-gray-50 transition border-b border-gray-200">
         {React.Children.map(rowCells.props.children, (cell, i) => (
           <td
             key={i}
             onClick={handleCellClick}
-            className={`${cell.props.className} cursor-pointer`}
+            onContextMenu={handleContextMenu}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            className={`${cell.props.className} cursor-default select-none`}
           >
             {cell.props.children}
           </td>
@@ -91,19 +124,18 @@ export function TableRowActionMenu({ isFolder = true, refId, children, rowCells,
             ref={menuRef}
             className="w-[max-content] z-[9999] bg-white border border-gray-200 rounded-lg shadow-md px-1 py-2 w-40"
             style={{ position: "absolute" }}
+            onClick={(e) => e.stopPropagation()}
           >
             {flattenChildren(children).map((child, idx) => {
               if (!React.isValidElement(child)) return null;
 
-              const isCustomComponent = typeof child.type === "function";
-
               return React.cloneElement(child, {
                 key: idx,
                 onClick: (e) => {
+                  e.stopPropagation();
                   child.props.onClick?.(e);
-                  closeMenu(); 
+                  closeMenu(); // ✅ auto close
                 },
-                ...(isCustomComponent && { closeMenu }),
               });
             })}
           </div>,

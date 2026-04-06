@@ -52,7 +52,7 @@ import {
 import CustomInput from "@/Components/CustomInput";
 import { Button } from "@/Components/ui/Button";
 // import { IoDownload } from "react-icons/io5";
-import { Download, X } from "lucide-react";
+import { ClipboardIcon, ClipboardPaste, Download, X } from "lucide-react";
 import { MenuProvider, useMenu } from "@/Providers/MenuContext";
 import { useLongPress } from "@/Hooks/useLongPress";
 import { createFileObject } from "@/Common/FileFactory";
@@ -117,7 +117,9 @@ const FileManagementContent = () => {
   const [files, setFiles] = useState([]);
 
   const [isLoadVisible, setIsLoadVisible] = useState(false);
-  const [listVisible, setListVisible] = useState(JSON.parse(sessionStorage.getItem("storage_visibility") ?? "[]"));
+  const [listVisible, setListVisible] = useState(
+    JSON.parse(sessionStorage.getItem("storage_visibility") ?? "[]"),
+  );
 
   const isAdmin = isAdminAccess() || isCompanyAccess();
 
@@ -267,32 +269,32 @@ const FileManagementContent = () => {
   }
 
   // async function loadVisibility() {
-    // if (isExpired()) {
-    //   await refreshSession();
-    // }
+  // if (isExpired()) {
+  //   await refreshSession();
+  // }
 
-    // const url = `${BASEURL}/api/v1/helper/storage-item-visibility`;
+  // const url = `${BASEURL}/api/v1/helper/storage-item-visibility`;
 
-    // setIsLoadVisible(true);
+  // setIsLoadVisible(true);
 
-    // setTimeout(async () => {
-    //   try {
-    //     // --- Buat array promise dinamis ---
-    //     const res = await axios.get(url, {
-    //       headers: {
-    //         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-    //       },
-    //     });
-    //     const body = res.data;
+  // setTimeout(async () => {
+  //   try {
+  //     // --- Buat array promise dinamis ---
+  //     const res = await axios.get(url, {
+  //       headers: {
+  //         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+  //       },
+  //     });
+  //     const body = res.data;
 
-    //     setListVisible(body?.data ?? []);
-    //   } catch (err) {
-    //     console.error(err);
-    //     setError("Terjadi kesalahan saat memuat data.");
-    //   } finally {
-    //     setIsLoadVisible(false);
-    //   }
-    // }, 1500);
+  //     setListVisible(body?.data ?? []);
+  //   } catch (err) {
+  //     console.error(err);
+  //     setError("Terjadi kesalahan saat memuat data.");
+  //   } finally {
+  //     setIsLoadVisible(false);
+  //   }
+  // }, 1500);
   // }
 
   useEffect(() => {
@@ -301,9 +303,9 @@ const FileManagementContent = () => {
   }, []);
 
   useEffect(() => {
-    if(mode=="restore"){
+    if (mode == "restore") {
       loadDataRestore();
-    } else{
+    } else {
       loadData();
     }
   }, [folderKeys, listVisible, mode]);
@@ -664,17 +666,44 @@ const FileManagementContent = () => {
                   >
                     <img src={Copy} alt="copy" /> Copy
                   </button>
+                  {data && (
+                    <>
+                      <button
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                        onClick={() => {
+                          setData(null);
+                          handlerPaste(data);
+                        }}
+                      >
+                        <ClipboardIcon size={16}/> Paste
+                      </button>
+                      <button
+                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                        onClick={() => {
+                          setData(null);
+                        }}
+                      >
+                        <X size={18}/> Cancel
+                      </button>
+                    </>
+                  )}
                   {hasGrantedButtonDownload && (
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                      onClick={() => downloadHandler(file)}
+                      onClick={() => {
+                        setData(null);
+                        downloadHandler(file);
+                      }}
                     >
                       <Download size={18} /> Download
                     </button>
                   )}
                   <button
                     className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                    onClick={() => editHandler(file)}
+                    onClick={() => {
+                      setData(null);
+                      editHandler(file);
+                    }}
                   >
                     <img src={Rename} alt="Rename" /> Rename
                   </button>
@@ -694,6 +723,7 @@ const FileManagementContent = () => {
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                       onClick={() => {
+                        setData(null);
                         setFileSelected(file);
                         setIsModalDeleteOpen(true);
                       }}
@@ -703,7 +733,10 @@ const FileManagementContent = () => {
                   )}
                   <button
                     className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                    onClick={() => collaboratorHandler(file)}
+                    onClick={() => {
+                      setData(null);
+                      collaboratorHandler(file)
+                    }}
                   >
                     <img src={Collaboration} alt="Collabolator" /> Add
                     Collaborator
@@ -906,9 +939,12 @@ const FileManagementContent = () => {
     try {
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
-      const request = await axios.delete(`${BASEURL}/api/v1/app/company/1/restore/storage/${fileSelected.id}`, {
-        headers: headers,
-      });
+      const request = await axios.delete(
+        `${BASEURL}/api/v1/app/company/1/restore/storage/${fileSelected.id}`,
+        {
+          headers: headers,
+        },
+      );
       const response = request.data;
       if (response?.success) {
         addToast("success", response?.success);
@@ -925,7 +961,8 @@ const FileManagementContent = () => {
     }
   };
 
-  const handlerRestore = async (file) => { //kenapa pertama kali klik selalu null tapi klik ke 2 ada datanya
+  const handlerRestore = async (file) => {
+    //kenapa pertama kali klik selalu null tapi klik ke 2 ada datanya
     // console.log("restore:", file);
     if (!file) {
       addToast("error", "belum pilih file/folder yang di hapus");
@@ -940,9 +977,13 @@ const FileManagementContent = () => {
     try {
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
-      const request = await axios.post(`${BASEURL}/api/v1/app/company/1/restore/storage/${file.id}`, {}, {
-        headers: headers,
-      });
+      const request = await axios.post(
+        `${BASEURL}/api/v1/app/company/1/restore/storage/${file.id}`,
+        {},
+        {
+          headers: headers,
+        },
+      );
       const response = request.data;
       if (response?.success) {
         addToast("success", response?.success);
@@ -959,6 +1000,14 @@ const FileManagementContent = () => {
     }
   };
 
+  const handlerPaste = async (file) => {
+        const fileObj = await createFileObject({
+        reference: file,
+        name: file?.name ?? "unknown",
+      });
+      setFiles([fileObj]);
+      setIsModalOpen(true);
+  }
   const handleContextMenu = (e) => {
     e.preventDefault();
     showMenu(e.clientX, e.clientY, async (d) => {
@@ -1752,44 +1801,44 @@ export function ModalCollaborator({
     }
 
     // if (isAdmin) {
-      setError(null);
-      setIsLoad(true);
-      setTimeout(async () => {
-        try {
-          if (onlyCollaboration) {
-            const [collaborationRes] = await Promise.allSettled([
-              fetchCollaboration(token, url_collaboration),
-            ]);
+    setError(null);
+    setIsLoad(true);
+    setTimeout(async () => {
+      try {
+        if (onlyCollaboration) {
+          const [collaborationRes] = await Promise.allSettled([
+            fetchCollaboration(token, url_collaboration),
+          ]);
 
-            const collaboration =
-              collaborationRes.status === "fulfilled"
-                ? collaborationRes.value
-                : [];
+          const collaboration =
+            collaborationRes.status === "fulfilled"
+              ? collaborationRes.value
+              : [];
 
-            setCollaborations(collaboration);
-          } else {
-            const [collaborationRes, usersRes] = await Promise.allSettled([
-              fetchCollaboration(token, url_collaboration),
-              fetchUsers(token, url_user),
-            ]);
+          setCollaborations(collaboration);
+        } else {
+          const [collaborationRes, usersRes] = await Promise.allSettled([
+            fetchCollaboration(token, url_collaboration),
+            fetchUsers(token, url_user),
+          ]);
 
-            const collaboration =
-              collaborationRes.status === "fulfilled"
-                ? collaborationRes.value
-                : [];
+          const collaboration =
+            collaborationRes.status === "fulfilled"
+              ? collaborationRes.value
+              : [];
 
-            const users = usersRes.status === "fulfilled" ? usersRes.value : [];
+          const users = usersRes.status === "fulfilled" ? usersRes.value : [];
 
-            setUsers(users);
-            setCollaborations(collaboration);
-          }
-        } catch (err) {
-          console.error(err);
-          setError("Terjadi kesalahan saat memuat data.");
-        } finally {
-          setIsLoad(false);
+          setUsers(users);
+          setCollaborations(collaboration);
         }
-      }, 1500);
+      } catch (err) {
+        console.error(err);
+        setError("Terjadi kesalahan saat memuat data.");
+      } finally {
+        setIsLoad(false);
+      }
+    }, 1500);
     // }
   }
 
