@@ -92,7 +92,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
               >
                 <LiaHomeSolid size={24} />
                 <span className={`${isCollapsed ? "hidden" : "block"}`}>
-                  Dashboard
+                  Home
                 </span>
               </Link>
             </li>

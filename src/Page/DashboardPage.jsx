@@ -243,7 +243,7 @@ const DashboardContent = () => {
               isWrapped ? "" : "gap-3"
             } space-x-8`}
           >
-            {hasGrantedButtonUpload && (
+            {/* {hasGrantedButtonUpload && (
               <button
                 onClick={() => {
                   alert("feature in development");
@@ -256,7 +256,7 @@ const DashboardContent = () => {
                 <LuUpload size={18} />
                 Upload file
               </button>
-            )}
+            )} */}
             <UserProfileMenu
               reftext={textRef}
               user={user}

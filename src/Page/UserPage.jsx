@@ -669,8 +669,8 @@ export function ModalResetPassword({
   extraAction = () => {},
 }) {
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(true);
-  const [showPasswordConfirm, setShowPasswordConfirm] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [clipboardValue, setClipboardValue] = useState("");
 
   const { addToast } = useToast();
