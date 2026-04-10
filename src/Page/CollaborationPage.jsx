@@ -574,6 +574,7 @@ const CollaborationContent = () => {
                 item={file}
                 selectedItem={selectedFile}
                 setSelectedItem={setSelectedFile}
+                disabledRename={true}
                 rowCells={
                   <>
                     <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">

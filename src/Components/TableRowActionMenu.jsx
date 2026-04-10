@@ -24,6 +24,7 @@ export function TableRowActionMenu({
   setSelectedItem,
   onRename,
   isLoadingRename = false, // 🔥 NEW
+  disabledRename = false // 🔥 NEW
 }) {
   const { data } = useMenu();
   const navigate = useNavigate();
@@ -92,6 +93,8 @@ export function TableRowActionMenu({
   /* ================= SELECT + DOUBLE CLICK RENAME ================= */
   const handleSelect = (e) => {
     e.stopPropagation();
+
+    if (disabledRename) return; // 🔥 ADD THIS
 
     setSelectedItem(item);
 
