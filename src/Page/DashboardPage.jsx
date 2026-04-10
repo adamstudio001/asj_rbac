@@ -79,7 +79,7 @@ const DashboardContent = () => {
       for (let entry of entries) {
         const lineHeight = parseInt(
           getComputedStyle(entry.target).lineHeight,
-          10
+          10,
         );
         if (entry.contentRect.height > lineHeight) {
           setIsWrapped(true);
@@ -107,10 +107,11 @@ const DashboardContent = () => {
       try {
         // PARALLEL REQUEST
         const [filtersRes, listRes] = await Promise.all([
-          axios.get(
-            `${BASEURL}/api/v1/helper/storage-item-type`,
-            { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
-          ),
+          axios.get(`${BASEURL}/api/v1/helper/storage-item-type`, {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            },
+          }),
           Promise.resolve({ data: { data: [] } }),
         ]);
 
@@ -131,7 +132,7 @@ const DashboardContent = () => {
           "error",
           err?.response?.data?.error ||
             err?.message ||
-            "Terjadi masalah saat mengambil file."
+            "Terjadi masalah saat mengambil file.",
         );
       } finally {
         setLoading(false);
@@ -156,7 +157,9 @@ const DashboardContent = () => {
           : `${baseUrlFiles}/storage/${fetchFolderKeys}?order_by[]=name&sort_by[]=asc&name=${searchQuery}&page=${fetchPage}`;
 
         const response = await axios.get(url, {
-          headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
         });
 
         const res = response.data;
@@ -171,7 +174,7 @@ const DashboardContent = () => {
           "error",
           err?.response?.data?.error ||
             err?.message ||
-            "Terjadi masalah saat mengambil file."
+            "Terjadi masalah saat mengambil file.",
         );
       } finally {
         setLoadingFile(false);
@@ -446,7 +449,11 @@ function RecentOpened() {
 
           const res = await axios.get(
             `${baseUrlFiles}/storage/recent-activity`,
-            { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
+            {
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              },
+            },
           );
 
           const mapped = res.data.data.map((item) => ({
@@ -456,7 +463,7 @@ function RecentOpened() {
               ? "folder"
               : item.storage_item_extension.toLowerCase(),
             preview: imageExtensions.includes(
-              item.storage_item_extension?.toLowerCase()
+              item.storage_item_extension?.toLowerCase(),
             )
               ? `${BASEURL}/download/${item.storage_item_name}`
               : null,
@@ -469,7 +476,7 @@ function RecentOpened() {
             "error",
             err?.response?.data?.error ||
               err?.message ||
-              "Terjadi masalah saat mengambil recent file."
+              "Terjadi masalah saat mengambil recent file.",
           );
         } finally {
           setLoadingRecent(false);
@@ -480,7 +487,43 @@ function RecentOpened() {
     fetchRecent();
   }, [token, reloadKey]);
 
-  const clear = () => setRecents([]);
+  const clear = () => {
+    setLoadingRecent(true);
+    setErrorRecent(false);
+
+    setTimeout(async () => {
+      try {
+        if (isExpired()) await refreshSession();
+
+        const request = await axios.delete(
+          `${baseUrlFiles}/storage/recent-activity`,
+          {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            },
+          },
+        );
+
+        const response = request.data;
+        if (response?.success) {
+          addToast("success", response?.success);
+          setRecents([]);
+        } else {
+          addToast("error", response?.error);
+        }
+      } catch (err) {
+        // setErrorRecent(true);
+        addToast(
+          "error",
+          err?.response?.data?.error ||
+            err?.message ||
+            "Terjadi masalah saat mengambil hapus recent file.",
+        );
+      } finally {
+        setLoadingRecent(false);
+      }
+    }, 1500);
+  };
 
   const renderIcon = (file) => {
     if (imageExtensions.includes(file.type)) {
@@ -574,7 +617,7 @@ function RecentOpened() {
                 window.open(
                   `${BASEURL}/download/${file.name}`,
                   "_blank",
-                  "noopener,noreferrer"
+                  "noopener,noreferrer",
                 );
               }
             }}

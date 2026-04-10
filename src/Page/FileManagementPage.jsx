@@ -115,6 +115,7 @@ const FileManagementContent = () => {
   const [isWrapped, setIsWrapped] = useState(false);
   const textRef = useRef(null);
   const [files, setFiles] = useState([]);
+  const [renamingId, setRenamingId] = useState(null);
 
   const [isLoadVisible, setIsLoadVisible] = useState(false);
   const [listVisible, setListVisible] = useState(
@@ -122,6 +123,7 @@ const FileManagementContent = () => {
   );
 
   const isAdmin = isAdminAccess() || isCompanyAccess();
+  const [loadingRename, setLoadingRename] = useState(false);
 
   const [mode, setMode] = useState("default");
 
@@ -435,7 +437,7 @@ const FileManagementContent = () => {
     }
 
     return (
-      (hasGrantedInRoot || hasGrantedInFolder) && (
+      (hasGrantedInRoot || hasGrantedInFolder || (isAdminAccess() || isCompanyAccess())) && (
         <button
           onClick={() => {
             setIsModalFolderOpen(true);
@@ -550,6 +552,74 @@ const FileManagementContent = () => {
     );
   }
 
+  const onSubmitRename = async (values) => {
+    if (isExpired()) {
+      await refreshSession();
+    }
+
+    setLoadingRename(true);
+    // setErrorMessage("");
+    try {
+      const formData =
+        values.type_identifier == "FOLDER"
+          ? {
+              folder_name: values.name,
+              visibility_identifier: values?.visibility_identifier ?? "GENERAL",
+            }
+          : {
+              file_name: values.name,
+              visibility_identifier: values?.visibility_identifier ?? "GENERAL",
+            };
+
+      const url = isAdmin
+        ? `${BASEURL}/api/v1/company/1/storage/${folderKeys}/${values.type_identifier == "FOLDER" ? "folder" : "file"}/${values.id}`
+        : `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/${values.type_identifier == "FOLDER" ? "folder" : "file"}/${values.id}`;
+
+      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+      const headers = buildHeaders(info, token);
+
+      const res = await axios.put(url, formData, {
+        headers: headers,
+      });
+      const body = res.data;
+      console.log(body);
+
+      if (body.error) {
+        addToast("error", body.error);
+      } else if (body.success) {
+        addToast("success", body.success);
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("error", "ada masalah pada aplikasi");
+    } finally {
+      setLoadingRename(false);
+    }
+
+    // reset();
+    // onOpenChange(false);
+    // addToast("success", "Save successfully");
+  };
+
+  const onRename = async (updatedFile) => {
+    setRenamingId(updatedFile.id);
+
+    try {
+      await onSubmitRename(updatedFile);
+      setLists((prev) =>
+        prev.map((f) =>
+          f.id === updatedFile.id ? { ...f, name: updatedFile.name } : f,
+        ),
+      );
+    } catch (err) {
+      console.error(err);
+      // rollback (simple version)
+      setLists((prev) => [...prev]);
+    } finally {
+      setRenamingId(null);
+    }
+  };
+
   function renderTable() {
     if (isLoad) {
       return (
@@ -642,6 +712,11 @@ const FileManagementContent = () => {
                 item={file}
                 selectedItem={selectedFile}
                 setSelectedItem={setSelectedFile}
+                onRename={(updatedFile) => {
+                  console.log(updatedFile);
+                  onRename(updatedFile);
+                }}
+                isLoadingRename={renamingId === file.id}
                 rowCells={
                   <>
                     <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
@@ -1042,7 +1117,7 @@ const FileManagementContent = () => {
             ) : (
               listVisible.map((visible, index) =>
                 hasGrantedCheckboxFilter(visible) ? (
-                  <>
+                  <div key={index}>
                     <label
                       key={visible.id ?? index}
                       className="flex items-center gap-2 cursor-pointer"
@@ -1065,7 +1140,7 @@ const FileManagementContent = () => {
                       />
                       <span>{visible.label}</span>
                     </label>
-                  </>
+                  </div>
                 ) : (
                   <></>
                 ),
@@ -1091,7 +1166,7 @@ const FileManagementContent = () => {
                 Restore File
               </button>
               {/* } */}
-              {folderKeys && hasGrantedButtonUploadFile && (
+              {(folderKeys && hasGrantedButtonUploadFile || (isAdminAccess() || isCompanyAccess())) && (
                 <button
                   onClick={() => {
                     setIsModalOpen(true);

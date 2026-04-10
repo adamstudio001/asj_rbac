@@ -22,19 +22,27 @@ export function TableRowActionMenu({
   item,
   selectedItem,
   setSelectedItem,
+  onRename,
+  isLoadingRename = false, // 🔥 NEW
 }) {
   const { data } = useMenu();
+  const navigate = useNavigate();
 
+  /* ================= STATE ================= */
   const [showMenu, setShowMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
+
+  /* ================= REFS ================= */
+  const clickTimeout = useRef(null);
+  const lastClickedId = useRef(null);
   const menuRef = useRef(null);
   const popperInstance = useRef(null);
   const pressTimer = useRef(null);
 
-  const navigate = useNavigate();
-
-  // ✅ Create & destroy popper
+  /* ================= POPPER ================= */
   useEffect(() => {
     if (showMenu && anchorEl && menuRef.current) {
       popperInstance.current = createPopper(anchorEl, menuRef.current, {
@@ -49,12 +57,12 @@ export function TableRowActionMenu({
     };
   }, [showMenu, anchorEl]);
 
-  // ✅ Close kalau clipboard berubah
+  /* ================= CLOSE ON MENU CHANGE ================= */
   useEffect(() => {
     setShowMenu(false);
   }, [data]);
 
-  // ✅ Click outside
+  /* ================= OUTSIDE CLICK ================= */
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!menuRef.current) return;
@@ -71,16 +79,67 @@ export function TableRowActionMenu({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [anchorEl]);
 
-  // ✅ Klik kiri → buka folder
+  /* ================= OPEN ================= */
   const handleCellClick = (e) => {
     e.stopPropagation();
+    if (editingId === refId) return;
 
     if (isFolder) {
       navigate(`/${path}/${encodeURIComponent(refId)}`);
     }
   };
 
-  // ✅ Klik kanan → buka menu
+  /* ================= SELECT + DOUBLE CLICK RENAME ================= */
+  const handleSelect = (e) => {
+    e.stopPropagation();
+
+    setSelectedItem(item);
+
+    if (lastClickedId.current !== refId) {
+      lastClickedId.current = refId;
+      return;
+    }
+
+    clearTimeout(clickTimeout.current);
+
+    clickTimeout.current = setTimeout(() => {
+      if (selectedItem?.id === refId) {
+        setEditingId(refId);
+        setEditName(item.name);
+      }
+    }, 200);
+  };
+
+  /* ================= RENAME COMMIT (LOCAL → PARENT) ================= */
+  const handleRenameCommit = () => {
+    const newName = editName.trim();
+
+    if (!newName || newName === item.name) {
+      setEditingId(null);
+      return;
+    }
+
+    onRename?.({
+      ...item,
+      name: newName,
+    });
+
+    setEditingId(null);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleRenameCommit();
+    }
+
+    if (e.key === "Escape") {
+      setEditingId(null);
+      setEditName(item.name);
+    }
+  };
+
+  /* ================= CONTEXT MENU ================= */
   const handleContextMenu = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -89,7 +148,7 @@ export function TableRowActionMenu({
     setShowMenu(true);
   };
 
-  // ✅ Long press (mobile)
+  /* ================= MOBILE LONG PRESS ================= */
   const handleTouchStart = (e) => {
     pressTimer.current = setTimeout(() => {
       setAnchorEl(e.currentTarget);
@@ -101,43 +160,60 @@ export function TableRowActionMenu({
     clearTimeout(pressTimer.current);
   };
 
-  const handleSelect = (e) => {
-    e.stopPropagation();
-    console.log(item, refId)
-    setSelectedItem(item);
-  };
-
   const closeMenu = () => setShowMenu(false);
 
+  /* ================= RENDER ================= */
   return (
     <>
       <tr
-        className={`hover:bg-gray-50 transition border-b border-gray-200 transition border-b ${
+        className={`hover:bg-gray-50 border-b transition ${
+          isLoadingRename ? "animate-pulse bg-gray-100" : ""
+        } ${
           selectedItem?.id === refId
-            ? "border-blue-500 bg-blue-50"
+            ? "bg-blue-50 border-blue-500"
             : "border-gray-200"
         }`}
       >
-        {React.Children.map(rowCells.props.children, (cell, i) => (
-          <td
-            key={i}
-            onClick={handleSelect}
-            onDoubleClick={handleCellClick}
-            onContextMenu={handleContextMenu}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            className={`${cell.props.className} cursor-default select-none`}
-          >
-            {cell.props.children}
-          </td>
-        ))}
+        {React.Children.map(rowCells.props.children, (cell, i) => {
+          const isNameColumn = i === 0;
+
+          return (
+            <td
+              key={i}
+              onClick={handleSelect}
+              onDoubleClick={handleCellClick}
+              onContextMenu={handleContextMenu}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              className={`${cell.props.className} cursor-default select-none`}
+            >
+              {/* ================= INLINE RENAME ================= */}
+              {isNameColumn && editingId === refId ? (
+                <input
+                  autoFocus
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  onBlur={handleRenameCommit}
+                  onKeyDown={handleKeyDown}
+                  className="border px-2 py-1 rounded w-full"
+                />
+              ) : isLoadingRename ? (
+                /* ================= SKELETON ================= */
+                <div className="h-4 w-32 bg-gray-300 rounded animate-pulse" />
+              ) : (
+                cell.props.children
+              )}
+            </td>
+          );
+        })}
       </tr>
 
+      {/* ================= CONTEXT MENU ================= */}
       {showMenu &&
         createPortal(
           <div
             ref={menuRef}
-            className="w-[max-content] z-[9999] bg-white border border-gray-200 rounded-lg shadow-md px-1 py-2 w-40"
+            className="z-[9999] bg-white border rounded-lg shadow-md px-1 py-2 w-40"
             style={{ position: "absolute" }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -149,12 +225,12 @@ export function TableRowActionMenu({
                 onClick: (e) => {
                   e.stopPropagation();
                   child.props.onClick?.(e);
-                  closeMenu(); // ✅ auto close
+                  closeMenu();
                 },
               });
             })}
           </div>,
-          document.body,
+          document.body
         )}
     </>
   );
