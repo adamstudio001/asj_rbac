@@ -601,21 +601,18 @@ const CollaborationContent = () => {
                   >
                     <img src={Copy} alt="copy" /> Copy
                   </button> */}
-                  {(hasGrantedButtonDownload || (isAdminAccess() || isCompanyAccess())) && (
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                       onClick={() => downloadHandler(file)}
                     >
                       <Download size={18} /> Download
                     </button>
-                  )}
                   {/* <button
                     className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                     onClick={() => editHandler(file)}
                   >
                     <img src={Rename} alt="Rename" /> Rename
                   </button> */}
-                  {(hasGrantedInfoPopper || (isAdminAccess() || isCompanyAccess())) && (
                     <FileInfoPopper
                       file={file.storageItem}
                       changeFile={setSelectedFile}
@@ -623,7 +620,6 @@ const CollaborationContent = () => {
                       paths={listsPath}
                       types={itemType}
                     />
-                  )}
                   {/* {((hasGrantedButtonReleteFile &&
                     file.type_identifier != "FOLDER") ||
                     (hasGrantedButtonReleteFolder &&
