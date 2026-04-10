@@ -398,15 +398,15 @@ const FileManagementContent = () => {
   function hasGrantedDownloadHandler(file) {
     return (
       (file?.visibility_identifier != "GENERAL" &&
-      !hasPermission("DOWNLOAD_SECRET_FILE") &&
-      isUserAccess()) || isAdmin
+        !hasPermission("DOWNLOAD_SECRET_FILE") &&
+        isUserAccess()) ||
+      isAdmin
     );
   }
 
   const hasGrantedButtonDownload = hasPermission("DOWNLOAD_FILE") || isAdmin;
 
-  const hasGrantedInfoPopper =
-    hasPermission("GET_INFO_FILE_FOLDER") || isAdmin;
+  const hasGrantedInfoPopper = hasPermission("GET_INFO_FILE_FOLDER") || isAdmin;
 
   const hasGrantedButtonReleteFile = hasPermission("DELETE_FILE") || isAdmin;
   const hasGrantedButtonReleteFolder =
@@ -424,18 +424,24 @@ const FileManagementContent = () => {
     return isAdmin || isGeneral || isSecret || isSuperSecret;
   }
 
-  const hasGrantedButtonUploadFile = hasPermission("UPLOAD_FILE") || isAdmin;
+  const hasGrantedButtonUploadFile = () => {
+    if (isAdmin) {
+      return !isEmpty(folderKeys);
+    }
+
+    return true; //&& hasPermission("UPLOAD_FILE")
+  };
 
   function renderCreateFolder() {
-    const hasGrantedInRoot = isRoot && hasPermission("CREATE_FOLDER");
-    const hasGrantedInFolder = !isRoot && hasPermission("CREATE_FOLDER");
+    const hasGrantedInRoot = isRoot && (isUserAccess() || isAdmin); //isRoot && hasPermission("CREATE_FOLDER")
+    const hasGrantedInFolder = !isRoot && (isUserAccess() || isAdmin); //!isRoot && hasPermission("CREATE_FOLDER")
 
     if (isRoot && isAdmin) {
       return <></>;
     }
 
     return (
-      (hasGrantedInRoot || hasGrantedInFolder || isAdmin) && (
+      (hasGrantedInRoot || hasGrantedInFolder) && (
         <button
           onClick={() => {
             setIsModalFolderOpen(true);
@@ -824,7 +830,8 @@ const FileManagementContent = () => {
                       collaboratorHandler(file);
                     }}
                   >
-                    <img src={Collaboration} alt="Collabolator" /> Add Collaborator
+                    <img src={Collaboration} alt="Collabolator" /> Add
+                    Collaborator
                   </button>
                 </>
               </TableRowActionMenu>
@@ -1173,7 +1180,7 @@ const FileManagementContent = () => {
                 Restore File
               </button>
               {/* } */}
-              {folderKeys && hasGrantedButtonUploadFile && (
+              {hasGrantedButtonUploadFile() && (
                 <button
                   onClick={() => {
                     setIsModalOpen(true);
@@ -1433,7 +1440,7 @@ const FileManagementContent = () => {
         refreshData={() => loadData()}
         idFolder={folderKeys}
         token={sessionStorage.getItem("token")}
-        hasPermission={hasPermission("UPLOAD_FILE") || isAdmin}
+        hasPermission={true} //hasPermission("UPLOAD_FILE") || isAdmin
         initialFiles={files}
         isAdmin={isAdminAccess()}
         isCompany={isCompanyAccess()}
@@ -1491,6 +1498,7 @@ export function ModalFolder({
     hasPermission,
     isAdminAccess,
     isCompanyAccess,
+    isUserAccess,
     isExpired,
     refreshSession,
   } = useAuth();
@@ -1536,11 +1544,11 @@ export function ModalFolder({
         folder_name: values.folder_name,
         visibility_identifier: category ?? "GENERAL",
       };
-      if (!isEdit && !hasPermission("CREATE_FOLDER") && isUserAccess()) {
-        addToast("error", "anda tidak memiliki permission CREATE_FOLDER");
-        setLoading(false);
-        return;
-      }
+      // if (!isEdit && !hasPermission("CREATE_FOLDER") && isUserAccess()) {
+      //   addToast("error", "anda tidak memiliki permission CREATE_FOLDER");
+      //   setLoading(false);
+      //   return;
+      // }
 
       let url = null;
       if (isAdmin) {
@@ -1671,6 +1679,7 @@ export function ModalRenameFile({
     hasPermission,
     isAdminAccess,
     isCompanyAccess,
+    isUserAccess,
     isExpired,
     refreshSession,
   } = useAuth();
@@ -1813,6 +1822,7 @@ export function ModalCollaborator({
     hasPermission,
     isAdminAccess,
     isCompanyAccess,
+    isUserAccess,
     isExpired,
     refreshSession,
   } = useAuth();
