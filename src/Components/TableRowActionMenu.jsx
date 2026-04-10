@@ -216,7 +216,7 @@ export function TableRowActionMenu({
         createPortal(
           <div
             ref={menuRef}
-            className="z-[9999] bg-white border rounded-lg shadow-md px-1 py-2 w-40"
+            className="z-[9999] bg-white border rounded-lg shadow-md px-1 py-2 w-[max-content]"
             style={{ position: "absolute" }}
             onClick={(e) => e.stopPropagation()}
           >

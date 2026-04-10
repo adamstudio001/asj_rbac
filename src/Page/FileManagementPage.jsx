@@ -21,6 +21,7 @@ import DeleteModal from "@/Components/DeleteModal";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import { FiRotateCcw } from "react-icons/fi";
 import Copy from "@assets/copy.svg";
+import Info from "@assets/info.svg";
 import Rename from "@assets/edit.svg";
 import Collaboration from "@assets/collaboration.svg";
 import Trash from "@assets/trash.svg";
@@ -396,18 +397,16 @@ const FileManagementContent = () => {
 
   function hasGrantedDownloadHandler(file) {
     return (
-      file?.visibility_identifier != "GENERAL" &&
+      (file?.visibility_identifier != "GENERAL" &&
       !hasPermission("DOWNLOAD_SECRET_FILE") &&
-      isUserAccess()
+      isUserAccess()) || isAdmin
     );
   }
 
   const hasGrantedButtonDownload = hasPermission("DOWNLOAD_FILE") || isAdmin;
 
   const hasGrantedInfoPopper =
-    hasPermission("GET_INFO_FILE_FOLDER") ||
-    isAdminAccess() ||
-    isCompanyAccess();
+    hasPermission("GET_INFO_FILE_FOLDER") || isAdmin;
 
   const hasGrantedButtonReleteFile = hasPermission("DELETE_FILE") || isAdmin;
   const hasGrantedButtonReleteFolder =
@@ -425,8 +424,7 @@ const FileManagementContent = () => {
     return isAdmin || isGeneral || isSecret || isSuperSecret;
   }
 
-  const hasGrantedButtonUploadFile =
-    hasPermission("UPLOAD_FILE") || isAdmin;
+  const hasGrantedButtonUploadFile = hasPermission("UPLOAD_FILE") || isAdmin;
 
   function renderCreateFolder() {
     const hasGrantedInRoot = isRoot && hasPermission("CREATE_FOLDER");
@@ -786,13 +784,23 @@ const FileManagementContent = () => {
                     <img src={Rename} alt="Rename" /> Rename
                   </button>
                   {hasGrantedInfoPopper && (
-                    <FileInfoPopper
-                      file={file}
-                      changeFile={setSelectedFile}
-                      eventInfoModal={setIsInfoModalOpen}
-                      paths={listsPath}
-                      types={itemType}
-                    />
+                    <button
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                      onClick={() => {
+                        setSelectedFile(file);
+                        setIsInfoModalOpen(true);
+                      }}
+                    >
+                      <img src={Info} alt="Info" /> Get Info
+                    </button>
+
+                    // <FileInfoPopper
+                    //   file={file}
+                    //   changeFile={setSelectedFile}
+                    //   eventInfoModal={setIsInfoModalOpen}
+                    //   paths={listsPath}
+                    //   types={itemType}
+                    // />
                   )}
                   {((hasGrantedButtonReleteFile &&
                     file.type_identifier != "FOLDER") ||
@@ -816,8 +824,7 @@ const FileManagementContent = () => {
                       collaboratorHandler(file);
                     }}
                   >
-                    <img src={Collaboration} alt="Collabolator" /> Add
-                    Collaborator
+                    <img src={Collaboration} alt="Collabolator" /> Add Collaborator
                   </button>
                 </>
               </TableRowActionMenu>
@@ -1166,7 +1173,7 @@ const FileManagementContent = () => {
                 Restore File
               </button>
               {/* } */}
-              {(folderKeys && hasGrantedButtonUploadFile) && (
+              {folderKeys && hasGrantedButtonUploadFile && (
                 <button
                   onClick={() => {
                     setIsModalOpen(true);

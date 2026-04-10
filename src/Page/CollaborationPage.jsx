@@ -20,6 +20,7 @@ import { TableRowActionMenu } from "@/Components/TableRowActionMenu";
 import DeleteModal from "@/Components/DeleteModal";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
 import { FiRotateCcw } from "react-icons/fi";
+import Info from "@assets/info.svg";
 import Copy from "@assets/copy.svg";
 import Rename from "@assets/edit.svg";
 import Collaboration from "@assets/collaboration.svg";
@@ -79,7 +80,7 @@ const CollaborationContent = () => {
 
   const { search, setSearch } = useSearch();
   const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
-    useState(false);
+  useState(false);
   const [page, setPage] = useState(1);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -115,7 +116,9 @@ const CollaborationContent = () => {
   const [files, setFiles] = useState([]);
 
   const [isLoadVisible, setIsLoadVisible] = useState(false);
-  const [listVisible, setListVisible] = useState(JSON.parse(sessionStorage.getItem("storage_visibility") ?? "[]"));
+  const [listVisible, setListVisible] = useState(
+    JSON.parse(sessionStorage.getItem("storage_visibility") ?? "[]"),
+  );
 
   const isAdmin = isAdminAccess() || isCompanyAccess();
 
@@ -385,10 +388,10 @@ const CollaborationContent = () => {
       addToast("error", "belum pilih file/folder yang di download");
       return;
     }
-    if (hasGrantedDownloadHandler(file)) {
-      addToast("error", "anda tidak memiliki akses DOWNLOAD_SECRET_FILE");
-      return;
-    }
+    // if (hasGrantedDownloadHandler(file)) {
+    //   addToast("error", "anda tidak memiliki akses DOWNLOAD_SECRET_FILE");
+    //   return;
+    // }
 
     if (isExpired()) {
       await refreshSession();
@@ -568,7 +571,9 @@ const CollaborationContent = () => {
             sortedFiles.map((file) => (
               <TableRowActionMenu
                 key={file.id}
-                isFolder={file.storageItem.type_identifier.toLowerCase() == "folder"}
+                isFolder={
+                  file.storageItem.type_identifier.toLowerCase() == "folder"
+                }
                 refId={file.id}
                 path="collaboration"
                 item={file}
@@ -580,18 +585,23 @@ const CollaborationContent = () => {
                     <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
                       {getFileIcon(
                         file.storageItem.name,
-                        file.storageItem.type_identifier.toLowerCase() == "folder",
+                        file.storageItem.type_identifier.toLowerCase() ==
+                          "folder",
                         24,
                       )}
                       <EllipsisTooltip className={"w-[250px]"}>
                         {file.storageItem.name}
                       </EllipsisTooltip>
                     </td>
-                    <td className="px-4 py-3">{formatFileType(file.storageItem.name)}</td>
+                    <td className="px-4 py-3">
+                      {formatFileType(file.storageItem.name)}
+                    </td>
                     <td className="px-4 py-3">
                       {formatDate(file.storageItem.updated_datetime)}
                     </td>
-                    <td className="px-4 py-3">{formatFileSize(file.storageItem.size)}</td>
+                    <td className="px-4 py-3">
+                      {formatFileSize(file.storageItem.size)}
+                    </td>
                   </>
                 }
               >
@@ -602,25 +612,37 @@ const CollaborationContent = () => {
                   >
                     <img src={Copy} alt="copy" /> Copy
                   </button> */}
-                    <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                      onClick={() => downloadHandler(file)}
-                    >
-                      <Download size={18} /> Download
-                    </button>
+                  <button
+                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                    onClick={() => downloadHandler(file)}
+                  >
+                    <Download size={18} /> Download
+                  </button>
                   {/* <button
                     className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                     onClick={() => editHandler(file)}
                   >
                     <img src={Rename} alt="Rename" /> Rename
                   </button> */}
-                    <FileInfoPopper
+
+                  {/* <FileInfoPopper
                       file={file.storageItem}
                       changeFile={setSelectedFile}
                       eventInfoModal={setIsInfoModalOpen}
                       paths={listsPath}
                       types={itemType}
-                    />
+                    /> */}
+
+                  <button
+                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                    onClick={() => {
+                      setSelectedFile(file);
+                      setIsInfoModalOpen(true);
+                    }}
+                  >
+                    <img src={Info} alt="Info" /> Get Info
+                  </button>
+
                   {/* {((hasGrantedButtonReleteFile &&
                     file.type_identifier != "FOLDER") ||
                     (hasGrantedButtonReleteFolder &&
@@ -738,7 +760,7 @@ const CollaborationContent = () => {
             >
               {/* {renderCreateFolder()} */}
               {/* {isAdminAccess &&  */}
-              
+
               {/* {folderKeys && hasGrantedButtonUploadFile && (
                 <button
                   onClick={() => {
@@ -1443,44 +1465,44 @@ export function ModalCollaborator({
     }
 
     // if (isAdmin) {
-      setError(null);
-      setIsLoad(true);
-      setTimeout(async () => {
-        try {
-          if (onlyCollaboration) {
-            const [collaborationRes] = await Promise.allSettled([
-              fetchCollaboration(token, url_collaboration),
-            ]);
+    setError(null);
+    setIsLoad(true);
+    setTimeout(async () => {
+      try {
+        if (onlyCollaboration) {
+          const [collaborationRes] = await Promise.allSettled([
+            fetchCollaboration(token, url_collaboration),
+          ]);
 
-            const collaboration =
-              collaborationRes.status === "fulfilled"
-                ? collaborationRes.value
-                : [];
+          const collaboration =
+            collaborationRes.status === "fulfilled"
+              ? collaborationRes.value
+              : [];
 
-            setCollaborations(collaboration);
-          } else {
-            const [collaborationRes, usersRes] = await Promise.allSettled([
-              fetchCollaboration(token, url_collaboration),
-              fetchUsers(token, url_user),
-            ]);
+          setCollaborations(collaboration);
+        } else {
+          const [collaborationRes, usersRes] = await Promise.allSettled([
+            fetchCollaboration(token, url_collaboration),
+            fetchUsers(token, url_user),
+          ]);
 
-            const collaboration =
-              collaborationRes.status === "fulfilled"
-                ? collaborationRes.value
-                : [];
+          const collaboration =
+            collaborationRes.status === "fulfilled"
+              ? collaborationRes.value
+              : [];
 
-            const users = usersRes.status === "fulfilled" ? usersRes.value : [];
+          const users = usersRes.status === "fulfilled" ? usersRes.value : [];
 
-            setUsers(users);
-            setCollaborations(collaboration);
-          }
-        } catch (err) {
-          console.error(err);
-          setError("Terjadi kesalahan saat memuat data.");
-        } finally {
-          setIsLoad(false);
+          setUsers(users);
+          setCollaborations(collaboration);
         }
-      }, 1500);
+      } catch (err) {
+        console.error(err);
+        setError("Terjadi kesalahan saat memuat data.");
+      } finally {
+        setIsLoad(false);
+      }
+    }, 1500);
     // }
   }
 
