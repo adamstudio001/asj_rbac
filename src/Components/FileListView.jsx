@@ -8,6 +8,7 @@ import {
 } from "@/Components/ui/Tooltip";
 import { BASEURL } from "@/Common/Constant";
 import { useState } from "react";
+import EllipsisTooltip from "./EllipsisTooltip";
 
 function FileListView({ lists, folderKeys, mode, isLoading = false }) {
   const navigate = useNavigate();
@@ -72,7 +73,10 @@ function FileListView({ lists, folderKeys, mode, isLoading = false }) {
                   )}
                 </div>
 
-                <TooltipProvider delayDuration={0}>
+                <EllipsisTooltip className={"w-[50cqi]"}>
+                  {file.name}
+                </EllipsisTooltip>
+                {/* <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <p className="flex-1 ml-4 text-[#1A1A1A] text-[13px] leading-[18px] font-medium line-clamp-1">
@@ -88,7 +92,7 @@ function FileListView({ lists, folderKeys, mode, isLoading = false }) {
                       {file.name}
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>
+                </TooltipProvider> */}
               </button>
             );
           })}
