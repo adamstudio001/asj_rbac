@@ -21,6 +21,21 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const getCompany = () => {
+    try {
+      const raw = sessionStorage.getItem("user");
+      if (!raw) return "1";
+
+      const parsed = JSON.parse(raw);
+
+      const companyId = parsed?.company?.[0]?.id;
+
+      return companyId ?? "1";
+    } catch (err) {
+      return "1";
+    }
+  };
+
   const [user, setUser] = useState(() => getStoredUser());
   const [token, setToken] = useState(() => sessionStorage.getItem("token"));
   const [expired, setExpired] = useState(() => {
@@ -202,6 +217,7 @@ export function AuthProvider({ children }) {
         isAdminAccess,
         isCompanyAccess,
         isUserAccess,
+        getCompany,
       }}
     >
       {children}

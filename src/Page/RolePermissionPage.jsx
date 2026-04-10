@@ -63,6 +63,7 @@ const RolePermissionContent = () => {
     isUserAccess,
     isExpired,
     refreshSession,
+    getCompany,
   } = useAuth();
 
   // const datas = [
@@ -119,19 +120,19 @@ const RolePermissionContent = () => {
           const [roleOriRes, roleRes, userRes] =
             await Promise.allSettled([
               axios.get(
-                `${BASEURL}/api/v1/company/1/role`,
+                `${BASEURL}/api/v1/company/${getCompany()}/role`,
                 {
                   headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
               ),
               axios.get(
-                `${BASEURL}/api/v1/company/1/role/role-with-user`,
+                `${BASEURL}/api/v1/company/${getCompany()}/role/role-with-user`,
                 {
                   headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
               ),
               axios.get(
-                `${BASEURL}/api/v1/company/1/user`, //?page=${page}
+                `${BASEURL}/api/v1/company/${getCompany()}/user`, //?page=${page}
                 {
                   headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
@@ -616,6 +617,7 @@ export function ModalPermission({
     refreshSession,
     isAdminAccess,
     isCompanyAccess,
+    getCompany,
   } = useAuth();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -694,7 +696,7 @@ export function ModalPermission({
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
 
-      const url = `${BASEURL}/api/v1/company/1/role/${data?.role?.[0]?.identifier}/permission`;
+      const url = `${BASEURL}/api/v1/company/${getCompany()}/role/${data?.role?.[0]?.identifier}/permission`;
       const method = "put";
 
       const res = await axios({
@@ -890,7 +892,7 @@ export function ModalRole({
   extraAction = () => {},
 }) {
   const [loading, setLoading] = useState(false);
-  const { token, hasPermission, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession, getCompany, } = useAuth();
   console.log(data, listRole);
 
   const {
@@ -937,7 +939,7 @@ export function ModalRole({
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
 
-      const url = `${BASEURL}/api/v1/company/1/role/${values?.role?.identifier}/user`;
+      const url = `${BASEURL}/api/v1/company/${getCompany()}/role/${values?.role?.identifier}/user`;
       const method = "put";
 
       const res = await axios({
@@ -1046,7 +1048,7 @@ export function ModalForm({
   mode = "create",
   extraAction = function () {},
 }) {
-  const { token, hasPermission, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession, getCompany, } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const {
@@ -1093,7 +1095,7 @@ export function ModalForm({
       const headers = buildHeaders(info, token);
 
       const baseUrl =
-        `${BASEURL}/api/v1/company/1/role`;
+        `${BASEURL}/api/v1/company/${getCompany()}/role`;
 
       const url =
         mode === "create" ? baseUrl : `${baseUrl}/${data?.id_role ?? 0}`;

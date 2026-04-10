@@ -19,6 +19,7 @@ import { buildHeaders, isEmpty } from "@/Common/Utils";
 import { createFileObject } from "@/Common/FileFactory";
 import RadioGroup from "./RadioGroup";
 import { BASEURL } from "@/Common/Constant";
+import { useAuth } from "@/Providers/AuthProvider";
 
 export default function ModalUpload({
   refreshData = () => {},
@@ -32,6 +33,7 @@ export default function ModalUpload({
   listVisible=[]
 }) { 
   const { isModalOpen, setIsModalOpen } = useFileManager();
+  const { getCompany } = useAuth();
   const { addToast } = useToast();
 
   const [files, setFiles] = useState([]);
@@ -185,8 +187,8 @@ export default function ModalUpload({
             throw Error("ada masalah data ketika di copy");
           }
           const urlDownload = (isAdmin || isCompany)? 
-          `${BASEURL}/api/v1/company/1/storage/${f?.reference?.id}/url-download`: 
-          `${BASEURL}/api/v1/app/company/1/storage/${f?.reference?.id}/url-download`;
+          `${BASEURL}/api/v1/company/${getCompany()}/storage/${f?.reference?.id}/url-download`: 
+          `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${f?.reference?.id}/url-download`;
 
           const resDownloadUrl = await fetch(urlDownload, {
             method: "POST",
@@ -223,8 +225,8 @@ export default function ModalUpload({
         // const headers = buildHeaders(info, token, false);
 
         const url = (isAdmin || isCompany)
-          ? `${BASEURL}/api/v1/company/1/storage/${idFolder}/file`
-          : `${BASEURL}/api/v1/app/company/1/storage/${idFolder}/file`;
+          ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${idFolder}/file`
+          : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${idFolder}/file`;
 
         const response = await axios.post(url, formData, {
           headers: headers,

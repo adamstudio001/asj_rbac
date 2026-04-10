@@ -97,6 +97,7 @@ const CollaborationContent = () => {
     isUserAccess,
     isExpired,
     refreshSession,
+    getCompany,
   } = useAuth();
   const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
   const [isModalRenameFileOpen, setIsModalRenameFileOpen] = useState(false);
@@ -262,15 +263,15 @@ const CollaborationContent = () => {
     let urlDelete = null; //[check] masih belum bedain antara delete folder dengan file
     if (fileSelected.type_identifier.toLowerCase() == "folder") {
       if (isAdmin) {
-        urlDelete = `${BASEURL}/api/v1/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/folder/${fileSelected.id}`;
       } else {
-        urlDelete = `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/folder/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/folder/${fileSelected.id}`;
       }
     } else {
       if (isAdmin) {
-        urlDelete = `${BASEURL}/api/v1/company/1/storage/${folderKeys}/file/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/file/${fileSelected.id}`;
       } else {
-        urlDelete = `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/file/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/file/${fileSelected.id}`;
       }
     }
 
@@ -398,8 +399,8 @@ const CollaborationContent = () => {
     }
 
     const urlDownload = isAdmin
-      ? `${BASEURL}/api/v1/company/1/storage/${file.storageItem.id}/url-download`
-      : `${BASEURL}/api/v1/app/company/1/storage/${file.storageItem.id}/url-download`;
+      ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${file.storageItem.id}/url-download`
+      : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${file.storageItem.id}/url-download`;
 
     // const newTab = window.open("about:blank");
     // if (!newTab) {
@@ -1072,6 +1073,7 @@ export function ModalFolder({
     isCompanyAccess,
     isExpired,
     refreshSession,
+    getCompany,
   } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -1124,9 +1126,9 @@ export function ModalFolder({
       let url = null;
       if (isAdmin) {
         if (isEdit) {
-          url = `${BASEURL}/api/v1/company/1/storage/${folderKeys}/folder/${data.id}`;
+          url = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/folder/${data.id}`;
         } else {
-          url = `${BASEURL}/api/v1/company/1/storage/${folderKeys}/folder`;
+          url = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/folder`;
         }
       } else {
         if (isRoot) {
@@ -1135,13 +1137,13 @@ export function ModalFolder({
           //   alert("fitur edit root folder belum ada");
           //   return;
           // } else {
-          url = `${BASEURL}/api/v1/app/company/1/storage/root/folder`;
+          url = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/root/folder`;
           // }
         } else {
           if (isEdit) {
-            url = `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/folder/${data.id}`;
+            url = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/folder/${data.id}`;
           } else {
-            url = `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/folder`;
+            url = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/folder`;
           }
         }
       }
@@ -1252,6 +1254,7 @@ export function ModalRenameFile({
     isCompanyAccess,
     isExpired,
     refreshSession,
+    getCompany,
   } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -1290,8 +1293,8 @@ export function ModalRenameFile({
         visibility_identifier: category ?? "GENERAL",
       };
       const url = isAdmin
-        ? `${BASEURL}/api/v1/company/1/storage/${folderKeys}/file/${data.id}`
-        : `${BASEURL}/api/v1/app/company/1/storage/${folderKeys}/file/${data.id}`;
+        ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/file/${data.id}`
+        : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/file/${data.id}`;
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
@@ -1394,6 +1397,7 @@ export function ModalCollaborator({
     isCompanyAccess,
     isExpired,
     refreshSession,
+    getCompany,
   } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -1406,9 +1410,9 @@ export function ModalCollaborator({
 
   const url_collaboration =
     isAdmin || isCompanyAccess
-      ? `${BASEURL}/api/v1/app/company/1/storage/${data?.id ?? "#"}/collaboration`
-      : `${BASEURL}/api/v1/company/1/storage/${data?.id ?? "#"}/collaboration`;
-  const url_user = `${BASEURL}/api/v1/app/company/1/user/all`;
+      ? `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${data?.id ?? "#"}/collaboration`
+      : `${BASEURL}/api/v1/company/${getCompany()}/storage/${data?.id ?? "#"}/collaboration`;
+  const url_user = `${BASEURL}/api/v1/app/company/${getCompany()}/user/all`;
 
   async function fetchUsers(token, url) {
     try {

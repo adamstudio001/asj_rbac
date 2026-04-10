@@ -69,6 +69,7 @@ const UserPageContent = () => {
     isCompanyAccess,
     isExpired,
     refreshSession,
+    getCompany,
   } = useAuth();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
@@ -87,7 +88,7 @@ const UserPageContent = () => {
       setTimeout(async () => {
         try {
           const [usersRes, jobsRes, branchesRes] = await Promise.allSettled([
-            axios.get(`${BASEURL}/api/v1/company/1/user?page=${page}`, {
+            axios.get(`${BASEURL}/api/v1/company/${getCompany()}/user?page=${page}`, {
               headers: {
                 Authorization: `Bearer ${sessionStorage.getItem("token")}`,
               },
@@ -182,7 +183,7 @@ const UserPageContent = () => {
         const headers = buildHeaders(info, token);
 
         const res = await axios.delete(
-          `${BASEURL}/api/v1/company/1/user/${selectedUser?.id ?? 0}`,
+          `${BASEURL}/api/v1/company/${getCompany()}/user/${selectedUser?.id ?? 0}`,
           {
             headers: headers,
           },
@@ -674,7 +675,7 @@ export function ModalResetPassword({
   const [clipboardValue, setClipboardValue] = useState("");
 
   const { addToast } = useToast();
-  const { token, hasPermission, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession, getCompany, } = useAuth();
 
   const {
     register,
@@ -727,7 +728,7 @@ export function ModalResetPassword({
 
     try {
       const res = await axios.put(
-        `${BASEURL}/api/v1/company/1/user/${data.id}/reset-password`,
+        `${BASEURL}/api/v1/company/${getCompany()}/user/${data.id}/reset-password`,
         {
           password: values.newPassword,
           password_confirmation: values.confirmPassword,
@@ -955,7 +956,7 @@ export function ModalUser({
   });
 
   const { addToast } = useToast();
-  const { token, hasPermission, isExpired, refreshSession } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession, getCompany, } = useAuth();
 
   useEffect(() => {
     reset({
@@ -1027,7 +1028,7 @@ export function ModalUser({
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
 
-      const baseUrl = `${BASEURL}/api/v1/company/1/user`;
+      const baseUrl = `${BASEURL}/api/v1/company/${getCompany()}/user`;
 
       const url = mode === "create" ? baseUrl : `${baseUrl}/${data?.id ?? 0}`;
 
