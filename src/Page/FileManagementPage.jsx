@@ -426,7 +426,7 @@ const FileManagementContent = () => {
   }
 
   const hasGrantedButtonUploadFile =
-    hasPermission("UPLOAD_FILE") || isAdminAccess() || isCompanyAccess();
+    hasPermission("UPLOAD_FILE") || isAdmin;
 
   function renderCreateFolder() {
     const hasGrantedInRoot = isRoot && hasPermission("CREATE_FOLDER");
@@ -437,7 +437,7 @@ const FileManagementContent = () => {
     }
 
     return (
-      (hasGrantedInRoot || hasGrantedInFolder || (isAdminAccess() || isCompanyAccess())) && (
+      (hasGrantedInRoot || hasGrantedInFolder || isAdmin) && (
         <button
           onClick={() => {
             setIsModalFolderOpen(true);
@@ -1166,7 +1166,7 @@ const FileManagementContent = () => {
                 Restore File
               </button>
               {/* } */}
-              {(folderKeys && hasGrantedButtonUploadFile || (isAdminAccess() || isCompanyAccess())) && (
+              {(folderKeys && hasGrantedButtonUploadFile) && (
                 <button
                   onClick={() => {
                     setIsModalOpen(true);
