@@ -159,20 +159,19 @@ function LoginContent() {
           permissions: permission_flat,
           myfolder: data,
         };
-        console.log(user);
 
-        // sessionStorage.setItem("info", JSON.stringify(info));
-        // sessionStorage.setItem("token", auth.token);
-        // sessionStorage.setItem("user", JSON.stringify(user));
-        // sessionStorage.setItem(
-        //   "storage_visibility",
-        //   JSON.stringify(dataVisibility),
-        // );
-        // sessionStorage.setItem("permissions", JSON.stringify(dataPermission));
-        // setToken(auth.token);
-        // setUser(user);
+        sessionStorage.setItem("info", JSON.stringify(info));
+        sessionStorage.setItem("token", auth.token);
+        sessionStorage.setItem("user", JSON.stringify(user));
+        sessionStorage.setItem(
+          "storage_visibility",
+          JSON.stringify(dataVisibility),
+        );
+        sessionStorage.setItem("permissions", JSON.stringify(dataPermission));
+        setToken(auth.token);
+        setUser(user);
 
-        // navigate("/dashboard");
+        navigate("/dashboard");
       }
     } catch (err) {
       console.error(err);
