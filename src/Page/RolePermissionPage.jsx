@@ -53,7 +53,7 @@ const RolePermissionContent = () => {
   const [listRole, setListRole] = useState([]);
   const [listPermission, setListPermissions] = useState(JSON.parse(sessionStorage.getItem("permissions") ?? "[]"));
 
-  const [sortConfig, setSortConfig] = useState({});
+  const [sortConfig, setSortConfig] = useState({user: 'asc'});
   const [selectedIds, setSelectedIds] = useState([]);
   const {
     token,
@@ -104,11 +104,12 @@ const RolePermissionContent = () => {
   useEffect(() => {
     setSearch("");
     loadData();
-  }, []);
+  }, [sortConfig]);
 
   const isAdmin = isAdminAccess() || isCompanyAccess();
 
   async function loadData() {
+    console.log(sortConfig)
     if (isExpired()) {
       await refreshSession();
     }
@@ -132,7 +133,7 @@ const RolePermissionContent = () => {
                 }
               ),
               axios.get(
-                `${BASEURL}/api/v1/company/${getCompany()}/user`, //?page=${page}
+                `${BASEURL}/api/v1/company/${getCompany()}/user?order_by[]=full_name&sort_by[]=${sortConfig?.user ?? "asc"}`, //?page=${page}
                 {
                   headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
                 }
@@ -245,27 +246,29 @@ const RolePermissionContent = () => {
       data.full_name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const activeSorts = Object.entries(sortConfig).filter(
-      ([_, dir]) => dir !== null
-    );
+    return result;
 
-    if (activeSorts.length === 0) {
-      return result;
-    }
+    // const activeSorts = Object.entries(sortConfig).filter(
+    //   ([_, dir]) => dir !== null
+    // );
 
-    return [...result].sort((a, b) => {
-      for (const [key, direction] of activeSorts) {
-        let aVal = a[key];
-        let bVal = b[key];
+    // if (activeSorts.length === 0) {
+    //   return result;
+    // }
 
-        aVal = aVal?.toString().toLowerCase() ?? "";
-        bVal = bVal?.toString().toLowerCase() ?? "";
+    // return [...result].sort((a, b) => {
+    //   for (const [key, direction] of activeSorts) {
+    //     let aVal = a[key];
+    //     let bVal = b[key];
 
-        if (aVal < bVal) return direction === "asc" ? -1 : 1;
-        if (aVal > bVal) return direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
+    //     aVal = aVal?.toString().toLowerCase() ?? "";
+    //     bVal = bVal?.toString().toLowerCase() ?? "";
+
+    //     if (aVal < bVal) return direction === "asc" ? -1 : 1;
+    //     if (aVal > bVal) return direction === "asc" ? 1 : -1;
+    //   }
+    //   return 0;
+    // });
   }, [datas, search, sortConfig]);
 
   // const allChecked =
@@ -893,7 +896,6 @@ export function ModalRole({
 }) {
   const [loading, setLoading] = useState(false);
   const { token, hasPermission, isExpired, refreshSession, getCompany, } = useAuth();
-  console.log(data, listRole);
 
   const {
     control,
