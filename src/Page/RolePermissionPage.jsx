@@ -775,12 +775,20 @@ function PermissionGroup({ accessGroups, field, className }) {
   return (
     <div className={`grid gap-10 grid-cols-1 md:grid-cols-2 ${className}`}>
       <PermissionSection group={find("General")} field={field} />
-      <PermissionSection group={find("File Management")} field={field} />
+      <PermissionSection group={find("File Management")} field={field} defaultChecked={[
+        "CREATE_FOLDER",
+        "UPDATE_FOLDER",
+        "DELETE_FOLDER",
+        "UPLOAD_FILE",
+        "UPDATE_FILE",
+        "DELETE_FILE",
+        "DOWNLOAD_FILE"
+      ]} />
     </div>
   );
 }
 
-function PermissionSection({ group, field }) {
+function PermissionSection({ group, field, defaultChecked = [] }) {
   if (!group) return null;
 
   // const isFile = group.group_name.toLowerCase() === "file management";
@@ -804,6 +812,7 @@ function PermissionSection({ group, field }) {
             key={permission.identifier}
             permission={permission}
             field={field}
+            defaultChecked={defaultChecked}
           />
         ))}
       </div>
@@ -811,7 +820,7 @@ function PermissionSection({ group, field }) {
   );
 }
 
-function PermissionItem({ permission, field }) {
+function PermissionItem({ permission, field, defaultChecked = [] }) {
   const checked = field.value.some(
     (p) => p.identifier === permission.identifier,
   );
@@ -819,7 +828,7 @@ function PermissionItem({ permission, field }) {
   return (
     <label className="grid grid-cols-[20px_1fr] gap-x-3 cursor-pointer">
       <Checkbox
-        checked={checked}
+        checked={field.value.length > 0? checked : defaultChecked.includes(permission.identifier)}
         onCheckedChange={(v) => {
           if (v) {
             field.onChange([
