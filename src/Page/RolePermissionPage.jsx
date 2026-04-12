@@ -5,19 +5,19 @@ import CustomSelect from "@/Components/CustomSelect";
 import { Button } from "@/Components/ui/Button";
 import {
   DialogModal,
-  DialogModalClose,
+  // DialogModalClose,
   DialogModalContent,
   DialogModalDescription,
   DialogModalFooter,
   DialogModalHeader,
   DialogModalTitle,
-  DialogModalTrigger,
+  // DialogModalTrigger,
 } from "@/Components/ui/DialogModal";
 import { useForm, Controller } from "react-hook-form";
 import { useToast } from "@/Providers/ToastProvider";
 import DeleteModal from "@/Components/DeleteModal";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import CustomInput from "@/Components/CustomInput";
 import { cn } from "@/lib/utils";
 import { TableActionMenuImage } from "@/Components/TableActionMenuV2";
@@ -28,7 +28,7 @@ import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
 import CustomTextArea from "@/Components/CustomTextArea";
 import { IoMdAdd } from "react-icons/io";
-import { buildHeaders } from "@/Common/Utils";
+import { buildHeaders, isEmpty } from "@/Common/Utils";
 import { BASEURL } from "@/Common/Constant";
 
 const RolePermissionPage = () => {
@@ -51,10 +51,12 @@ const RolePermissionContent = () => {
 
   const [datas, setDatas] = useState([]);
   const [listRole, setListRole] = useState([]);
-  const [listPermission, setListPermissions] = useState(JSON.parse(sessionStorage.getItem("permissions") ?? "[]"));
+  const [listPermission, _] = useState(
+    JSON.parse(sessionStorage.getItem("permissions") ?? "[]"),
+  );
 
-  const [sortConfig, setSortConfig] = useState({user: 'asc'});
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ full_name: "asc" });
+  // const [selectedIds, setSelectedIds] = useState([]);
   const {
     token,
     hasPermission,
@@ -66,41 +68,6 @@ const RolePermissionContent = () => {
     getCompany,
   } = useAuth();
 
-  // const datas = [
-  //   {
-  //     id: 1,
-  //     employId: "#29112025001",
-  //     user: "Desy Puji Astuti",
-  //     role: "Super Admin",
-  //     position: "HR/GA",
-  //     permission: [],
-  //   },
-  //   {
-  //     id: 2,
-  //     employId: "#29112025002",
-  //     user: "Hani Ayu Wulandari",
-  //     role: "Admin Legal",
-  //     position: "Tax",
-  //     permission: [],
-  //   },
-  //   {
-  //     id: 3,
-  //     employId: "#29112025003",
-  //     user: "Rahul",
-  //     role: "User",
-  //     position: "Legal",
-  //     permission: [],
-  //   },
-  //   {
-  //     id: 4,
-  //     employId: "#29112025004",
-  //     user: "Dika",
-  //     role: "User",
-  //     position: "OPS",
-  //     permission: [],
-  //   },
-  // ];
-
   useEffect(() => {
     setSearch("");
     loadData();
@@ -109,7 +76,7 @@ const RolePermissionContent = () => {
   const isAdmin = isAdminAccess() || isCompanyAccess();
 
   async function loadData() {
-    console.log(sortConfig)
+    console.log(sortConfig);
     if (isExpired()) {
       await refreshSession();
     }
@@ -118,26 +85,34 @@ const RolePermissionContent = () => {
       setIsLoad(true);
       setTimeout(async () => {
         try {
-          const [roleOriRes, roleRes, userRes] =
+          const params = Object.entries(sortConfig)
+            .filter(([_, dir]) => dir)
+            .map(([col, dir]) => `order_by[]=${col}&sort_by[]=${dir}`)
+            .join("&");
+
+          const [roleOriRes, userRoleRes, positionRes] =
             await Promise.allSettled([
+              axios.get(`${BASEURL}/api/v1/company/${getCompany()}/role`, {
+                headers: {
+                  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                },
+              }),
               axios.get(
-                `${BASEURL}/api/v1/company/${getCompany()}/role`,
+                `${BASEURL}/api/v1/company/${getCompany()}/role/role-with-user?${params}`,
                 {
-                  headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
-                }
+                  headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                  },
+                },
               ),
               axios.get(
-                `${BASEURL}/api/v1/company/${getCompany()}/role/role-with-user`,
+                `${BASEURL}/api/v1/helper/job`,
                 {
-                  headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
-                }
+                  headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                  },
+                },
               ),
-              axios.get(
-                `${BASEURL}/api/v1/company/${getCompany()}/user?order_by[]=full_name&sort_by[]=${sortConfig?.user ?? "asc"}`, //?page=${page}
-                {
-                  headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
-                }
-              )
             ]);
 
           const roleOris =
@@ -145,19 +120,18 @@ const RolePermissionContent = () => {
               ? roleOriRes.value.data?.data || []
               : [];
 
-          const roles =
-            roleRes.status === "fulfilled"
-              ? roleRes.value.data?.data || []
+          const userroles =
+            userRoleRes.status === "fulfilled"
+              ? userRoleRes.value.data?.data || []
               : [];
 
-          const users =
-            userRes.status === "fulfilled"
-              ? userRes.value.data?.data || []
+          const positions =
+            positionRes.status === "fulfilled"
+              ? positionRes.value.data?.data || []
               : [];
 
-          setDatas(userRoleAdapter(users, roles));
+          setDatas(userRoleAdapter(userroles, positions));
           setListRole(roleAdapter(roleOris));
-          // setListPermissions(permissions);
         } catch (err) {
           console.error(err);
           addToast("error", "ada masalah pada aplikasi");
@@ -168,48 +142,35 @@ const RolePermissionContent = () => {
     }
   }
 
-  function buildUserRoleMap(apiRolesResponse = []) {
-    const map = new Map();
+  function userRoleAdapter(
+    apiUserRolesResponse = [],
+    apiPositionsResponse = [],
+  ) {
+    return apiUserRolesResponse.map((user) => {
+      let position = null;
+      const positions = apiPositionsResponse.filter(
+        (item) => item.identifier === user?.job_identifier,
+      );
 
-    apiRolesResponse.forEach((role) => {
-      role.employment?.forEach((emp) => {
-        if (!emp.user_id) return;
-
-        const existing = map.get(emp.user_id) ?? [];
-
-        map.set(emp.user_id, [
-          ...existing,
-          {
-            id: role.id,
-            name: role.name,
-            permission_list: role.permission_list ?? [],
-          },
-        ]);
-      });
-    });
-
-    return map;
-  }
-
-  function userRoleAdapter(apiUsersResponse = [], apiRolesResponse = []) {
-    if (!Array.isArray(apiUsersResponse)) return [];
-
-    const roleMap = buildUserRoleMap(apiRolesResponse);
-
-    return apiUsersResponse.map((user) => {
-      const employment = user.employment?.[0] ?? null;
-      const roles = roleMap.get(user.id) ?? [];
+      if (positions.length === 1) {
+        position = positions[0];
+      }
 
       return {
         id: user.id,
         full_name: user.full_name,
-        employee_id: employment?.employee_id ?? "",
-        role: roles.map((r) => ({
-          identifier: r.id,
-          label: r.name,
-        })),
-        permissions: [...new Set(roles.flatMap((r) => r.permission_list))],
-        position: employment?.job_identifier ?? "",
+        employee_id: user?.employee_id ?? "",
+        role: isEmpty(user?.role_id)
+          ? []
+          : [
+              {
+                identifier: user?.role_id,
+                label: user?.role_name,
+              },
+            ],
+        permissions: user?.role_permission_list ?? [],
+        position: user?.job_identifier ?? "",
+        label_position: position?.label ?? "",
       };
     });
   }
@@ -243,7 +204,7 @@ const RolePermissionContent = () => {
 
   const filteredDatas = useMemo(() => {
     let result = datas.filter((data) =>
-      data.full_name.toLowerCase().includes(search.toLowerCase())
+      data.full_name.toLowerCase().includes(search.toLowerCase()),
     );
 
     return result;
@@ -280,7 +241,7 @@ const RolePermissionContent = () => {
       <th
         className={cn(
           "px-4 py-3 font-inter font-medium text-[14px] text-black select-none",
-          className
+          className,
         )}
       >
         <div className="flex items-center gap-2">
@@ -413,7 +374,7 @@ const RolePermissionContent = () => {
         <thead className="bg-[#F3F3F3]">
           <tr className="border border-gray-200">
             <SortableTh
-              column="user"
+              column="full_name"
               className="w-[250px]"
               left={<></>}
               // <Checkbox
@@ -471,10 +432,10 @@ const RolePermissionContent = () => {
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
                 {Array.isArray(data.role) && data.role.length > 0
                   ? data.role.map((r) => r.label).join(", ")
-                  : "-"}
+                  : ""}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {data.position}
+                {data.label_position}
               </td>
               <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
                 {hasGrantedShowButtonAction && (
@@ -509,7 +470,7 @@ const RolePermissionContent = () => {
                           ) {
                             addToast(
                               "error",
-                              "tidak dapat ubah role karena sudah terdaftar role lebih dari 1"
+                              "tidak dapat ubah role karena sudah terdaftar role lebih dari 1",
                             );
                             return;
                           }
@@ -629,7 +590,7 @@ export function ModalPermission({
   const getAllPermissions = (groups) => groups.flatMap((g) => g.permissions);
   const mapPermissionByIdentifier = (
     allPermissions,
-    selectedIdentifiers = []
+    selectedIdentifiers = [],
   ) => allPermissions.filter((p) => selectedIdentifiers.includes(p.identifier));
 
   const {
@@ -652,7 +613,7 @@ export function ModalPermission({
 
     const selectedPermissions = mapPermissionByIdentifier(
       allPermissions,
-      data.permissions ?? []
+      data.permissions ?? [],
     );
 
     reset({
@@ -678,7 +639,7 @@ export function ModalPermission({
     if (Array.isArray(data.role) && data.role.length > 1) {
       addToast(
         "error",
-        "tidak dapat ubah role karena sudah terdaftar role lebih dari 1"
+        "tidak dapat ubah role karena sudah terdaftar role lebih dari 1",
       );
       return;
     }
@@ -763,7 +724,7 @@ export function ModalPermission({
                     const isAllChecked =
                       allPermissions.length &&
                       allPermissions.every((p) =>
-                        field.value.some((v) => v.identifier === p.identifier)
+                        field.value.some((v) => v.identifier === p.identifier),
                       );
 
                     return (
@@ -812,14 +773,9 @@ function PermissionGroup({ accessGroups, field, className }) {
   const find = (name) => accessGroups.find((g) => g.group_name === name);
 
   return (
-    <div
-      className={`grid gap-10 grid-cols-1 md:grid-cols-2 ${className}`}
-    >
+    <div className={`grid gap-10 grid-cols-1 md:grid-cols-2 ${className}`}>
       <PermissionSection group={find("General")} field={field} />
-      <PermissionSection
-        group={find("File Management")}
-        field={field}
-      />
+      <PermissionSection group={find("File Management")} field={field} />
     </div>
   );
 }
@@ -838,10 +794,8 @@ function PermissionSection({ group, field }) {
   // }, [items, useTwoColumns]);
 
   return (
-     <div className="flex flex-col gap-4">
-      <h3 className="font-semibold text-[#5B84D6]">
-        {group.group_name}
-      </h3>
+    <div className="flex flex-col gap-4">
+      <h3 className="font-semibold text-[#5B84D6]">{group.group_name}</h3>
 
       {/* responsive permission grid */}
       <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(180px,1fr))] sm:grid-cols-2">
@@ -859,7 +813,7 @@ function PermissionSection({ group, field }) {
 
 function PermissionItem({ permission, field }) {
   const checked = field.value.some(
-    (p) => p.identifier === permission.identifier
+    (p) => p.identifier === permission.identifier,
   );
 
   return (
@@ -877,7 +831,7 @@ function PermissionItem({ permission, field }) {
             ]);
           } else {
             field.onChange(
-              field.value.filter((p) => p.identifier !== permission.identifier)
+              field.value.filter((p) => p.identifier !== permission.identifier),
             );
           }
         }}
@@ -895,7 +849,8 @@ export function ModalRole({
   extraAction = () => {},
 }) {
   const [loading, setLoading] = useState(false);
-  const { token, hasPermission, isExpired, refreshSession, getCompany, } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession, getCompany } =
+    useAuth();
 
   const {
     control,
@@ -1050,7 +1005,8 @@ export function ModalForm({
   mode = "create",
   extraAction = function () {},
 }) {
-  const { token, hasPermission, isExpired, refreshSession, getCompany, } = useAuth();
+  const { token, hasPermission, isExpired, refreshSession, getCompany } =
+    useAuth();
   const [loading, setLoading] = useState(false);
 
   const {
@@ -1096,8 +1052,7 @@ export function ModalForm({
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
 
-      const baseUrl =
-        `${BASEURL}/api/v1/company/${getCompany()}/role`;
+      const baseUrl = `${BASEURL}/api/v1/company/${getCompany()}/role`;
 
       const url =
         mode === "create" ? baseUrl : `${baseUrl}/${data?.id_role ?? 0}`;

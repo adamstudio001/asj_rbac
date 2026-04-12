@@ -8,17 +8,18 @@ import { useParams } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import { getFileIconBig } from "@src/Common/Utils";
 import Navbar from "@src/Components/Navbar";
-import { LuUpload } from "react-icons/lu";
+import Document from "@assets/document.svg";
 // import { ToastProvider } from "@src/Providers/ToastProvider";
 import ModalUpload from "@/Components/ModalUpload";
 import { useAuth } from "@/Providers/AuthProvider";
 import axios from "axios";
 import { useToast } from "@/Providers/ToastProvider";
-import { filterAndSortFiles, isEmpty } from "@/Common/Utils";
+import { filterAndSortFiles, getFileIcon, isEmpty } from "@/Common/Utils";
 import Pagination from "@/Components/Pagination";
 import { useNavigate } from "react-router-dom";
 import UserProfileMenu from "@/Components/UserProfileMenu";
 import { BASEURL } from "@/Common/Constant";
+import EllipsisTooltip from "@/Components/EllipsisTooltip";
 
 const DashboardPage = () => {
   return (
@@ -529,9 +530,9 @@ function RecentOpened() {
     if (imageExtensions.includes(file.type)) {
       return (
         <img
-          src={file.preview}
+          src={getFileIcon(file.name, false, 0, true)}
           alt={file.name}
-          className="w-full h-24 object-cover rounded-xl"
+          className="w-full h-21 rounded-xl"
         />
       );
     }
@@ -611,6 +612,7 @@ function RecentOpened() {
           <button
             key={idx}
             onClick={() => {
+              //[pr] ganti jadi handler
               if (file.type === "folder") {
                 navigate(`/filemanager/${file.storage_item_id}`);
               } else {
@@ -630,7 +632,9 @@ function RecentOpened() {
             >
               {renderIcon(file)}
             </div>
-            <div className="text-sm truncate w-full">{file.name}</div>
+            <EllipsisTooltip className={"text-sm truncate w-full"}>
+              {file.name}
+            </EllipsisTooltip>
           </button>
         ))}
       </div>

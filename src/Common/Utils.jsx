@@ -9,28 +9,69 @@ import Zip from "@assets/zip.svg";
 import Document from "@assets/document.svg";
 import { formatDistanceToNowStrict, isValid } from "date-fns";
 
-export function getFileIcon(fileName, isFolder = false, size = 32) {
+export function getFileIcon(
+  fileName,
+  isFolder = false,
+  size = 32,
+  withoutElement = false,
+) {
   if (isFolder)
-    return <img src={Folder} alt="Folder" width={size} height={size} />;
+    return withoutElement ? (
+      Folder
+    ) : (
+      <img src={Folder} alt="Folder" width={size} height={size} />
+    );
 
   const ext = fileName.split(".").pop().toLowerCase();
 
   if (["ppt", "pptx"].includes(ext))
-    return <img src={Document} alt="presentation" width={size} height={size} />;
+    return withoutElement ? (
+      Document
+    ) : (
+      <img src={Document} alt="presentation" width={size} height={size} />
+    );
   if (["xlsx", "xls"].includes(ext))
-    return <img src={Xls} alt="Folder" width={size} height={size} />;
+    return withoutElement ? (
+      Xls
+    ) : (
+      <img src={Xls} alt="Folder" width={size} height={size} />
+    );
   if (["doc", "docx", "txt"].includes(ext))
-    return <img src={Document} alt="document" width={size} height={size} />;
+    return withoutElement ? (
+      Document
+    ) : (
+      <img src={Document} alt="document" width={size} height={size} />
+    );
   if (["mp3", "zip"].includes(ext))
-    return <img src={Zip} alt="archive" width={size} height={size} />;
+    return withoutElement ? (
+      Zip
+    ) : (
+      <img src={Zip} alt="archive" width={size} height={size} />
+    );
   if (["mp4", "mkv", "avi"].includes(ext))
-    return <img src={Video} alt="video" width={size} height={size} />;
+    return withoutElement ? (
+      Video
+    ) : (
+      <img src={Video} alt="video" width={size} height={size} />
+    );
   if (["pdf"].includes(ext))
-    return <img src={Pdf} alt="archive" width={size} height={size} />;
+    return withoutElement ? (
+      Pdf
+    ) : (
+      <img src={Pdf} alt="archive" width={size} height={size} />
+    );
   if (["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"].includes(ext))
-    return <img src={Images} alt="image" width={size} height={size} />;
+    return withoutElement ? (
+      Images
+    ) : (
+      <img src={Images} alt="image" width={size} height={size} />
+    );
   if (["png", "svg"].includes(ext))
-    return <img src={Png} alt="ilustrate" width={size} height={size} />;
+    return withoutElement ? (
+      Png
+    ) : (
+      <img src={Png} alt="ilustrate" width={size} height={size} />
+    );
 
   return <CgFileDocument className="text-gray-400 text-xl" />; // default
 }
