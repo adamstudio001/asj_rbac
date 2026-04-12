@@ -183,7 +183,10 @@ function LoginContent() {
       ...new Set(
         user.employment
           .filter((e) => e.is_active_status)
-          .flatMap((e) => e.role?.permission_list ?? []),
+          .flatMap((e) => [
+            ...(e.role?.permission_list ?? []),
+            ...(e.default_permission_list ?? []),
+          ]),
       ),
     ];
   }
