@@ -67,27 +67,42 @@ function LoginContent() {
     return () => clearInterval(interval);
   }, [isLoaded]);
 
-  async function getParentStorage({ isAdmin, token }) {
-    const baseUrl = isAdmin
-      ? `${BASEURL}/api/v1/company/1`
-      : `${BASEURL}/api/v1/app/company/1`;
+  function getParentStorage({ isAdmin, data }) {
+    const emp = data?.employment?.[0];
 
-    const url = `${baseUrl}/storage?order_by[]=name&sort_by[]=asc&visibility_identifier=GENERAL`;
+    const permissions = emp
+      ? [
+          ...(emp.role?.permission_list ?? []),
+          ...(emp.default_permission_list ?? []),
+        ]
+      : [];
 
-    const res = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const rawData = res?.data?.data ?? [];
-    const filtered = rawData.filter(
-      (d) => d?.parent_id !== null && d?.parent_id !== undefined,
+    const viewPermissions = permissions.filter(
+      (p, i, arr) => /^VIEW_.*_FOLDER$/.test(p) && arr.indexOf(p) === i,
     );
-    const parentData = [...new Set(filtered.map((item) => item.parent_id))];
+
+    const expected = emp ? `VIEW_${emp.job_identifier}_FOLDER` : null;
+
+    const isInvalidAdmin = isAdmin;
+    const isInvalidEmployment = !emp || data?.employment?.length !== 1;
+    const isInactive = !emp?.is_active_status;
+    const hasMultipleViewAccess = viewPermissions.length > 1;
+    const isMismatchedPermission =
+      viewPermissions.length === 1 && viewPermissions[0] !== expected;
+
+    // 🔥 centralized guard
+    if (
+      isInvalidAdmin ||
+      isInvalidEmployment ||
+      isInactive ||
+      hasMultipleViewAccess ||
+      isMismatchedPermission
+    ) {
+      return { data: null };
+    }
 
     return {
-      data: isAdmin || parentData.length > 1 ? null : parentData[0],
+      data: data?.parent_storage_item?.id ?? null,
     };
   }
 
@@ -129,8 +144,8 @@ function LoginContent() {
             : 0;
 
         const { data } = await getParentStorage({
-          isAdmin,
-          token: auth.token,
+          isAdmin: isAdmin,
+          data: body.data,
         });
 
         const user = {
@@ -144,19 +159,20 @@ function LoginContent() {
           permissions: permission_flat,
           myfolder: data,
         };
+        console.log(user);
 
-        sessionStorage.setItem("info", JSON.stringify(info));
-        sessionStorage.setItem("token", auth.token);
-        sessionStorage.setItem("user", JSON.stringify(user));
-        sessionStorage.setItem(
-          "storage_visibility",
-          JSON.stringify(dataVisibility),
-        );
-        sessionStorage.setItem("permissions", JSON.stringify(dataPermission));
-        setToken(auth.token);
-        setUser(user);
+        // sessionStorage.setItem("info", JSON.stringify(info));
+        // sessionStorage.setItem("token", auth.token);
+        // sessionStorage.setItem("user", JSON.stringify(user));
+        // sessionStorage.setItem(
+        //   "storage_visibility",
+        //   JSON.stringify(dataVisibility),
+        // );
+        // sessionStorage.setItem("permissions", JSON.stringify(dataPermission));
+        // setToken(auth.token);
+        // setUser(user);
 
-        navigate("/dashboard");
+        // navigate("/dashboard");
       }
     } catch (err) {
       console.error(err);
