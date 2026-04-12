@@ -1074,6 +1074,7 @@ export function ModalFolder({
     isExpired,
     refreshSession,
     getCompany,
+    getMyFolder
   } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -1255,6 +1256,7 @@ export function ModalRenameFile({
     isExpired,
     refreshSession,
     getCompany,
+    getMyFolder
   } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -1398,6 +1400,7 @@ export function ModalCollaborator({
     isExpired,
     refreshSession,
     getCompany,
+    getMyFolder
   } = useAuth();
 
   const [loading, setLoading] = useState(false);

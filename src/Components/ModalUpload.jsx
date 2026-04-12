@@ -225,8 +225,8 @@ export default function ModalUpload({
         // const headers = buildHeaders(info, token, false);
 
         const url = (isAdmin || isCompany)
-          ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${idFolder}/file`
-          : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${idFolder}/file`;
+          ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${idFolder ?? "#"}/file`
+          : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${idFolder ?? "#"}/file`;
 
         const response = await axios.post(url, formData, {
           headers: headers,

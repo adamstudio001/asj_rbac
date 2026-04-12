@@ -24,6 +24,7 @@ import Copy from "@assets/copy.svg";
 import Info from "@assets/info.svg";
 import Rename from "@assets/edit.svg";
 import Collaboration from "@assets/collaboration.svg";
+import Classification from "@assets/classification.svg";
 import Trash from "@assets/trash.svg";
 import FolderCreate from "@assets/folder_create.svg";
 import RestoreFile from "@assets/restore.svg";
@@ -74,8 +75,22 @@ const FileManagementPage = () => {
 };
 
 const FileManagementContent = () => {
+  const {
+    user,
+    token,
+    logout,
+    hasPermission,
+    isAdminAccess,
+    isCompanyAccess,
+    isUserAccess,
+    isExpired,
+    refreshSession,
+    getCompany,
+    getMyFolder,
+  } = useAuth();
+
   const { folderKeys } = useParams();
-  const isRoot = isEmpty(folderKeys);
+  const isRoot = isEmpty(getMyFolder() ?? folderKeys);
   const navigate = useNavigate();
   const { showMenu, data, setData } = useMenu();
 
@@ -89,20 +104,10 @@ const FileManagementContent = () => {
   const { addToast } = useToast();
   const { setIsModalOpen } = useFileManager(); //#getFileDirectory
 
-  const {
-    user,
-    token,
-    logout,
-    hasPermission,
-    isAdminAccess,
-    isCompanyAccess,
-    isUserAccess,
-    isExpired,
-    refreshSession,
-    getCompany,
-  } = useAuth();
-  const [isModalFolderOpen, setIsModalFolderOpen] = useState(false);
   const [isModalRenameFileOpen, setIsModalRenameFileOpen] = useState(false);
+  const [isModalClassificationOpen, setIsModalClassificationOpen] =
+    useState(false);
+
   const [isModalCollaboratorOpen, setIsModalCollaboratorOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [itemType, setItemType] = useState([]);
@@ -169,7 +174,7 @@ const FileManagementContent = () => {
       : `${BASEURL}/api/v1/app/company/1`;
 
     const url = `${baseUrl}/${
-      !isRoot ? `storage/${folderKeys}` : `storage`
+      !isRoot ? `storage/${folderKeys ?? getMyFolder()}` : `storage`
     }?order_by[]=name&sort_by[]=asc&visibility_identifier=${selectedIdentifier}`;
 
     // --- Breadcrumb URL hanya jika folderKeys punya nilai ---
@@ -333,15 +338,15 @@ const FileManagementContent = () => {
     let urlDelete = null; //[check] masih belum bedain antara delete folder dengan file
     if (fileSelected.type_identifier.toLowerCase() == "folder") {
       if (isAdmin) {
-        urlDelete = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/folder/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys ?? getMyFolder()}/folder/${fileSelected.id}`;
       } else {
-        urlDelete = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/folder/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys ?? getMyFolder()}/folder/${fileSelected.id}`;
       }
     } else {
       if (isAdmin) {
-        urlDelete = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/file/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys ?? getMyFolder()}/file/${fileSelected.id}`;
       } else {
-        urlDelete = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/file/${fileSelected.id}`;
+        urlDelete = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys ?? getMyFolder()}/file/${fileSelected.id}`;
       }
     }
 
@@ -377,13 +382,18 @@ const FileManagementContent = () => {
       return;
     }
 
-    if (file.type_identifier.toLowerCase() == "folder") {
-      setIsModalFolderOpen(true);
-      setFileSelected(file);
-    } else {
-      setIsModalRenameFileOpen(true);
-      setFileSelected(file);
+    setIsModalRenameFileOpen(true);
+    setFileSelected(file);
+  }
+
+  function classificationHandler(file) {
+    if (!file) {
+      addToast("error", "belum pilih file/folder yang di klasifikasi");
+      return;
     }
+
+    setIsModalClassificationOpen(true);
+    setFileSelected(file);
   }
 
   function collaboratorHandler(file) {
@@ -413,6 +423,12 @@ const FileManagementContent = () => {
   const hasGrantedButtonReleteFolder =
     hasPermission("DELETE_FOLDER") || isAdmin;
 
+  const hasGrantedCollaboration =
+    (isUserAccess &&
+      (hasPermission("VIEW_SUPER_SECRET_FOLDER_FILE") ||
+        hasPermission("VIEW_SECRET_FOLDER_FILE"))) ||
+    isAdmin;
+
   function hasGrantedCheckboxFilter(visible) {
     const isGeneral = visible?.identifier == "GENERAL";
     const isSecret =
@@ -426,26 +442,43 @@ const FileManagementContent = () => {
   }
 
   const hasGrantedButtonUploadFile = () => {
-    if (isAdmin) {
-      return !isEmpty(folderKeys);
+    const hasGrantedInRoot =
+      isAdmin || (isRoot && hasPermission("UPLOAD_FILE"));
+    const hasGrantedInFolder =
+      isAdmin || (!isRoot && hasPermission("UPLOAD_FILE"));
+
+    // console.log(isRoot, folderKeys ?? getMyFolder(), hasGrantedInRoot, hasGrantedInFolder)
+    if (isRoot && isAdmin) {
+      return false;
     }
 
-    return true; //&& hasPermission("UPLOAD_FILE")
+    if (isUserAccess() && isRoot) {
+      return false;
+    }
+
+    return hasGrantedInRoot || hasGrantedInFolder;
   };
 
   function renderCreateFolder() {
-    const hasGrantedInRoot = isRoot && (isUserAccess() || isAdmin); //isRoot && hasPermission("CREATE_FOLDER")
-    const hasGrantedInFolder = !isRoot && (isUserAccess() || isAdmin); //!isRoot && hasPermission("CREATE_FOLDER")
+    const hasGrantedInRoot =
+      isAdmin || (isRoot && hasPermission("CREATE_FOLDER"));
+    const hasGrantedInFolder =
+      isAdmin || (!isRoot && hasPermission("CREATE_FOLDER"));
 
+    // console.log(isRoot, folderKeys ?? getMyFolder(), hasGrantedInRoot, hasGrantedInFolder)
     if (isRoot && isAdmin) {
       return <></>;
+    }
+
+    if (isUserAccess() && isRoot) {
+      return;
     }
 
     return (
       (hasGrantedInRoot || hasGrantedInFolder) && (
         <button
           onClick={() => {
-            setIsModalFolderOpen(true);
+            setIsModalRenameFileOpen(true);
             setFileSelected(null);
           }}
           className="flex max-sm:flex-1 items-center gap-3 bg-[#1B2E48] text-white font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#1b2e48d9] transition"
@@ -577,8 +610,8 @@ const FileManagementContent = () => {
             };
 
       const url = isAdmin
-        ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/${values.type_identifier == "FOLDER" ? "folder" : "file"}/${values.id}`
-        : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/${values.type_identifier == "FOLDER" ? "folder" : "file"}/${values.id}`;
+        ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys ?? getMyFolder()}/${values.type_identifier == "FOLDER" ? "folder" : "file"}/${values.id}`
+        : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys ?? getMyFolder()}/${values.type_identifier == "FOLDER" ? "folder" : "file"}/${values.id}`;
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
       const headers = buildHeaders(info, token);
@@ -770,17 +803,7 @@ const FileManagementContent = () => {
                       </button>
                     </>
                   )}
-                  {hasGrantedButtonDownload && (
-                    <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                      onClick={() => {
-                        setData(null);
-                        downloadHandler(file);
-                      }}
-                    >
-                      <Download size={18} /> Download
-                    </button>
-                  )}
+
                   <button
                     className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                     onClick={() => {
@@ -790,40 +813,18 @@ const FileManagementContent = () => {
                   >
                     <img src={Rename} alt="Rename" /> Rename
                   </button>
-                  {hasGrantedInfoPopper && (
-                    <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                      onClick={() => {
-                        setSelectedFile(file);
-                        setIsInfoModalOpen(true);
-                      }}
-                    >
-                      <img src={Info} alt="Info" /> Get Info
-                    </button>
 
-                    // <FileInfoPopper
-                    //   file={file}
-                    //   changeFile={setSelectedFile}
-                    //   eventInfoModal={setIsInfoModalOpen}
-                    //   paths={listsPath}
-                    //   types={itemType}
-                    // />
-                  )}
-                  {((hasGrantedButtonReleteFile &&
-                    file.type_identifier != "FOLDER") ||
-                    (hasGrantedButtonReleteFolder &&
-                      file.type_identifier == "FOLDER")) && (
-                    <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                      onClick={() => {
-                        setData(null);
-                        setFileSelected(file);
-                        setIsModalDeleteOpen(true);
-                      }}
-                    >
-                      <img src={Trash} alt="Trash" /> Remove
-                    </button>
-                  )}
+                  <button
+                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+                    onClick={() => {
+                      setData(null);
+                      classificationHandler(file);
+                    }}
+                  >
+                    <img src={Classification} alt="Classification" />{" "}
+                    Classification
+                  </button>
+
                   <button
                     className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
                     onClick={() => {
@@ -833,6 +834,66 @@ const FileManagementContent = () => {
                   >
                     <img src={Collaboration} alt="Collabolator" /> Add
                     Collaborator
+                  </button>
+
+                  <button
+                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+                    disabled={!hasGrantedButtonDownload}
+                    onClick={() => {
+                      if (hasGrantedButtonDownload) {
+                        setData(null);
+                        downloadHandler(file);
+                      }
+                    }}
+                  >
+                    <Download size={18} /> Download
+                  </button>
+
+                  <button
+                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+                    disabled={!hasGrantedInfoPopper}
+                    onClick={() => {
+                      if (hasGrantedInfoPopper) {
+                        setSelectedFile(file);
+                        setIsInfoModalOpen(true);
+                      }
+                    }}
+                  >
+                    <img src={Info} alt="Info" /> Get Info
+                  </button>
+
+                  {/* <FileInfoPopper
+                       file={file}
+                       changeFile={setSelectedFile}
+                       eventInfoModal={setIsInfoModalOpen}
+                       paths={listsPath}
+                       types={itemType}
+                     /> */}
+
+                  <button
+                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+                    disabled={
+                      !(
+                        (hasGrantedButtonReleteFile &&
+                          file.type_identifier != "FOLDER") ||
+                        (hasGrantedButtonReleteFolder &&
+                          file.type_identifier == "FOLDER")
+                      )
+                    }
+                    onClick={() => {
+                      if (
+                        (hasGrantedButtonReleteFile &&
+                          file.type_identifier != "FOLDER") ||
+                        (hasGrantedButtonReleteFolder &&
+                          file.type_identifier == "FOLDER")
+                      ) {
+                      }
+                      setData(null);
+                      setFileSelected(file);
+                      setIsModalDeleteOpen(true);
+                    }}
+                  >
+                    <img src={Trash} alt="Trash" /> Remove
                   </button>
                 </>
               </TableRowActionMenu>
@@ -1439,7 +1500,7 @@ const FileManagementContent = () => {
       {/* Modal Upload */}
       <ModalUpload
         refreshData={() => loadData()}
-        idFolder={folderKeys}
+        idFolder={folderKeys ?? getMyFolder()}
         token={sessionStorage.getItem("token")}
         hasPermission={true} //hasPermission("UPLOAD_FILE") || isAdmin
         initialFiles={files}
@@ -1450,7 +1511,7 @@ const FileManagementContent = () => {
       />
 
       {/* Modal Folder */}
-      <ModalFolder
+      {/* <ModalFolder
         open={isModalFolderOpen}
         onOpenChange={setIsModalFolderOpen}
         folderKeys={folderKeys}
@@ -1458,21 +1519,36 @@ const FileManagementContent = () => {
         mode={fileSelected ? "edit" : "create"}
         extraAction={() => loadData()}
         listVisible={listVisible}
-      />
+      /> */}
 
-      <ModalRenameFile
-        open={isModalRenameFileOpen}
-        onOpenChange={setIsModalRenameFileOpen}
-        folderKeys={folderKeys}
-        data={fileSelected}
-        extraAction={() => loadData()}
-        listVisible={listVisible}
-      />
+      {isModalRenameFileOpen && (
+        <ModalRenameFile
+          open={isModalRenameFileOpen}
+          onOpenChange={setIsModalRenameFileOpen}
+          folderKeys={folderKeys ?? getMyFolder()}
+          mode="rename"
+          data={fileSelected}
+          extraAction={() => loadData()}
+          listVisible={listVisible}
+        />
+      )}
+
+      {isModalClassificationOpen && (
+        <ModalRenameFile
+          open={isModalClassificationOpen}
+          onOpenChange={setIsModalClassificationOpen}
+          folderKeys={folderKeys ?? getMyFolder()}
+          mode="classification"
+          data={fileSelected}
+          extraAction={() => loadData()}
+          listVisible={listVisible}
+        />
+      )}
 
       <ModalCollaborator
         open={isModalCollaboratorOpen}
         onOpenChange={setIsModalCollaboratorOpen}
-        folderKeys={folderKeys}
+        folderKeys={folderKeys ?? getMyFolder()}
         data={fileSelected}
         extraAction={() => loadData()}
       />
@@ -1484,193 +1560,194 @@ const FileManagementContent = () => {
 
 export default FileManagementPage;
 
-export function ModalFolder({
-  open,
-  onOpenChange,
-  folderKeys,
-  data,
-  mode,
-  extraAction = function () {},
-  listVisible = [],
-}) {
-  const { addToast } = useToast();
-  const {
-    token,
-    hasPermission,
-    isAdminAccess,
-    isCompanyAccess,
-    isUserAccess,
-    isExpired,
-    refreshSession,
-    getCompany,
-  } = useAuth();
+// export function ModalFolder({
+//   open,
+//   onOpenChange,
+//   folderKeys,
+//   data,
+//   mode,
+//   extraAction = function () {},
+//   listVisible = [],
+// }) {
+//   const { addToast } = useToast();
+//   const {
+//     token,
+//     hasPermission,
+//     isAdminAccess,
+//     isCompanyAccess,
+//     isUserAccess,
+//     isExpired,
+//     refreshSession,
+//     getCompany,
+//   } = useAuth();
 
-  const [loading, setLoading] = useState(false);
-  const [category, setCategory] = useState(null);
-  const isAdmin = isAdminAccess() || isCompanyAccess();
+//   const [loading, setLoading] = useState(false);
+//   const [category, setCategory] = useState(null);
+//   const isAdmin = isAdminAccess() || isCompanyAccess();
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-    reset,
-  } = useForm({
-    defaultValues: {
-      folder_name: data?.name ?? "",
-    },
-  });
+//   const {
+//     register,
+//     handleSubmit,
+//     control,
+//     formState: { errors },
+//     reset,
+//   } = useForm({
+//     defaultValues: {
+//       folder_name: data?.name ?? "",
+//     },
+//   });
 
-  const isEdit = mode == "edit";
-  const isRoot =
-    !folderKeys ||
-    folderKeys === null ||
-    folderKeys === undefined ||
-    folderKeys === Object;
+//   const isEdit = mode == "edit";
+//   const isRoot =
+//     !folderKeys ||
+//     folderKeys === null ||
+//     folderKeys === undefined ||
+//     folderKeys === Object;
 
-  useEffect(() => {
-    reset({
-      folder_name: data?.name ?? "",
-    });
-  }, [data, reset]);
+//   useEffect(() => {
+//     reset({
+//       folder_name: data?.name ?? "",
+//     });
+//   }, [data, reset]);
 
-  const onSubmit = async (values) => {
-    if (isExpired()) {
-      await refreshSession();
-    }
+//   const onSubmit = async (values) => {
+//     if (isExpired()) {
+//       await refreshSession();
+//     }
 
-    setLoading(true);
-    // setErrorMessage("");
-    try {
-      const formData = {
-        folder_name: values.folder_name,
-        visibility_identifier: category ?? "GENERAL",
-      };
-      // if (!isEdit && !hasPermission("CREATE_FOLDER") && isUserAccess()) {
-      //   addToast("error", "anda tidak memiliki permission CREATE_FOLDER");
-      //   setLoading(false);
-      //   return;
-      // }
+//     setLoading(true);
+//     // setErrorMessage("");
+//     try {
+//       const formData = {
+//         folder_name: values.folder_name,
+//         visibility_identifier: category ?? "GENERAL",
+//       };
+//       // if (!isEdit && !hasPermission("CREATE_FOLDER") && isUserAccess()) {
+//       //   addToast("error", "anda tidak memiliki permission CREATE_FOLDER");
+//       //   setLoading(false);
+//       //   return;
+//       // }
 
-      let url = null;
-      if (isAdmin) {
-        if (isEdit) {
-          url = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/folder/${data.id}`;
-        } else {
-          url = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/folder`;
-        }
-      } else {
-        if (isRoot) {
-          // if (isEdit) {
-          //   setLoading(true);
-          //   alert("fitur edit root folder belum ada");
-          //   return;
-          // } else {
-          url = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/root/folder`;
-          // }
-        } else {
-          if (isEdit) {
-            url = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/folder/${data.id}`;
-          } else {
-            url = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/folder`;
-          }
-        }
-      }
+//       let url = null;
+//       if (isAdmin) {
+//         if (isEdit) {
+//           url = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/folder/${data.id}`;
+//         } else {
+//           url = `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/folder`;
+//         }
+//       } else {
+//         if (isRoot) {
+//           // if (isEdit) {
+//           //   setLoading(true);
+//           //   alert("fitur edit root folder belum ada");
+//           //   return;
+//           // } else {
+//           url = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/root/folder`;
+//           // }
+//         } else {
+//           if (isEdit) {
+//             url = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/folder/${data.id}`;
+//           } else {
+//             url = `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/folder`;
+//           }
+//         }
+//       }
 
-      const info = JSON.parse(sessionStorage.getItem("info") || "{}");
-      const headers = buildHeaders(info, token);
+//       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
+//       const headers = buildHeaders(info, token);
 
-      const res = isEdit
-        ? await axios.put(url, formData, {
-            headers: headers,
-          })
-        : await axios.post(url, formData, {
-            headers: headers,
-          });
-      const body = res.data;
-      console.log(body);
+//       const res = isEdit
+//         ? await axios.put(url, formData, {
+//             headers: headers,
+//           })
+//         : await axios.post(url, formData, {
+//             headers: headers,
+//           });
+//       const body = res.data;
+//       console.log(body);
 
-      if (body.error) {
-        addToast("error", body.error);
-      } else if (body.success) {
-        addToast("success", body.success);
-        onOpenChange(false);
-        extraAction();
-      }
-    } catch (err) {
-      console.error(err);
-      addToast("error", "ada masalah pada aplikasi");
-    } finally {
-      setLoading(false);
-    }
+//       if (body.error) {
+//         addToast("error", body.error);
+//       } else if (body.success) {
+//         addToast("success", body.success);
+//         onOpenChange(false);
+//         extraAction();
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       addToast("error", "ada masalah pada aplikasi");
+//     } finally {
+//       setLoading(false);
+//     }
 
-    // reset();
-    // onOpenChange(false);
-    // addToast("success", "Save successfully");
-  };
+//     // reset();
+//     // onOpenChange(false);
+//     // addToast("success", "Save successfully");
+//   };
 
-  useEffect(() => {
-    if (!open) {
-      reset();
-    }
-  }, [open, reset]);
+//   useEffect(() => {
+//     if (!open) {
+//       reset();
+//     }
+//   }, [open, reset]);
 
-  return (
-    <DialogModal open={open} onOpenChange={onOpenChange}>
-      <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-full sm:max-w-5xl">
-        {" "}
-        {/*max-h-[min(640px,80vh)]*/}
-        <DialogModalHeader>
-          <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
-            {mode == "edit" ? `Rename Folder` : `New Folder`}
-          </DialogModalTitle>
+//   return (
+//     <DialogModal open={open} onOpenChange={onOpenChange}>
+//       <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-full sm:max-w-5xl">
+//         {" "}
+//         {/*max-h-[min(640px,80vh)]*/}
+//         <DialogModalHeader>
+//           <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
+//             {mode == "edit" ? `Rename Folder` : `New Folder`}
+//           </DialogModalTitle>
 
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="overflow-y-auto scroll-custom"
-          >
-            <DialogModalDescription asChild>
-              <div className="px-6 pb-8 space-y-8">
-                <CustomInput
-                  label="Folder Name"
-                  name="folder_name"
-                  register={register}
-                  errors={errors}
-                  rules={{
-                    required: "Folder name is required",
-                  }}
-                />
+//           <form
+//             onSubmit={handleSubmit(onSubmit)}
+//             className="overflow-y-auto scroll-custom"
+//           >
+//             <DialogModalDescription asChild>
+//               <div className="px-6 pb-8 space-y-8">
+//                 <CustomInput
+//                   label="Folder Name"
+//                   name="folder_name"
+//                   register={register}
+//                   errors={errors}
+//                   rules={{
+//                     required: "Folder name is required",
+//                   }}
+//                 />
 
-                <RadioGroup
-                  className="justify-end"
-                  value={category}
-                  onChange={setCategory}
-                  orientation="horizontal"
-                  options={listVisible}
-                />
-              </div>
-            </DialogModalDescription>
+//                 <RadioGroup
+//                   className="justify-end"
+//                   value={category}
+//                   onChange={setCategory}
+//                   orientation="horizontal"
+//                   options={listVisible}
+//                 />
+//               </div>
+//             </DialogModalDescription>
 
-            <DialogModalFooter className="px-6 pb-6 items-center">
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
-              >
-                {loading ? "Sending..." : "Save"}
-              </Button>
-            </DialogModalFooter>
-          </form>
-        </DialogModalHeader>
-      </DialogModalContent>
-    </DialogModal>
-  );
-}
+//             <DialogModalFooter className="px-6 pb-6 items-center">
+//               <Button
+//                 type="submit"
+//                 disabled={loading}
+//                 className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+//               >
+//                 {loading ? "Sending..." : "Save"}
+//               </Button>
+//             </DialogModalFooter>
+//           </form>
+//         </DialogModalHeader>
+//       </DialogModalContent>
+//     </DialogModal>
+//   );
+// }
 
 export function ModalRenameFile({
   open,
   onOpenChange,
   folderKeys,
+  mode,
   data,
   extraAction = function () {},
   listVisible = [],
@@ -1685,11 +1762,21 @@ export function ModalRenameFile({
     isExpired,
     refreshSession,
     getCompany,
+    getMyFolder,
   } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState(null);
+  const [styledListVisible, setStyledListVisible] = useState([]);
   const isAdmin = isAdminAccess() || isCompanyAccess();
+
+  const isFolder =
+    data?.type_identifier?.toLowerCase() == "folder" ||
+    data?.type_identifier == null;
+  const keyField = isFolder ? "folder_name" : "file_name";
+  const isCreate = isEmpty(data);
+
+  console.log(isFolder, isCreate);
 
   const {
     register,
@@ -1699,15 +1786,78 @@ export function ModalRenameFile({
     reset,
   } = useForm({
     defaultValues: {
-      file_name: data?.name ?? "",
+      [keyField]: data?.name ?? "",
     },
   });
 
   useEffect(() => {
     reset({
-      file_name: data?.name ?? "",
+      [keyField]: data?.name ?? "",
     });
   }, [data, reset]);
+
+  useEffect(() => {
+    if (mode === "classification") {
+      const mapped = listVisible.map((item) => {
+        let className = "";
+
+        switch (item.identifier) {
+          case "GENERAL":
+            className = "bg-emerald-50 border-emerald-700 text-emerald-700";
+            break;
+
+          case "SECRET":
+            className = "bg-amber-50 border-amber-700 text-amber-700";
+            break;
+
+          case "SUPER_SECRET":
+            className = "bg-rose-50 border-rose-700 text-rose-700";
+            break;
+
+          default:
+            className = "bg-gray-50 border-gray-400 text-gray-700";
+        }
+
+        return {
+          ...item,
+          className,
+        };
+      });
+
+      console.log(mapped);
+
+      setStyledListVisible(mapped);
+    } else {
+      setStyledListVisible(listVisible);
+    }
+  }, [mode, listVisible]);
+
+  async function getUrl({
+    isCreate,
+    isAdmin,
+    info,
+    token,
+    formData,
+    data = null,
+    folderKeys,
+    isFolder,
+  }) {
+    const headers = buildHeaders(info, token);
+
+    if (isCreate) {
+      const url = isAdmin
+        ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys ?? "#"}/${isFolder ? "folder" : "file"}`
+        : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys ?? "#"}/${isFolder ? "folder" : "file"}`;
+
+      return await axios.post(url, formData, { headers });
+    } else {
+      const url = isAdmin
+        ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys ?? "#"}/${isFolder ? "folder" : "file"}/${data?.id ?? "#"}`
+        : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys ?? "#"}/${isFolder ? "folder" : "file"}/${data?.id ?? "#"}`;
+
+      return await axios.put(url, formData, { headers });
+    }
+  }
 
   const onSubmit = async (values) => {
     if (isExpired()) {
@@ -1717,21 +1867,23 @@ export function ModalRenameFile({
     setLoading(true);
     // setErrorMessage("");
     try {
-      console.log(values);
       const formData = {
-        file_name: values.file_name,
+        [keyField]: values[keyField],
         visibility_identifier: category ?? "GENERAL",
       };
-      const url = isAdmin
-        ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${folderKeys}/file/${data.id}`
-        : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${folderKeys}/file/${data.id}`;
 
       const info = JSON.parse(sessionStorage.getItem("info") || "{}");
-      const headers = buildHeaders(info, token);
-
-      const res = await axios.put(url, formData, {
-        headers: headers,
+      const res = await getUrl({
+        isCreate,
+        isAdmin,
+        info,
+        token,
+        formData,
+        data,
+        folderKeys,
+        isFolder,
       });
+
       const body = res.data;
       console.log(body);
 
@@ -1767,7 +1919,9 @@ export function ModalRenameFile({
         {/*max-h-[min(640px,80vh)]*/}
         <DialogModalHeader>
           <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48]">
-            Rename File
+            {mode == "classification"
+              ? "Classification"
+              : `${isCreate ? "Create" : "Rename"} ${isFolder ? "Folder" : "File"}`}
           </DialogModalTitle>
 
           <form
@@ -1775,32 +1929,51 @@ export function ModalRenameFile({
             className="overflow-y-auto scroll-custom"
           >
             <DialogModalDescription asChild>
-              <div className="px-6 pb-8 space-y-8">
-                <CustomInput
-                  label="File Name"
-                  name="file_name"
-                  register={register}
-                  errors={errors}
-                  rules={{
-                    required: "File name is required",
-                  }}
-                />
+              {mode == "classification" ? (
+                <div className="px-6 pb-4 text-[16px] !text-[#1B2E48]">
+                  <div className="space-y-8">
+                    <p>
+                      <b>File/Folder Name:</b> {data?.name ?? "-"}
+                    </p>
 
-                <RadioGroup
-                  className="justify-end"
-                  value={category}
-                  onChange={setCategory}
-                  orientation="horizontal"
-                  options={listVisible}
-                />
-              </div>
+                    <RadioGroup
+                      className="space-y-4 justify-end"
+                      value={category}
+                      mode="classification"
+                      onChange={setCategory}
+                      orientation="vertical"
+                      options={styledListVisible}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="px-6 pb-8 space-y-8">
+                  <CustomInput
+                    label={isFolder ? "Folder Name" : "File Name"}
+                    name={keyField}
+                    register={register}
+                    errors={errors}
+                    rules={{
+                      required: `${isFolder ? "Folder name" : "File name"} is required`,
+                    }}
+                  />
+
+                  <RadioGroup
+                    className="justify-end"
+                    value={category}
+                    onChange={setCategory}
+                    orientation="horizontal"
+                    options={styledListVisible}
+                  />
+                </div>
+              )}
             </DialogModalDescription>
 
-            <DialogModalFooter className="px-6 pb-6 items-center">
+            <DialogModalFooter className="px-6 py-6 items-center">
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full max-w-[40cqi] bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
+                className="w-full max-w-[40cqi] !py-6 bg-[#1a2f48] hover:bg-[#1a2f48]/80 text-white"
               >
                 {loading ? "Sending..." : "Save"}
               </Button>
@@ -1829,6 +2002,7 @@ export function ModalCollaborator({
     isExpired,
     refreshSession,
     getCompany,
+    getMyFolder,
   } = useAuth();
 
   const [loading, setLoading] = useState(false);

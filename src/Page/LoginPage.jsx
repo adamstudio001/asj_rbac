@@ -67,6 +67,30 @@ function LoginContent() {
     return () => clearInterval(interval);
   }, [isLoaded]);
 
+  async function getParentStorage({ isAdmin, token }) {
+    const baseUrl = isAdmin
+      ? `${BASEURL}/api/v1/company/1`
+      : `${BASEURL}/api/v1/app/company/1`;
+
+    const url = `${baseUrl}/storage?order_by[]=name&sort_by[]=asc&visibility_identifier=GENERAL`;
+
+    const res = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const rawData = res?.data?.data ?? [];
+    const filtered = rawData.filter(
+      (d) => d?.parent_id !== null && d?.parent_id !== undefined,
+    );
+    const parentData = [...new Set(filtered.map((item) => item.parent_id))];
+
+    return {
+      data: isAdmin || parentData.length > 1 ? null : parentData[0],
+    };
+  }
+
   const onSubmit = async (data) => {
     setLoading(true);
     // setErrorMessage("");
@@ -98,6 +122,17 @@ function LoginContent() {
         );
         const dataPermission = resPermission.data?.data ?? [];
 
+        const isAdmin =
+          (body.data.has_admin_access_status ? 1 : 0) ||
+          body.data.has_company_access_status
+            ? 1
+            : 0;
+
+        const { data } = await getParentStorage({
+          isAdmin,
+          token: auth.token,
+        });
+
         const user = {
           full_name: body.data.full_name,
           email: body.data.email,
@@ -107,9 +142,8 @@ function LoginContent() {
           company_access: body.data.has_company_access_status ? 1 : 0,
           user_access: body.data.has_user_access_status ? 1 : 0,
           permissions: permission_flat,
+          myfolder: data,
         };
-
-        console.log(permission_flat);
 
         sessionStorage.setItem("info", JSON.stringify(info));
         sessionStorage.setItem("token", auth.token);

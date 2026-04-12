@@ -1,4 +1,5 @@
 import { BASEURL } from "@/Common/Constant";
+import { isEmpty } from "@/Common/Utils";
 import axios from "axios";
 import React, { createContext, useContext, useState, useEffect } from "react";
 
@@ -88,6 +89,16 @@ export function AuthProvider({ children }) {
       return info.company_access == 1;
     } catch {
       return false;
+    }
+  };
+
+  const getMyFolder = () => {
+    try {
+      const storedUser = sessionStorage.getItem("user");
+      const info = storedUser ? JSON.parse(storedUser) : null;
+      return info?.myfolder;
+    } catch {
+      return null;
     }
   };
 
@@ -218,6 +229,7 @@ export function AuthProvider({ children }) {
         isCompanyAccess,
         isUserAccess,
         getCompany,
+        getMyFolder,
       }}
     >
       {children}

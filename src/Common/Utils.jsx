@@ -275,14 +275,17 @@ export function filterAndSortFilesCollaboration(files, activeFilter) {
   const searchQuery = activeFilter?.search?.toLowerCase() || "";
 
   const filteredFiles = files.filter((file) => {
-    const isFolder = file.storageItem.type_identifier?.toLowerCase() === "folder";
+    const isFolder =
+      file.storageItem.type_identifier?.toLowerCase() === "folder";
 
     // Filter folder
     if (isFolderFilter) return isFolder;
 
     // Filter ekstensi
     if (activeFilter?.group?.extensions?.length > 0) {
-      const ext = (file.storageItem.extension || file.storageItem.name.split(".").pop())?.toLowerCase();
+      const ext = (
+        file.storageItem.extension || file.storageItem.name.split(".").pop()
+      )?.toLowerCase();
       if (!isFolder && activeFilter.group.extensions.includes(ext)) {
         return searchQuery
           ? file.storageItem.name.toLowerCase().includes(searchQuery)
@@ -292,7 +295,9 @@ export function filterAndSortFilesCollaboration(files, activeFilter) {
     }
 
     // Filter search
-    return searchQuery ? file.storageItem.name.toLowerCase().includes(searchQuery) : true;
+    return searchQuery
+      ? file.storageItem.name.toLowerCase().includes(searchQuery)
+      : true;
   });
 
   // 🔥 SORT FIXED → Folder first, then alphabetical name
@@ -304,12 +309,33 @@ export function filterAndSortFilesCollaboration(files, activeFilter) {
     if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
 
     // 2) Urutkan nama secara alphabetical
-    return a.storageItem.name.localeCompare(b.storageItem.name, "id", { sensitivity: "base" });
+    return a.storageItem.name.localeCompare(b.storageItem.name, "id", {
+      sensitivity: "base",
+    });
   });
 }
 
-export const isEmpty = (str) =>
-  !str || str.trim().length === 0 || str === undefined || str === null;
+export const isEmpty = (value) => {
+  if (value === null || value === undefined) return true;
+
+  if (typeof value === "string") {
+    return value.trim().length === 0;
+  }
+
+  if (typeof value === "number") {
+    return value <= 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+
+  if (typeof value === "object") {
+    return Object.keys(value).length === 0;
+  }
+
+  return false;
+};
 
 export function buildHeaders(old, token, isjson = true) {
   let latitude = old.lat;
