@@ -23,15 +23,15 @@ import { useAuth } from "@/Providers/AuthProvider";
 
 export default function ModalUpload({
   refreshData = () => {},
-  initialFiles=[],
+  initialFiles = [],
   idFolder = null,
   token = null,
   hasPermission = false,
   isAdmin = false,
   isCompany = false,
   isUser = false,
-  listVisible=[]
-}) { 
+  listVisible = [],
+}) {
   const { isModalOpen, setIsModalOpen } = useFileManager();
   const { getCompany } = useAuth();
   const { addToast } = useToast();
@@ -39,6 +39,23 @@ export default function ModalUpload({
   const [files, setFiles] = useState([]);
   const inputRef = useRef(null);
   const [category, setCategory] = useState(null);
+  const enableEditable = false;
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
+
+  const startEdit = (file) => {
+    if (file.status !== "idle") return;
+    setEditingId(file.id);
+    setEditName(file.path);
+  };
+
+  const saveEdit = (id) => {
+    setFiles((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, path: editName } : f)),
+    );
+    setEditingId(null);
+    setEditName("");
+  };
 
   const handleBrowse = () => inputRef.current.click();
 
@@ -57,7 +74,6 @@ export default function ModalUpload({
           });
           resolve([customFile]);
         });
-
       } else if (entry.isDirectory) {
         const dirReader = entry.createReader();
         let entries = [];
@@ -97,7 +113,7 @@ export default function ModalUpload({
     //   error: null,
     // }));
     const newFiles = await Promise.all(
-      selected.map((f) => createFileObject({ file: f }))
+      selected.map((f) => createFileObject({ file: f })),
     );
 
     setFiles((prev) => [...prev, ...newFiles]);
@@ -126,7 +142,7 @@ export default function ModalUpload({
     //   error: null,
     // }));
     const droppedFiles = await Promise.all(
-      collectedFiles.map((f) => createFileObject({ file: f }))
+      collectedFiles.map((f) => createFileObject({ file: f })),
     );
 
     setFiles((prev) => [...prev, ...droppedFiles]);
@@ -152,14 +168,14 @@ export default function ModalUpload({
     pending.forEach((fileObj) => uploadSingleFile(fileObj));
   };
 
-  useEffect(()=>{
-    console.log(files)
-  },[files]);
+  useEffect(() => {
+    console.log(files);
+  }, [files]);
   // ==========================
   // 🚀 Upload Single File
   // ==========================
   const uploadSingleFile = async (f) => {
-    if(!hasPermission){
+    if (!hasPermission) {
       addToast("error", "anda tidak memiliki permission UPLOAD_FILE");
       return;
     }
@@ -171,7 +187,7 @@ export default function ModalUpload({
     //   return;
     // }
 
-    console.log(f.file)
+    console.log(f.file);
     // 1️⃣ STATE: uploading (shimmer)
     setFileState(fileId, { status: "uploading", progress: 0 });
 
@@ -183,12 +199,13 @@ export default function ModalUpload({
 
       if (f.isReference && !f.file) {
         try {
-          if(isEmpty(`${f?.reference?.id}`)){
+          if (isEmpty(`${f?.reference?.id}`)) {
             throw Error("ada masalah data ketika di copy");
           }
-          const urlDownload = (isAdmin || isCompany)? 
-          `${BASEURL}/api/v1/company/${getCompany()}/storage/${f?.reference?.id}/url-download`: 
-          `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${f?.reference?.id}/url-download`;
+          const urlDownload =
+            isAdmin || isCompany
+              ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${f?.reference?.id}/url-download`
+              : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${f?.reference?.id}/url-download`;
 
           const resDownloadUrl = await fetch(urlDownload, {
             method: "POST",
@@ -206,12 +223,15 @@ export default function ModalUpload({
             responseType: "blob",
           });
           const blob = blobResponse.data;
-          
+
           const file = new File([blob], f.path, { type: blob.type });
           f.file = file;
         } catch (err) {
-          console.log(err)
-          setFileState(fileId, { status: "error", error: "terjadi masalah pada server ketika copy berkas" });
+          console.log(err);
+          setFileState(fileId, {
+            status: "error",
+            error: "terjadi masalah pada server ketika copy berkas",
+          });
           return;
         }
       }
@@ -224,9 +244,10 @@ export default function ModalUpload({
         // const info = JSON.parse(sessionStorage.getItem("info") || "{}");
         // const headers = buildHeaders(info, token, false);
 
-        const url = (isAdmin || isCompany)
-          ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${idFolder ?? "#"}/file`
-          : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${idFolder ?? "#"}/file`;
+        const url =
+          isAdmin || isCompany
+            ? `${BASEURL}/api/v1/company/${getCompany()}/storage/${idFolder ?? "#"}/file`
+            : `${BASEURL}/api/v1/app/company/${getCompany()}/storage/${idFolder ?? "#"}/file`;
 
         const response = await axios.post(url, formData, {
           headers: headers,
@@ -236,7 +257,7 @@ export default function ModalUpload({
           },
         });
 
-        setTimeout(()=>{
+        setTimeout(() => {
           const res = response.data;
 
           // 3️⃣ STATE: API RESPONSE CHECK
@@ -256,7 +277,7 @@ export default function ModalUpload({
             addToast("success", `Uploaded: ${f.path}`);
             refreshData();
           }
-        },5000); // verify delay
+        }, 5000); // verify delay
       } catch (err) {
         setFileState(fileId, {
           status: "error",
@@ -266,7 +287,7 @@ export default function ModalUpload({
 
         addToast(
           "error",
-          `Failed: ${f.path} — ${err?.response?.data?.message || err.message}`
+          `Failed: ${f.path} — ${err?.response?.data?.message || err.message}`,
         );
       }
     }, 5000); // shimmer delay
@@ -277,7 +298,7 @@ export default function ModalUpload({
   // ==========================
   const setFileState = (id, updates) => {
     setFiles((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, ...updates } : f))
+      prev.map((f) => (f.id === id ? { ...f, ...updates } : f)),
     );
   };
 
@@ -293,21 +314,27 @@ export default function ModalUpload({
 
   return (
     <DialogModal open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogModalContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-xl" showClose={false} isUplodFile={true}>
+      <DialogModalContent
+        className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-xl"
+        showClose={false}
+        isUplodFile={true}
+      >
         <DialogModalHeader>
           <DialogModalTitle className="px-6 py-4 font-inter font-bold text-[22px] text-[#1B2E48] text-center">
             Upload
           </DialogModalTitle>
         </DialogModalHeader>
 
-        <DialogModalDescription asChild className="flex flex-col mx-4 sm:mx-auto">
+        <DialogModalDescription
+          asChild
+          className="flex flex-col mx-4 sm:mx-auto"
+        >
           <div className="flex-1 max-w-lg pb-6 space-y-4 w-[-webkit-fill-available]">
-
             {/* DRAG AREA */}
             <div
               className={cn(
                 files.length === 0 && `flex-1 h-auto`,
-                `bg-[#f8f8ff] rounded-lg p-8 flex flex-col gap-4 items-center justify-center text-center cursor-pointer`
+                `bg-[#f8f8ff] rounded-lg p-8 flex flex-col gap-4 items-center justify-center text-center cursor-pointer`,
               )}
               onClick={handleBrowse}
               onDrop={handleDrop}
@@ -336,7 +363,7 @@ export default function ModalUpload({
             {files.length > 0 && (
               <div className="w-full overflow-hidden flex flex-col gap-2">
                 {files.map((f) => {
-                  console.log(f)
+                  console.log(f);
                   return (
                     <div
                       key={f.id}
@@ -346,13 +373,36 @@ export default function ModalUpload({
                           ? "border-red-400"
                           : f.status === "uploaded"
                             ? "border-green-500"
-                            : "border-gray-400"
+                            : "border-gray-400",
                       )}
                     >
                       <div className={`flex justify-between p-2`}>
-                        <span className="truncate">{f.path}</span>
+                        {(enableEditable && editingId === f.id) ? (
+                          <input
+                            value={editName}
+                            autoFocus
+                            onChange={(e) => setEditName(e.target.value)}
+                            onBlur={() => saveEdit(f.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveEdit(f.id);
+                            }}
+                            className="border px-2 py-1 rounded w-full"
+                          />
+                        ) : (
+                          <span
+                            className="truncate cursor-pointer"
+                            onDoubleClick={() => startEdit(f)}
+                            title="Double click to rename"
+                          >
+                            {f.path}
+                          </span>
+                        )}
                         <button
-                          disabled={f.status !== "idle" && f.status !== "uploaded" && f.status !== "error"}
+                          disabled={
+                            f.status !== "idle" &&
+                            f.status !== "uploaded" &&
+                            f.status !== "error"
+                          }
                           onClick={() => handleRemove(f)}
                           className="w-5 h-5 bg-gray-300 hover:bg-black rounded-full text-white flex justify-center items-center"
                         >
@@ -379,8 +429,8 @@ export default function ModalUpload({
 
                       {f.error && renderError(f.error)}
                     </div>
-                  )}
-                )}
+                  );
+                })}
               </div>
             )}
 

@@ -212,7 +212,7 @@ export function TableRowActionMenu({
       </tr>
 
       {/* ================= CONTEXT MENU ================= */}
-      {showMenu &&
+      {(showMenu && children) &&
         createPortal(
           <div
             ref={menuRef}
