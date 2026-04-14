@@ -1026,7 +1026,7 @@ export function ModalForm({
     reset,
   } = useForm({
     defaultValues: {
-      name: data?.full_name ?? "",
+      // name: data?.full_name ?? "",
       role: data?.role ?? "",
       role_description: data?.role_description ?? "",
     },
@@ -1034,7 +1034,7 @@ export function ModalForm({
 
   useEffect(() => {
     reset({
-      name: data?.full_name ?? "",
+      // name: data?.full_name ?? "",
       role: data?.role ?? "",
       role_description: data?.role_description ?? "",
     });
@@ -1122,14 +1122,14 @@ export function ModalForm({
         >
           <DialogModalDescription asChild>
             <div className="px-6 space-y-6">
-              <CustomInput
+              {/* <CustomInput
                 label="Name"
                 name="name"
                 register={register}
                 errors={errors}
                 rules={{}}
                 disabled
-              />
+              /> */}
 
               <CustomInput
                 label="Role"
