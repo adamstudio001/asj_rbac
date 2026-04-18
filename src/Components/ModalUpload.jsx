@@ -434,7 +434,7 @@ export default function ModalUpload({
               </div>
             )}
 
-            {files.length > 0 && (
+            {files.length > 2 && (
               <RadioGroup
                 className="justify-end"
                 value={category}

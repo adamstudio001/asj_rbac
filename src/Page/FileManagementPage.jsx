@@ -1530,7 +1530,7 @@ const FileManagementContent = () => {
         isAdmin={isAdminAccess()}
         isCompany={isCompanyAccess()}
         isUser={isUserAccess()}
-        listVisible={listVisible}
+        listVisible={listCheckboxFilter}
       />
 
       {/* Modal Folder */}
