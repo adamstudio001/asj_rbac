@@ -1588,15 +1588,11 @@ const FileManagementContent = () => {
         <DialogContent className="sm:max-w-md p-0 overflow-hidden">
           <div className="border-b px-6 py-4">
             <DialogTitle className="text-base font-semibold">
-              Download Super Secret File
+              Download {downloadTarget?.visibility_identifier=="SUPER_SECRET"? "Super Secret":"Secret"} File
             </DialogTitle>
           </div>
 
           <div className="px-6 py-5 space-y-4">
-            <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-700">
-              File ini memiliki level akses <b>SUPER_SECRET</b>.
-            </div>
-
             <div>
               <p className="text-sm text-slate-500 mb-1">Nama File</p>
               <p className="text-sm font-medium text-slate-800 break-all">
