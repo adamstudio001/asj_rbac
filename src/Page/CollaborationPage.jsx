@@ -395,7 +395,7 @@ const CollaborationContent = () => {
       return;
     }
 
-    if (file?.storageItem?.visibility_identifier === "SUPER_SECRET" && !isConfirm) {
+    if ((file?.storageItem?.visibility_identifier === "SUPER_SECRET" || file?.storageItem?.visibility_identifier === "SECRET") && !isConfirm) {
       setDownloadTarget(file);
       setIsDownloadConfirmOpen(true);
       return;

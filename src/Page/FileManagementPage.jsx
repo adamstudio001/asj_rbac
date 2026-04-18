@@ -500,7 +500,7 @@ const FileManagementContent = () => {
       return;
     }
 
-    if (file.visibility_identifier === "SUPER_SECRET" && !isConfirm) {
+    if ((file.visibility_identifier === "SUPER_SECRET" || file.visibility_identifier === "SECRET") && !isConfirm) {
       setDownloadTarget(file);
       setIsDownloadConfirmOpen(true);
       return;
