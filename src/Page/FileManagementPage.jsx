@@ -427,10 +427,7 @@ const FileManagementContent = () => {
   const hasGrantedButtonReleteFolder = true || isAdmin; //hasPermission("DELETE_FOLDER")
 
   const hasGrantedCollaboration =
-    (isUserAccess &&
-      (hasPermission("VIEW_SUPER_SECRET_FOLDER_FILE") ||
-        hasPermission("VIEW_SECRET_FOLDER_FILE"))) ||
-    isAdmin;
+    (isUserAccess() && hasPermission("DEFINE_COLLABORATOR")) || isAdmin;
 
   function hasGrantedCheckboxFilter(visible) {
     const isGeneral = visible?.identifier == "GENERAL";
@@ -537,7 +534,7 @@ const FileManagementContent = () => {
 
       const { data: response } = await axios.post(
         urlDownload,
-        { password: passwordFile ?? ""},
+        { password: passwordFile ?? "" },
         {
           headers: headers,
         },
@@ -774,7 +771,7 @@ const FileManagementContent = () => {
                   onRename(updatedFile);
                 }}
                 isLoadingRename={renamingId === file.id}
-                disabledRename={!((getMyFolder() ?? folderKeys))}
+                disabledRename={!(getMyFolder() ?? folderKeys)}
                 rowCells={
                   <>
                     <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
@@ -837,7 +834,7 @@ const FileManagementContent = () => {
 
                     <button
                       className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
-                      disabled={!(listCheckboxFilter<2)}
+                      disabled={!(listCheckboxFilter < 2)}
                       onClick={() => {
                         setData(null);
                         classificationHandler(file);
@@ -848,7 +845,8 @@ const FileManagementContent = () => {
                     </button>
 
                     <button
-                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+                      disabled={!hasGrantedCollaboration}
                       onClick={() => {
                         setData(null);
                         collaboratorHandler(file);
