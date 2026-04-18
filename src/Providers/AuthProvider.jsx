@@ -102,6 +102,16 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const getRole = () => {
+    try {
+      const storedUser = sessionStorage.getItem("user");
+      const info = storedUser ? JSON.parse(storedUser) : null;
+      return isEmpty(info?.role) ? null : info?.role;
+    } catch {
+      return null;
+    }
+  };
+
   const isExpired = () => {
     try {
       const storedUser = sessionStorage.getItem("user");
@@ -230,6 +240,7 @@ export function AuthProvider({ children }) {
         isUserAccess,
         getCompany,
         getMyFolder,
+        getRole,
       }}
     >
       {children}

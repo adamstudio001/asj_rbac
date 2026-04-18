@@ -120,6 +120,9 @@ const CollaborationContent = () => {
   const [listVisible, setListVisible] = useState(
     JSON.parse(sessionStorage.getItem("storage_visibility") ?? "[]"),
   );
+  const [isDownloadConfirmOpen, setIsDownloadConfirmOpen] = useState(false);
+  const [downloadTarget, setDownloadTarget] = useState(null);
+  const [passwordFile, setPasswordFile] = useState(null);
 
   const isAdmin = isAdminAccess() || isCompanyAccess();
 
@@ -384,9 +387,17 @@ const CollaborationContent = () => {
     );
   }
 
-  async function downloadHandler(file) {
+  async function downloadHandler(file, isConfirm = false) {
+    console.log("download", file);
+
     if (!file) {
-      addToast("error", "belum pilih file/folder yang di download");
+      addToast("error", "Belum pilih file/folder yang di download");
+      return;
+    }
+
+    if (file?.storageItem?.visibility_identifier === "SUPER_SECRET" && !isConfirm) {
+      setDownloadTarget(file);
+      setIsDownloadConfirmOpen(true);
       return;
     }
     // if (hasGrantedDownloadHandler(file)) {
@@ -408,6 +419,7 @@ const CollaborationContent = () => {
     //   return;
     // }
 
+    setIsDownloadConfirmOpen(false);
     setIsModalLoading(true);
 
     try {
@@ -416,15 +428,11 @@ const CollaborationContent = () => {
 
       const { data: response } = await axios.post(
         urlDownload,
-        {},
+        {"password":passwordFile},
         {
           headers: headers,
         },
       );
-      console.log(response, {
-        responseType: "blob",
-        headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
-      });
 
       if (response?.success) {
         const urlTarget = response.data.download_url;
@@ -440,8 +448,12 @@ const CollaborationContent = () => {
         const a = document.createElement("a");
         a.href = blobUrl;
 
-        // fallback nama file
-        a.download = storageItem.name || "downloaded_file";
+        let fileName = file?.storageItem?.name || "downloaded_file";
+        if (file?.storageItem?.type_identifier === "FOLDER") {
+          fileName = `${fileName}.zip`;
+        }
+
+        a.download = fileName;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -453,6 +465,7 @@ const CollaborationContent = () => {
         addToast("error", response?.error);
       }
     } catch (err) {
+      console.error(err);
       // newTab.close();
 
       addToast(
@@ -463,6 +476,8 @@ const CollaborationContent = () => {
       );
     } finally {
       setIsModalLoading(false);
+      setDownloadTarget(null);
+      setPasswordFile(null);
     }
   }
 
@@ -893,7 +908,7 @@ const CollaborationContent = () => {
                       </td>
                       <td className="font-medium">
                         {getLabelByIdentifier(
-                          selectedFile?.type_identifier,
+                          selectedFile?.storageItem?.type_identifier,
                           itemType,
                         )}
                       </td>
@@ -903,7 +918,7 @@ const CollaborationContent = () => {
                         Size:
                       </td>
                       <td className="font-medium">
-                        {selectedFile?.size || ""}
+                        {selectedFile?.storageItem?.size || ""}
                       </td>
                     </tr>
                     <tr>
@@ -913,7 +928,7 @@ const CollaborationContent = () => {
                       <td className="font-medium leading-snug break-words">
                         {[
                           ...(listsPath?.map((item) => item.name) || []),
-                          selectedFile?.name || "",
+                          selectedFile?.storageItem?.name || "",
                         ]
                           .filter(Boolean)
                           .join(" > ")}
@@ -924,7 +939,9 @@ const CollaborationContent = () => {
                         Created:
                       </td>
                       <td className="font-medium">
-                        {formatDatetime(selectedFile?.created_datetime || "")}
+                        {formatDatetime(
+                          selectedFile?.storageItem?.created_datetime || "",
+                        )}
                       </td>
                     </tr>
                     <tr>
@@ -932,7 +949,9 @@ const CollaborationContent = () => {
                         Modified:
                       </td>
                       <td className="font-medium">
-                        {formatDatetime(selectedFile?.updated_datetime || "")}
+                        {formatDatetime(
+                          selectedFile?.storageItem?.updated_datetime || "",
+                        )}
                       </td>
                     </tr>
                   </tbody>
@@ -956,7 +975,7 @@ const CollaborationContent = () => {
                       </td>
                       <td className="font-medium">
                         {getLabelByIdentifier(
-                          selectedFile?.type_identifier,
+                          selectedFile?.storageItem?.type_identifier,
                           itemType,
                         )}
                       </td>
@@ -968,7 +987,7 @@ const CollaborationContent = () => {
                       <td className="font-medium leading-snug break-words">
                         {[
                           ...(listsPath?.map((item) => item.name) || []),
-                          selectedFile?.name || "",
+                          selectedFile?.storageItem?.name || "",
                         ]
                           .filter(Boolean)
                           .join(" > ")}
@@ -980,9 +999,9 @@ const CollaborationContent = () => {
                       </td>
                       <td className="font-medium">
                         {selectedFile?.createdByUser
-                          ? `${selectedFile.createdByUser.full_name} (${
-                              selectedFile.createdByUser.employment?.[0]?.role
-                                ?.name ?? "-"
+                          ? `${selectedFile?.storageItem?.createdByUser.full_name} (${
+                              selectedFile?.storageItem?.createdByUser
+                                .employment?.[0]?.role?.name ?? "-"
                             })`
                           : ""}
                       </td>
@@ -993,9 +1012,9 @@ const CollaborationContent = () => {
                       </td>
                       <td className="font-medium">
                         {selectedFile?.updatedByUser
-                          ? `${selectedFile.updatedByUser.full_name} (${
-                              selectedFile.updatedByUser.employment?.[0]?.role
-                                ?.name ?? "-"
+                          ? `${selectedFile?.storageItem?.updatedByUser.full_name} (${
+                              selectedFile?.storageItem?.updatedByUser
+                                .employment?.[0]?.role?.name ?? "-"
                             })`
                           : ""}
                       </td>
@@ -1049,6 +1068,76 @@ const CollaborationContent = () => {
         extraAction={() => loadData()}
       />
 
+      <Dialog
+        open={isDownloadConfirmOpen}
+        onOpenChange={(open) => {
+          setIsDownloadConfirmOpen(open);
+
+          if (!open) {
+            setDownloadTarget(null);
+            setPasswordFile(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          <div className="border-b px-6 py-4">
+            <DialogTitle className="text-base font-semibold">
+              Download Super Secret File
+            </DialogTitle>
+          </div>
+
+          <div className="px-6 py-5 space-y-4">
+            <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-700">
+              File ini memiliki level akses <b>SUPER_SECRET</b>.
+            </div>
+
+            <div>
+              <p className="text-sm text-slate-500 mb-1">Nama File</p>
+              <p className="text-sm font-medium text-slate-800 break-all">
+                {downloadTarget?.storageItem?.name || "-"}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">
+                Password File
+              </label>
+
+              <input
+                type="password"
+                value={passwordFile || ""}
+                onChange={(e) => setPasswordFile(e.target.value)}
+                placeholder="Masukkan password file"
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-black"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 border-t px-6 py-4">
+            <button
+              type="button"
+              className="rounded-md border px-4 py-2 text-sm hover:bg-slate-50"
+              onClick={() => {
+                setIsDownloadConfirmOpen(false);
+                setDownloadTarget(null);
+                setPasswordFile(null);
+              }}
+            >
+              Batal
+            </button>
+
+            <button
+              type="button"
+              disabled={!passwordFile}
+              className="rounded-md bg-black px-4 py-2 text-sm text-white disabled:opacity-50"
+              onClick={() => downloadHandler(downloadTarget, true)}
+            >
+              Lanjut Download
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <ModalLoader show={isModalLoading} />
     </>
   );
@@ -1074,7 +1163,7 @@ export function ModalFolder({
     isExpired,
     refreshSession,
     getCompany,
-    getMyFolder
+    getMyFolder,
   } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -1118,11 +1207,11 @@ export function ModalFolder({
         folder_name: values.folder_name,
         visibility_identifier: category ?? "GENERAL",
       };
-      if (!isEdit && !hasPermission("CREATE_FOLDER") && isUserAccess()) {
-        addToast("error", "anda tidak memiliki permission CREATE_FOLDER");
-        setLoading(false);
-        return;
-      }
+      // if (!isEdit && !hasPermission("CREATE_FOLDER") && isUserAccess()) {
+      //   addToast("error", "anda tidak memiliki permission CREATE_FOLDER");
+      //   setLoading(false);
+      //   return;
+      // }
 
       let url = null;
       if (isAdmin) {
@@ -1256,7 +1345,7 @@ export function ModalRenameFile({
     isExpired,
     refreshSession,
     getCompany,
-    getMyFolder
+    getMyFolder,
   } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -1400,7 +1489,7 @@ export function ModalCollaborator({
     isExpired,
     refreshSession,
     getCompany,
-    getMyFolder
+    getMyFolder,
   } = useAuth();
 
   const [loading, setLoading] = useState(false);

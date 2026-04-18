@@ -124,6 +124,7 @@ function LoginContent() {
       } else if (body.data && body.data.auth) {
         const auth = body.data.auth;
         const permission_flat = getPermissions(body.data);
+        const role = getRole(body.data);
 
         const resVisibility = await axios.get(
           `${BASEURL}/api/v1/helper/storage-item-visibility`,
@@ -158,6 +159,7 @@ function LoginContent() {
           user_access: body.data.has_user_access_status ? 1 : 0,
           permissions: permission_flat,
           myfolder: data,
+          role: role,
         };
 
         sessionStorage.setItem("info", JSON.stringify(info));
@@ -204,6 +206,10 @@ function LoginContent() {
           ]),
       ),
     ];
+  }
+
+  function getRole(user) {
+    return user.employment.find((e) => e.is_active_status)?.role?.name ?? null;
   }
 
   return (
@@ -347,7 +353,7 @@ function LoginContent() {
           </form>
 
           {/* Ask Admin */}
-          <div className="mt-4 text-sm text-center">
+          {/* <div className="mt-4 text-sm text-center">
             <p className="text-gray-500">
               Don't have an account?{" "}
               <button
@@ -358,7 +364,7 @@ function LoginContent() {
                 Ask Admin
               </button>
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
 

@@ -175,10 +175,10 @@ export default function ModalUpload({
   // 🚀 Upload Single File
   // ==========================
   const uploadSingleFile = async (f) => {
-    if (!hasPermission) {
-      addToast("error", "anda tidak memiliki permission UPLOAD_FILE");
-      return;
-    }
+    // if (!hasPermission) {
+    //   addToast("error", "anda tidak memiliki permission UPLOAD_FILE");
+    //   return;
+    // }
     const fileId = f.id;
 
     // if (f.file.size > 1 * 1024 * 1024) {

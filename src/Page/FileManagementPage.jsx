@@ -80,6 +80,7 @@ const FileManagementContent = () => {
     token,
     logout,
     hasPermission,
+    getRole,
     isAdminAccess,
     isCompanyAccess,
     isUserAccess,
@@ -133,6 +134,9 @@ const FileManagementContent = () => {
   const [loadingRename, setLoadingRename] = useState(false);
 
   const [mode, setMode] = useState("default");
+  const [isDownloadConfirmOpen, setIsDownloadConfirmOpen] = useState(false);
+  const [downloadTarget, setDownloadTarget] = useState(null);
+  const [passwordFile, setPasswordFile] = useState(null);
 
   useEffect(() => {
     if (!textRef.current) return;
@@ -415,13 +419,12 @@ const FileManagementContent = () => {
     );
   }
 
-  const hasGrantedButtonDownload = hasPermission("DOWNLOAD_FILE") || isAdmin;
+  const hasGrantedButtonDownload = true || isAdmin; //hasPermission("DOWNLOAD_FILE")
 
   const hasGrantedInfoPopper = hasPermission("GET_INFO_FILE_FOLDER") || isAdmin;
 
-  const hasGrantedButtonReleteFile = hasPermission("DELETE_FILE") || isAdmin;
-  const hasGrantedButtonReleteFolder =
-    hasPermission("DELETE_FOLDER") || isAdmin;
+  const hasGrantedButtonReleteFile = true || isAdmin; //hasPermission("DELETE_FILE")
+  const hasGrantedButtonReleteFolder = true || isAdmin; //hasPermission("DELETE_FOLDER")
 
   const hasGrantedCollaboration =
     (isUserAccess &&
@@ -433,19 +436,19 @@ const FileManagementContent = () => {
     const isGeneral = visible?.identifier == "GENERAL";
     const isSecret =
       visible?.identifier == "SECRET" &&
-      hasPermission("VIEW_SECRET_FOLDER_FILE");
+      hasPermission("VIEW_SECRET_FOLDER_FILE") &&
+      getRole();
     const isSuperSecret =
       visible?.identifier == "SUPER_SECRET" &&
-      hasPermission("VIEW_SUPER_SECRET_FOLDER_FILE");
+      hasPermission("VIEW_SUPER_SECRET_FOLDER_FILE") &&
+      getRole();
 
     return isAdmin || isGeneral || isSecret || isSuperSecret;
   }
 
   const hasGrantedButtonUploadFile = () => {
-    const hasGrantedInRoot =
-      isAdmin || (isRoot && hasPermission("UPLOAD_FILE"));
-    const hasGrantedInFolder =
-      isAdmin || (!isRoot && hasPermission("UPLOAD_FILE"));
+    const hasGrantedInRoot = isAdmin || (isRoot && true); //hasPermission("UPLOAD_FILE")
+    const hasGrantedInFolder = isAdmin || (!isRoot && true); //hasPermission("UPLOAD_FILE")
 
     // console.log(isRoot, folderKeys ?? getMyFolder(), hasGrantedInRoot, hasGrantedInFolder)
     if (isRoot && isAdmin) {
@@ -459,11 +462,13 @@ const FileManagementContent = () => {
     return hasGrantedInRoot || hasGrantedInFolder;
   };
 
+  const listCheckboxFilter = listVisible.filter((visible) =>
+    hasGrantedCheckboxFilter(visible),
+  );
+
   function renderCreateFolder() {
-    const hasGrantedInRoot =
-      isAdmin || (isRoot && hasPermission("CREATE_FOLDER"));
-    const hasGrantedInFolder =
-      isAdmin || (!isRoot && hasPermission("CREATE_FOLDER"));
+    const hasGrantedInRoot = isAdmin || (isRoot && true); //hasPermission("CREATE_FOLDER")
+    const hasGrantedInFolder = isAdmin || (!isRoot && true); //hasPermission("CREATE_FOLDER")
 
     // console.log(isRoot, folderKeys ?? getMyFolder(), hasGrantedInRoot, hasGrantedInFolder)
     if (isRoot && isAdmin) {
@@ -490,15 +495,24 @@ const FileManagementContent = () => {
     );
   }
 
-  async function downloadHandler(file) {
+  async function downloadHandler(file, isConfirm = false) {
+    console.log("download", file);
+
     if (!file) {
-      addToast("error", "belum pilih file/folder yang di download");
+      addToast("error", "Belum pilih file/folder yang di download");
       return;
     }
-    if (hasGrantedDownloadHandler(file)) {
-      addToast("error", "anda tidak memiliki akses DOWNLOAD_SECRET_FILE");
+
+    if (file.visibility_identifier === "SUPER_SECRET" && !isConfirm) {
+      setDownloadTarget(file);
+      setIsDownloadConfirmOpen(true);
       return;
     }
+
+    // if (hasGrantedDownloadHandler(file)) {
+    //   addToast("error", "anda tidak memiliki akses DOWNLOAD_SECRET_FILE");
+    //   return;
+    // }
 
     if (isExpired()) {
       await refreshSession();
@@ -514,6 +528,7 @@ const FileManagementContent = () => {
     //   return;
     // }
 
+    setIsDownloadConfirmOpen(false);
     setIsModalLoading(true);
 
     try {
@@ -522,15 +537,11 @@ const FileManagementContent = () => {
 
       const { data: response } = await axios.post(
         urlDownload,
-        {},
+        { password: passwordFile ?? ""},
         {
           headers: headers,
         },
       );
-      console.log(response, {
-        responseType: "blob",
-        headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
-      });
 
       if (response?.success) {
         const urlTarget = response.data.download_url;
@@ -547,7 +558,13 @@ const FileManagementContent = () => {
         a.href = blobUrl;
 
         // fallback nama file
-        a.download = file.name || "downloaded_file";
+        let fileName = file?.name || "downloaded_file";
+        if (file?.type_identifier === "FOLDER") {
+          fileName = `${fileName}.zip`;
+        }
+
+        a.download = fileName;
+
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -569,6 +586,8 @@ const FileManagementContent = () => {
       );
     } finally {
       setIsModalLoading(false);
+      setDownloadTarget(null);
+      setPasswordFile(null);
     }
   }
 
@@ -755,6 +774,7 @@ const FileManagementContent = () => {
                   onRename(updatedFile);
                 }}
                 isLoadingRename={renamingId === file.id}
+                disabledRename={!((getMyFolder() ?? folderKeys))}
                 rowCells={
                   <>
                     <td className="px-4 py-3 text-gray-800 flex gap-2 items-center ">
@@ -775,95 +795,96 @@ const FileManagementContent = () => {
                   </>
                 }
               >
-                {(getMyFolder() ?? folderKeys) && 
-                <>
-                  <button
-                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                    onClick={() => setData(file)}
-                  >
-                    <img src={Copy} alt="copy" /> Copy
-                  </button>
-                  {data && (
-                    <>
-                      <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                        onClick={() => {
-                          setData(null);
-                          handlerPaste(data);
-                        }}
-                      >
-                        <ClipboardIcon size={16} /> Paste
-                      </button>
-                      <button
-                        className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                        onClick={() => {
-                          setData(null);
-                        }}
-                      >
-                        <X size={18} /> Cancel
-                      </button>
-                    </>
-                  )}
+                {(getMyFolder() ?? folderKeys) && (
+                  <>
+                    <button
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                      onClick={() => setData(file)}
+                    >
+                      <img src={Copy} alt="copy" /> Copy
+                    </button>
+                    {data && (
+                      <>
+                        <button
+                          className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                          onClick={() => {
+                            setData(null);
+                            handlerPaste(data);
+                          }}
+                        >
+                          <ClipboardIcon size={16} /> Paste
+                        </button>
+                        <button
+                          className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                          onClick={() => {
+                            setData(null);
+                          }}
+                        >
+                          <X size={18} /> Cancel
+                        </button>
+                      </>
+                    )}
 
-                  <button
-                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                    onClick={() => {
-                      setData(null);
-                      editHandler(file);
-                    }}
-                  >
-                    <img src={Rename} alt="Rename" /> Rename
-                  </button>
-
-                  <button
-                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
-                    onClick={() => {
-                      setData(null);
-                      classificationHandler(file);
-                    }}
-                  >
-                    <img src={Classification} alt="Classification" />{" "}
-                    Classification
-                  </button>
-
-                  <button
-                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
-                    onClick={() => {
-                      setData(null);
-                      collaboratorHandler(file);
-                    }}
-                  >
-                    <img src={Collaboration} alt="Collabolator" /> Add
-                    Collaborator
-                  </button>
-
-                  <button
-                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
-                    disabled={!hasGrantedButtonDownload}
-                    onClick={() => {
-                      if (hasGrantedButtonDownload) {
+                    <button
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                      onClick={() => {
                         setData(null);
-                        downloadHandler(file);
-                      }
-                    }}
-                  >
-                    <Download size={18} /> Download
-                  </button>
+                        editHandler(file);
+                      }}
+                    >
+                      <img src={Rename} alt="Rename" /> Rename
+                    </button>
 
-                  <button
-                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
-                    disabled={!hasGrantedInfoPopper}
-                    onClick={() => {
-                      if (hasGrantedInfoPopper) {
-                        setSelectedFile(file);
-                        setIsInfoModalOpen(true);
-                      }
-                    }}
-                  >
-                    <img src={Info} alt="Info" /> Get Info
-                  </button>
+                    <button
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+                      disabled={!(listCheckboxFilter<2)}
+                      onClick={() => {
+                        setData(null);
+                        classificationHandler(file);
+                      }}
+                    >
+                      <img src={Classification} alt="Classification" />{" "}
+                      Classification
+                    </button>
 
-                  {/* <FileInfoPopper
+                    <button
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424]"
+                      onClick={() => {
+                        setData(null);
+                        collaboratorHandler(file);
+                      }}
+                    >
+                      <img src={Collaboration} alt="Collabolator" /> Add
+                      Collaborator
+                    </button>
+
+                    <button
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+                      disabled={!hasGrantedButtonDownload}
+                      onClick={() => {
+                        if (hasGrantedButtonDownload) {
+                          setData(null);
+                          downloadHandler(file);
+                        }
+                      }}
+                    >
+                      <Download size={18} /> Download
+                    </button>
+
+                    <button
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+                      disabled={!hasGrantedInfoPopper}
+                      onClick={() => {
+                        if (hasGrantedInfoPopper) {
+                          setSelectedFile(file);
+                          setIsInfoModalOpen(true);
+                        }
+                      }}
+                    >
+                      <img src={Info} alt="Info" /> Get Info
+                    </button>
+
+                    {/* <FileInfoPopper
                        file={file}
                        changeFile={setSelectedFile}
                        eventInfoModal={setIsInfoModalOpen}
@@ -871,33 +892,33 @@ const FileManagementContent = () => {
                        types={itemType}
                      /> */}
 
-                  <button
-                    className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
-                    disabled={
-                      !(
-                        (hasGrantedButtonReleteFile &&
-                          file.type_identifier != "FOLDER") ||
-                        (hasGrantedButtonReleteFolder &&
-                          file.type_identifier == "FOLDER")
-                      )
-                    }
-                    onClick={() => {
-                      if (
-                        (hasGrantedButtonReleteFile &&
-                          file.type_identifier != "FOLDER") ||
-                        (hasGrantedButtonReleteFolder &&
-                          file.type_identifier == "FOLDER")
-                      ) {
+                    <button
+                      className="flex gap-2 items-center w-full px-3 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] hover:rounded-sm hover:text-[#242424] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+                      disabled={
+                        !(
+                          (hasGrantedButtonReleteFile &&
+                            file.type_identifier != "FOLDER") ||
+                          (hasGrantedButtonReleteFolder &&
+                            file.type_identifier == "FOLDER")
+                        )
                       }
-                      setData(null);
-                      setFileSelected(file);
-                      setIsModalDeleteOpen(true);
-                    }}
-                  >
-                    <img src={Trash} alt="Trash" /> Remove
-                  </button>
-                </>
-                }
+                      onClick={() => {
+                        if (
+                          (hasGrantedButtonReleteFile &&
+                            file.type_identifier != "FOLDER") ||
+                          (hasGrantedButtonReleteFolder &&
+                            file.type_identifier == "FOLDER")
+                        ) {
+                        }
+                        setData(null);
+                        setFileSelected(file);
+                        setIsModalDeleteOpen(true);
+                      }}
+                    >
+                      <img src={Trash} alt="Trash" /> Remove
+                    </button>
+                  </>
+                )}
               </TableRowActionMenu>
             ))
           )}
@@ -1531,7 +1552,7 @@ const FileManagementContent = () => {
           mode="rename"
           data={fileSelected}
           extraAction={() => loadData()}
-          listVisible={listVisible}
+          listVisible={listCheckboxFilter}
         />
       )}
 
@@ -1543,7 +1564,7 @@ const FileManagementContent = () => {
           mode="classification"
           data={fileSelected}
           extraAction={() => loadData()}
-          listVisible={listVisible}
+          listVisible={listCheckboxFilter}
         />
       )}
 
@@ -1554,6 +1575,76 @@ const FileManagementContent = () => {
         data={fileSelected}
         extraAction={() => loadData()}
       />
+
+      <Dialog
+        open={isDownloadConfirmOpen}
+        onOpenChange={(open) => {
+          setIsDownloadConfirmOpen(open);
+
+          if (!open) {
+            setDownloadTarget(null);
+            setPasswordFile(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          <div className="border-b px-6 py-4">
+            <DialogTitle className="text-base font-semibold">
+              Download Super Secret File
+            </DialogTitle>
+          </div>
+
+          <div className="px-6 py-5 space-y-4">
+            <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-700">
+              File ini memiliki level akses <b>SUPER_SECRET</b>.
+            </div>
+
+            <div>
+              <p className="text-sm text-slate-500 mb-1">Nama File</p>
+              <p className="text-sm font-medium text-slate-800 break-all">
+                {downloadTarget?.name || "-"}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">
+                Password File
+              </label>
+
+              <input
+                type="password"
+                value={passwordFile || ""}
+                onChange={(e) => setPasswordFile(e.target.value)}
+                placeholder="Masukkan password file"
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-black"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 border-t px-6 py-4">
+            <button
+              type="button"
+              className="rounded-md border px-4 py-2 text-sm hover:bg-slate-50"
+              onClick={() => {
+                setIsDownloadConfirmOpen(false);
+                setDownloadTarget(null);
+                setPasswordFile(null);
+              }}
+            >
+              Batal
+            </button>
+
+            <button
+              type="button"
+              disabled={!passwordFile}
+              className="rounded-md bg-black px-4 py-2 text-sm text-white disabled:opacity-50"
+              onClick={() => downloadHandler(downloadTarget, true)}
+            >
+              Lanjut Download
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ModalLoader show={isModalLoading} />
     </>
@@ -1778,7 +1869,7 @@ export function ModalRenameFile({
   const keyField = isFolder ? "folder_name" : "file_name";
   const isCreate = isEmpty(data);
 
-  console.log(isFolder, isCreate);
+  console.log("modalrename", listVisible);
 
   const {
     register,
@@ -1960,13 +2051,15 @@ export function ModalRenameFile({
                     }}
                   />
 
-                  <RadioGroup
-                    className="justify-end"
-                    value={category}
-                    onChange={setCategory}
-                    orientation="horizontal"
-                    options={styledListVisible}
-                  />
+                  {styledListVisible.length > 1 && (
+                    <RadioGroup
+                      className="justify-end"
+                      value={category}
+                      onChange={setCategory}
+                      orientation="horizontal"
+                      options={styledListVisible}
+                    />
+                  )}
                 </div>
               )}
             </DialogModalDescription>

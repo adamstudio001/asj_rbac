@@ -105,14 +105,11 @@ const RolePermissionContent = () => {
                   },
                 },
               ),
-              axios.get(
-                `${BASEURL}/api/v1/helper/job`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-                  },
+              axios.get(`${BASEURL}/api/v1/helper/job`, {
+                headers: {
+                  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
                 },
-              ),
+              }),
             ]);
 
           const roleOris =
@@ -355,10 +352,11 @@ const RolePermissionContent = () => {
       );
     }
 
-    function MenuItem({ children, onClick, closeMenu }) {
+    function MenuItem({ children, onClick, closeMenu, disabled }) {
       return (
         <button
-          className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4]"
+          className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-[#424242] hover:bg-[#F4F4F4] disabled:hover:bg-[transparent] disabled:text-[#242424]/50"
+          disabled={disabled}
           onClick={(e) => {
             onClick?.(e);
             closeMenu?.();
@@ -405,13 +403,14 @@ const RolePermissionContent = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredDatas.map((data) => (
-            <tr
-              key={data.id}
-              className="hover:bg-gray-50 transition border-b border-gray-200"
-            >
-              <td className="px-4 py-3 font-inter text-[14px] leading-[14px] flex gap-2">
-                {/* <Checkbox
+          {filteredDatas.map((data) => {
+            return (
+              <tr
+                key={data.id}
+                className="hover:bg-gray-50 transition border-b border-gray-200"
+              >
+                <td className="px-4 py-3 font-inter text-[14px] leading-[14px] flex gap-2">
+                  {/* <Checkbox
                   key={data.id}
                   checked={selectedIds.includes(data.id)}
                   onCheckedChange={(checked) => {
@@ -422,25 +421,25 @@ const RolePermissionContent = () => {
                     );
                   }}
                 /> */}
-                <EllipsisTooltip className={"w-[250px]"}>
-                  {data.full_name}
-                </EllipsisTooltip>
-              </td>
-              <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {data.employee_id}
-              </td>
-              <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {Array.isArray(data.role) && data.role.length > 0
-                  ? data.role.map((r) => r.label).join(", ")
-                  : ""}
-              </td>
-              <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {data.label_position}
-              </td>
-              <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
-                {hasGrantedShowButtonAction && (
-                  <TableActionMenuImage>
-                    {/* <button
+                  <EllipsisTooltip className={"w-[250px]"}>
+                    {data.full_name}
+                  </EllipsisTooltip>
+                </td>
+                <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                  {data.employee_id}
+                </td>
+                <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                  {Array.isArray(data.role) && data.role.length > 0
+                    ? data.role.map((r) => r.label).join(", ")
+                    : ""}
+                </td>
+                <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                  {data.label_position}
+                </td>
+                <td className="px-4 py-3 font-inter text-[14px] leading-[14px]">
+                  {hasGrantedShowButtonAction && (
+                    <TableActionMenuImage>
+                      {/* <button
                       className="mx-2 flex gap-2 items-center w-[-webkit-fill-available] rounded px-2 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                       onClick={() => {
                         setSelectedData(data);
@@ -450,50 +449,52 @@ const RolePermissionContent = () => {
                       <img src={add_team} alt="view profile" />
                       Edit
                     </button> */}
-                    {hasGrantedButtonPermission && (
-                      <MenuItem
-                        onClick={() => {
-                          setSelectedData(data);
-                          setIsModalPermissionOpen(true);
-                        }}
-                      >
-                        <img src={change_permission} alt="permission" />
-                        Change Permission
-                      </MenuItem>
-                    )}
-                    {hasGrantedButtonRole && (
-                      <MenuItem
-                        onClick={() => {
-                          if (
-                            Array.isArray(data.role) &&
-                            data.role.length > 1
-                          ) {
-                            addToast(
-                              "error",
-                              "tidak dapat ubah role karena sudah terdaftar role lebih dari 1",
-                            );
-                            return;
-                          }
+                      {hasGrantedButtonPermission && (
+                        <MenuItem
+                          disabled={data?.role?.length==0}
+                          onClick={() => {
+                            setSelectedData(data);
+                            setIsModalPermissionOpen(true);
+                          }}
+                        >
+                          <img src={change_permission} alt="permission" />
+                          Change Permission
+                        </MenuItem>
+                      )}
+                      {hasGrantedButtonRole && (
+                        <MenuItem
+                          onClick={() => {
+                            if (
+                              Array.isArray(data.role) &&
+                              data?.role?.length > 1
+                            ) {
+                              addToast(
+                                "error",
+                                "tidak dapat ubah role karena sudah terdaftar role lebih dari 1",
+                              );
+                              return;
+                            }
 
-                          setSelectedData(data);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <img src={change_role} alt="role" />
-                        Change role
-                      </MenuItem>
-                    )}
-                    {/* <button
+                            setSelectedData(data);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <img src={change_role} alt="role" />
+                          Change role
+                        </MenuItem>
+                      )}
+                      {/* <button
                           className="flex gap-2 items-center w-full px-3 py-2 text-sm text-sm text-[#424242] hover:bg-[#F4F4F4] hover:text-[#242424]"
                           onClick={() => setIsModalDeleteOpen(true)}
                         >
                           Delete
                         </button> */}
-                  </TableActionMenuImage>
-                )}
-              </td>
-            </tr>
-          ))}
+                    </TableActionMenuImage>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     );
@@ -775,15 +776,19 @@ function PermissionGroup({ accessGroups, field, className }) {
   return (
     <div className={`grid gap-10 grid-cols-1 md:grid-cols-2 ${className}`}>
       <PermissionSection group={find("General")} field={field} />
-      <PermissionSection group={find("File Management")} field={field} defaultChecked={[
-        "CREATE_FOLDER",
-        "UPDATE_FOLDER",
-        "DELETE_FOLDER",
-        "UPLOAD_FILE",
-        "UPDATE_FILE",
-        "DELETE_FILE",
-        "DOWNLOAD_FILE"
-      ]} />
+      <PermissionSection
+        group={find("File Management")}
+        field={field}
+        defaultChecked={[
+          "CREATE_FOLDER",
+          "UPDATE_FOLDER",
+          "DELETE_FOLDER",
+          "UPLOAD_FILE",
+          "UPDATE_FILE",
+          "DELETE_FILE",
+          "DOWNLOAD_FILE",
+        ]}
+      />
     </div>
   );
 }
@@ -828,7 +833,11 @@ function PermissionItem({ permission, field, defaultChecked = [] }) {
   return (
     <label className="grid grid-cols-[20px_1fr] gap-x-3 cursor-pointer">
       <Checkbox
-        checked={field.value.length > 0? checked : defaultChecked.includes(permission.identifier)}
+        checked={
+          field.value.length > 0
+            ? checked
+            : defaultChecked.includes(permission.identifier)
+        }
         onCheckedChange={(v) => {
           if (v) {
             field.onChange([

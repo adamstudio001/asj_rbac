@@ -22,18 +22,21 @@ function FileGridView({ lists, folderKeys, mode, isLoading = false }) {
   }
 
   const handleNavigate = (file) => {
+    console.log(file)
     if (file.type_identifier.toLowerCase() === "folder") {
-      navigate(
-        `/dashboard/${encodeURIComponent(
-          folderKeys != file.parent_id ? file.parent_id : file.id
-        )}`
-      );
+      navigate(`/filemanager/${file.parent_id}`);
+      // navigate(
+      //   `/dashboard/${encodeURIComponent(
+      //     folderKeys != file.parent_id ? file.parent_id : file.id
+      //   )}`
+      // );
     } else {
-      window.open(
-        `${BASEURL}/download/${file.name}`,
-        "_blank",
-        "noopener,noreferrer"
-      );
+      navigate(`/filemanager/${file.parent_id}`);
+      // window.open(
+      //   `${BASEURL}/download/${file.name}`,
+      //   "_blank",
+      //   "noopener,noreferrer"
+      // );
     }
   };
 

@@ -212,7 +212,6 @@ const UserPageContent = () => {
   }
 
   useEffect(() => {
-    console.log(sessionStorage.getItem("info"));
     setSearch("");
     loadData();
   }, []);
@@ -1202,7 +1201,7 @@ export function ModalUser({
                       </div>
 
                       <CustomInput
-                        label="email"
+                        label="Email"
                         name="email"
                         register={register}
                         errors={errors}

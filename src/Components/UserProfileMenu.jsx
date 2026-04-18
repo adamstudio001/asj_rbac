@@ -96,7 +96,7 @@ export default function UserProfileMenu({
               animate-in fade-in zoom-in-95 p-2
             "
           >
-            <button
+            {/* <button
               className="flex items-center gap-2 w-full px-4 py-3 font-medium text-[#424242] text-sm hover:bg-[#F4F4F4] rounded"
               onClick={() => {
                 setOpen(false);
@@ -104,7 +104,7 @@ export default function UserProfileMenu({
             >
               <img src={view_user} alt="view profile" />
               View Profile
-            </button>
+            </button> */}
 
             <button
               className="flex items-center gap-2 w-full px-4 py-3 font-medium text-[#424242] text-sm hover:bg-[#F4F4F4] rounded"

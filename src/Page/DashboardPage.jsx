@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import UserProfileMenu from "@/Components/UserProfileMenu";
 import { BASEURL } from "@/Common/Constant";
 import EllipsisTooltip from "@/Components/EllipsisTooltip";
+import StorageMeter from "@/Components/StorageMeter";
 
 const DashboardPage = () => {
   return (
@@ -200,7 +201,7 @@ const DashboardContent = () => {
 
   // Fetch saat page berubah (kecuali page=1 sudah di-handle di atas)
   useEffect(() => {
-    if (page !== 1) fetchFiles(page, folderKeys);
+    fetchFiles(page, folderKeys);
   }, [page]);
 
   // Fetch saat search berubah (debounced)
@@ -397,6 +398,16 @@ const DashboardContent = () => {
             </>
           )}
 
+          {isAdmin && (
+            <div className="py-6 space-y-4">
+              <h1 className="text-sm font-medium text-black font-inter text-[14px] leading-[100%]">
+                Storage
+              </h1>
+
+              <StorageMeter />
+            </div>
+          )}
+
           {renderPaging()}
         </div>
       </main>
@@ -459,6 +470,7 @@ function RecentOpened() {
 
           const mapped = res.data.data.map((item) => ({
             storage_item_id: item.storage_item_id,
+            parent_storage_item_id: item.parent_storage_item_id,
             name: item.storage_item_name,
             type: isEmpty(item.storage_item_extension)
               ? "folder"
@@ -612,15 +624,15 @@ function RecentOpened() {
           <button
             key={idx}
             onClick={() => {
-              //[pr] ganti jadi handler
               if (file.type === "folder") {
                 navigate(`/filemanager/${file.storage_item_id}`);
               } else {
-                window.open(
-                  `${BASEURL}/download/${file.name}`,
-                  "_blank",
-                  "noopener,noreferrer",
-                );
+                navigate(`/filemanager/${file.parent_storage_item_id}`);
+                // window.open(
+                //   `${BASEURL}/download/${file.name}`,
+                //   "_blank",
+                //   "noopener,noreferrer",
+                // );
               }
             }}
             className="bg-gray-50 hover:bg-gray-100 cursor-pointer p-4 rounded-2xl flex flex-col items-center text-center shadow-sm"
