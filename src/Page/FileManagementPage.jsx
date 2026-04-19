@@ -63,6 +63,7 @@ import { Checkbox } from "@/Components/ui/Checkbox";
 import RadioGroup from "@/Components/RadioGroup";
 import CustomSelect from "@/Components/CustomSelect";
 import { BASEURL } from "@/Common/Constant";
+import CollabUsers from "@/Components/CollabUsers";
 
 const FileManagementPage = () => {
   return (
@@ -692,6 +693,9 @@ const FileManagementContent = () => {
               <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
                 File Size
               </th>
+              <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+                Share With
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -699,6 +703,9 @@ const FileManagementContent = () => {
               .fill(null)
               .map((_, i) => (
                 <tr key={i}>
+                  <td className="border px-4 py-2">
+                    <div className="skeleton h-4 w-full"></div>
+                  </td>
                   <td className="border px-4 py-2">
                     <div className="skeleton h-4 w-full"></div>
                   </td>
@@ -733,6 +740,9 @@ const FileManagementContent = () => {
             </th>
             <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
               File Size
+            </th>
+            <th className="px-4 py-3 font-medium text-[14px] text-[#5B5B5B]">
+              Share With
             </th>
           </tr>
         </thead>
@@ -789,6 +799,9 @@ const FileManagementContent = () => {
                       {formatDate(file.updated_datetime)}
                     </td>
                     <td className="px-4 py-3">{formatFileSize(file.size)}</td>
+                    <td>
+                      <CollabUsers users={file?.collaborations ?? []} />
+                    </td>
                   </>
                 }
               >
