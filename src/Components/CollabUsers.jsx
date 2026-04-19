@@ -19,8 +19,18 @@ export default function CollabUsers({ users = [] }) {
     "bg-purple-700","bg-fuchsia-700","bg-pink-700","bg-rose-700","bg-slate-700",
   ];
 
-  const getColor = (name = "") => {
-    const hash = name
+  // FIX: pakai id + index + name supaya user dengan nama sama tetap beda warna
+  const getColor = (user, index) => {
+    const name = user?.employment?.user?.full_name || "User";
+    const uid =
+      user?.employment?.user?.id ||
+      user?.employment_id ||
+      user?.owner_user_id ||
+      0;
+
+    const seed = `${name}-${uid}-${index}`;
+
+    const hash = seed
       .split("")
       .reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
@@ -29,17 +39,17 @@ export default function CollabUsers({ users = [] }) {
 
   return (
     <div className="relative flex items-center">
-      {visible.map((u) => {
-        const name =
-          u?.employment?.user?.full_name || "User";
+      {visible.map((u, index) => {
+        const name = u?.employment?.user?.full_name || "User";
 
         return (
           <div
-            key={u.id}
+            key={`${u?.employment?.user?.id}-${index}`}
             onMouseEnter={() => setHoverText(name)}
             onMouseLeave={() => setHoverText("")}
             className={`-ml-2 first:ml-0 h-7 w-7 rounded-full text-white text-xs flex items-center justify-center border-2 border-white cursor-pointer shadow-sm ${getColor(
-              name
+              u,
+              index
             )}`}
           >
             {name.charAt(0).toUpperCase()}
@@ -53,11 +63,7 @@ export default function CollabUsers({ users = [] }) {
             setHoverText(
               users
                 .slice(3)
-                .map(
-                  (x) =>
-                    x?.employment?.user?.full_name ||
-                    "User"
-                )
+                .map((x) => x?.employment?.user?.full_name || "User")
                 .join(", ")
             )
           }
