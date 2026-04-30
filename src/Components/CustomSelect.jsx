@@ -77,7 +77,7 @@ const CustomSelect = React.memo(function CustomSelect({
             },
             {
               name:"flip",
-              enabled:false
+              enabled:true
             },
             {
               name:"preventOverflow",
