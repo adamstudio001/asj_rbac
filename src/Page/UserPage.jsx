@@ -213,8 +213,8 @@ const UserPageContent = () => {
 
   useEffect(() => {
     setSearch("");
-    loadData();
-  }, []);
+    loadData(page);
+  }, [page]);
 
   const filteredUsers = users.filter((user) =>
     user.full_name.toLowerCase().includes(search.toLowerCase()),
