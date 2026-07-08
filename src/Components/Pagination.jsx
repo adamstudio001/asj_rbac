@@ -68,7 +68,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange, className }) => {
       {pages.map((page) => (
         <button
           key={page}
-          onClick={() => onPageChange(page)}
+          onClick={() => {
+            console.log(`page: ${page}`)
+            onPageChange(page)
+          }}
           className={clsx(
             buttonBase,
             page === currentPage

@@ -180,7 +180,7 @@ const FileManagementContent = () => {
 
     const url = `${baseUrl}/${
       !isRoot ? `storage/${folderKeys ?? getMyFolder()}` : `storage`
-    }?order_by[]=name&sort_by[]=asc&visibility_identifier=${selectedIdentifier}`;
+    }?order_by[]=name&sort_by[]=asc&visibility_identifier=${selectedIdentifier}&page=${page}`;
 
     // --- Breadcrumb URL hanya jika folderKeys punya nilai ---
     const hasFolder =
@@ -263,7 +263,7 @@ const FileManagementContent = () => {
       try {
         // --- Buat array promise dinamis ---
         const dataList = await axios.get(
-          `${BASEURL}/api/v1/app/company/${getCompany()}/restore/storage`,
+          `${BASEURL}/api/v1/app/company/${getCompany()}/restore/storage?&page=${page}`,
           {
             headers: {
               Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -322,7 +322,7 @@ const FileManagementContent = () => {
     } else {
       loadData();
     }
-  }, [folderKeys, listVisible, mode]);
+  }, [folderKeys, listVisible, mode, page]);
 
   // const files = getFileDirectory(lists, folderKeys);
   const sortedFiles = filterAndSortFiles(lists, {
@@ -1267,8 +1267,8 @@ const FileManagementContent = () => {
                   setMode((prev) =>
                     prev === "restore" ? "default" : "restore",
                   );
+                  setPage(1);
                   setFileSelected(null);
-                  loadDataRestore();
                 }}
                 className={`flex max-sm:flex-1 items-center gap-3 ${mode != "default" ? "border border-[#1B2E48]" : "bg-[#F3F3F3] text-[#1E293B]"} font-inter font-medium text-[14px] px-4 py-2 rounded-md hover:bg-[#e6e5e5] transition`}
               >

@@ -167,7 +167,7 @@ const CollaborationContent = () => {
 
     const url = `${baseUrl}/${
       !isRoot ? `storage/collaboration/${folderKeys}` : `storage/collaboration`
-    }?visibility_identifier=${selectedIdentifier}`;
+    }?visibility_identifier=${selectedIdentifier}&page=${page}`;
 
     // --- Breadcrumb URL hanya jika folderKeys punya nilai ---
     const hasFolder =
@@ -245,7 +245,7 @@ const CollaborationContent = () => {
 
   useEffect(() => {
     loadData();
-  }, [folderKeys, listVisible]);
+  }, [folderKeys, listVisible, page]);
 
   // const files = getFileDirectory(lists, folderKeys);
   const sortedFiles = filterAndSortFilesCollaboration(lists, {
